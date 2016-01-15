@@ -1,0 +1,7 @@
+name: Publish Document
+account: rpubs
+server: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/142457/4b2769f361a64c76bc86c95e05617098
+bundleId: https://api.rpubs.com/api/v1/document/142457/4b2769f361a64c76bc86c95e05617098
+url: http://rpubs.com/tiernan_martin/142457
+when: 1452619241.56165

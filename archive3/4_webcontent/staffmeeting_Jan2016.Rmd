@@ -1,0 +1,66 @@
+---
+title: "A Neighborhood Question"
+subtitle: "Staff Meeting, January 2016"
+author: "Tiernan Martin | [tiernan@futurewise.org](tiernan@futurewise.org)"
+date: "January 11, 2016"
+output:
+  ioslides_presentation:
+    widescreen: true
+        
+---
+
+```{r setup, include=FALSE}
+options(scipen =999,stringsAsFactors = FALSE)
+
+knitr::opts_chunk$set(echo = FALSE,warning=FALSE,message=FALSE,tidy = TRUE)
+library(htmlwidgets)
+library(readr)
+library(dplyr)
+library(knitr)
+library(magrittr)
+library(rgdal)
+library(leaflet)
+library(RColorBrewer)
+library(gplots)
+library(rgeos)
+
+
+
+```
+
+## The Purposes of this Presentation {.build}
+> 1. **Practice**
+>     + dry run so I can work through some kinks
+>     + on the my question and how it is presented
+>          + on the my question and how it is presented
+>
+> 2. **Get feedback **
+>     + on the my question and how it is presented
+>     + on the approach you think would be best and why
+>
+> 3. **Introduce my skill set**
+>     + GIS
+>     + R Statsical Programming Language
+
+## Project overview
+We're creating a baseline conditions report for the Yesler Community Collaborative. The report will be provide the project's partners with a data-rich snapshot of Yesler Terrace and the neighborhoods that surround it.
+
+###Primary Goal
+- Convey how the neighborhoods compare to each other (as well as to Seattle as a whole) across the typical range of topics
+
+### Secondary Goal
+- Provide the project partners with data that they can use to create their own graphs and visuals (i.e, cleaned, processed, and aggregated data sets)
+
+
+## Introduction to R 
+
+```{r}
+
+medInc <- read_csv(file = "medianIncome2014.csv") 
+DT::datatable(medInc)
+
+```
+
+## An Interactive Map: Median Household Income
+
+<iframe  title="Median Household Income" width="980" height="400" src="http://tiernanmartin.github.io/FW-YCC-Baseline-Conditions/4_webcontent/lflt_medHhInc.html" frameborder="0" allowfullscreen></iframe>

@@ -1,0 +1,6 @@
+<query schema-version="1.0" lang="en" type="search" sig="-Cdn0Zn35_D-USoqB7TqypJtScA">
+  <search-config>
+    <category-search type="geo" summary-level-code="150" name="All Block Groups within King County, Washington"/>
+    <category-search type="geo" summary-level-code="160" name="Seattle city, Washington"/>
+  </search-config>
+</query>
