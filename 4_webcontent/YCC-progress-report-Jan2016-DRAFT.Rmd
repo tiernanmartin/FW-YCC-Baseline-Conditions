@@ -36,7 +36,7 @@ knitr::opts_chunk$set(echo = FALSE)
 - Community & Culture  
 <br>  
 <br>  
-  ![report icon](report-with-charts-icon-01.png)
+  ![report icon](images/report-with-charts-icon.png)
 
 
 ## PROGRESS UPDATE: Data We Have {.columns-2}
