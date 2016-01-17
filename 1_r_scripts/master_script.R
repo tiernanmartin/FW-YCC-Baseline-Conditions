@@ -895,6 +895,32 @@ medianIncome2014 <- {
             
 } # Note: this uses Pareto interpolation to estimate the median income value
 
+medHhInc_bar <- {
+        myBuPu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,name = "BuPu"), 
+                                   space = "Lab",
+                                   bias = 3)
+        
+        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
+        
+        pal <- colorNumeric(palette = blues,
+                            domain = c(round(min(medianIncome2014$MEDIAN),-4),round(max(medianIncome2014$MEDIAN),-3)))
+        mypal <- pal(sort(medianIncome2014$MEDIAN))
+        ggplot(medianIncome2014, aes(x=reorder(NHOOD.ABBR, MEDIAN), y=MEDIAN)) +
+                geom_bar(stat='identity',fill = mypal, alpha = .5) +
+                geom_text(data = medianIncome2014,label = medianIncome2014$NHOOD.ABBR, hjust = 1.5) +
+                theme(
+                        panel.background = element_blank(),
+                        panel.grid.minor = element_blank(), 
+                        panel.grid.major = element_blank(),
+                        plot.background = element_blank(),
+                        axis.ticks = element_blank(),
+                        axis.title.x = element_blank(),
+                        axis.title.y = element_blank(),
+                        axis.text = element_blank()) +
+                coord_flip()
+        
+}
+
 myLflt_medInc <- function(){
         
         shp_df <- geo_join(spatial_data = bg_rev,
