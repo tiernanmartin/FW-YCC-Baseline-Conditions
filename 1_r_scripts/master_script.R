@@ -24,6 +24,7 @@ require(readr)
 require(rapport)        # for creating a camel case string
 require(VGAM)           # for creating estimate median values for neighborhoods
 require(htmlwidgets)
+require(classInt)       # for setting breaks in graphs (http://bit.ly/1QexSEP)
 
 
 options(scipen=999,stringsAsFactors = FALSE)
@@ -784,6 +785,10 @@ acs_bg_FH <- make_nhood_acs(nhood.abbr = "FH")
 
 acs_bg_12AV <- make_nhood_acs(nhood.abbr = "12AV")
 
+acs_sea <- geo.make(state = "WA", county = "King", place = "Seattle")
+
+acs_KC <- geo.make(state = "WA", county = "King")
+
 # Create a collection of all the neighborhood geographies
 
 geo_bg <- c(acs_bg_CD,
@@ -792,6 +797,15 @@ geo_bg <- c(acs_bg_CD,
          acs_bg_PS,
          acs_bg_CID,
          acs_bg_YTLS)
+
+geo_bg_plus <- c(acs_bg_CD,
+                 acs_bg_FH,
+                 acs_bg_12AV,
+                 acs_bg_PS,
+                 acs_bg_CID,
+                 acs_bg_YTLS,
+                 acs_sea,
+                 acs_KC)
 
 # DEMOGRAPHIC DATA: COMMUNITY CHARACTERISTICS -----------------------------------------------------
 
@@ -895,6 +909,89 @@ medianIncome2014 <- {
             
 } # Note: this uses Pareto interpolation to estimate the median income value
 
+
+medianIncome2014_plus <- {
+        Sys.sleep(1)
+        acs <- acs.fetch(endyear = 2014, span = 5,
+                         geography = geo_bg_plus,
+                         table.number = "B19001", col.names = "pretty")
+        
+        rnames <- acs@estimate %>% t()  %>% as.data.frame() %>% rownames() %>% as.data.frame()
+        
+        medInc <- 
+                acs@estimate %>% 
+                t() %>% 
+                as.data.frame() %>% 
+                bind_cols(rnames) %>% 
+                gather(geo,count,-.) 
+        
+        colnames(medInc) <- c("Range","Nhood","HH_Count")
+        
+        medInc <- 
+                medInc %>% 
+                mutate(Range = gsub("Household\\sIncome:\\s","",x = Range),
+                       Nhood = as.character(Nhood),
+                       Nhood = ifelse(grepl("\\s2",x = Nhood),
+                                      "CID",
+                                      ifelse(grepl("\\s1",x = Nhood),
+                                             "YTLS",
+                                             Nhood))) %>% 
+                filter(!grepl("Total",Range)) %>% 
+                mutate(RangeNum = as.numeric(gsub("[^\\d]+", "", Range, perl=TRUE))) %>% 
+                mutate(RangeStr = as.character(RangeNum),
+                       RangeStrLen = round(str_length(RangeStr)/2)) %>% 
+                mutate(RangeLower = ifelse(str_length(RangeStr) == 6,
+                                           RangeNum,
+                                           ifelse(str_length(RangeStr) < 6,
+                                                  1,
+                                                  str_extract(RangeStr,paste0("^\\d{",RangeStrLen,"}"))))) %>% 
+                mutate(RangeUpper = ifelse(str_length(RangeStr) == 6,
+                                           500000,
+                                           ifelse(str_length(RangeStr) < 6,
+                                                  RangeNum,
+                                                  str_extract(RangeStr,paste0("\\d{",RangeStrLen,"}$"))))) %>% 
+                select(RangeDesc = Range,
+                       RangeLower,
+                       RangeUpper,
+                       Nhood,
+                       HH_Count) %>% 
+                group_by(Nhood) %>% 
+                mutate(RangeLower = as.numeric(RangeLower),
+                       RangeUpper = as.numeric(RangeUpper),
+                       CumSum = cumsum(HH_Count)) %>% 
+                do({
+                        cs <- .["CumSum"] %>% unlist() %>% as.numeric() %>% as.vector()
+                        midRow <- findInterval(max(cs)/2, cs) + 1
+                        
+                        a <- .[midRow,"RangeLower"]
+                        b <- .[midRow,"RangeUpper"]
+                        Pa <- .[midRow-1,"CumSum"] / .[nrow(.),"CumSum"]
+                        Pb <- .[midRow,"CumSum"] / .[nrow(.),"CumSum"]
+                        
+                        thedaNum <- log(1-Pa)-log(1-Pb)
+                        thedaDen <- log(b)-log(a)
+                        theda <- thedaNum/thedaDen
+                        
+                        kNum <- Pb - Pa
+                        kDen <- 1 / (a^theda) - 1 / (b^theda)
+                        k <- (kNum / kDen) ^ (1 / theda) 
+                        
+                        medianEst <- k * (2^(1 / theda))
+                        
+                        medianEst <- as.vector(medianEst) %>% round(digits = -1)
+                        
+                        data.frame(.,medianEst)
+                }) %>% 
+                summarise(first(medianEst))
+        
+        colnames(medInc) <- c("NHOOD.ABBR","MEDIAN")
+        
+        medInc
+        
+} # Note: this uses Pareto interpolation to estimate the median income value
+
+
+
 medHhInc_bar <- {
         myBuPu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,name = "BuPu"), 
                                    space = "Lab",
@@ -903,11 +1000,17 @@ medHhInc_bar <- {
         blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
         
         pal <- colorNumeric(palette = blues,
-                            domain = c(round(min(medianIncome2014$MEDIAN),-4),round(max(medianIncome2014$MEDIAN),-3)))
-        mypal <- pal(sort(medianIncome2014$MEDIAN))
-        ggplot(medianIncome2014, aes(x=reorder(NHOOD.ABBR, MEDIAN), y=MEDIAN)) +
-                geom_bar(stat='identity',fill = mypal, alpha = .5) +
-                geom_text(data = medianIncome2014,label = medianIncome2014$NHOOD.ABBR, hjust = 1.5) +
+                            domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
+        
+        brks.qt <-  classIntervals(medianIncome2014_plus$MEDIAN, n = 7, style = "quantile") %>% 
+                .[["brks"]] %>% 
+                round(digits = -3)
+        
+        
+        mypal <- pal(brks.qt)
+        ggplot(medianIncome2014_plus, aes(x=reorder(NHOOD.ABBR, MEDIAN), y=MEDIAN)) +
+                geom_bar(stat='identity',fill = mypal, alpha = 1) +
+                geom_text(data = medianIncome2014_plus,label = medianIncome2014_plus$NHOOD.ABBR, hjust = 1.5) +
                 theme(
                         panel.background = element_blank(),
                         panel.grid.minor = element_blank(), 
@@ -920,6 +1023,11 @@ medHhInc_bar <- {
                 coord_flip()
         
 }
+
+png('~/Pictures/medHhInc_bar.png',width=170,height=170,res = 72,units="px",bg = "transparent")
+print(medHhInc_bar)
+dev.off()
+
 
 myLflt_medInc <- function(){
         
