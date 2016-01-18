@@ -2,6 +2,7 @@
 
 # SETUP: LOAD PACKAGES AND PROJECT SETTINGS --------------------------------------------------------------
 
+require(scales)         # for ggplot2 label formatting (e.g., 'dollar', 'percent', ect.)
 require(gplots)         # for converting colors to HEX strings
 require(grDevices)      # for color palettes
 require(rgdal)          # for readOGR and others
@@ -909,7 +910,6 @@ medianIncome2014 <- {
             
 } # Note: this uses Pareto interpolation to estimate the median income value
 
-
 medianIncome2014_plus <- {
         Sys.sleep(1)
         acs <- acs.fetch(endyear = 2014, span = 5,
@@ -925,17 +925,14 @@ medianIncome2014_plus <- {
                 bind_cols(rnames) %>% 
                 gather(geo,count,-.) 
         
-        colnames(medInc) <- c("Range","Nhood","HH_Count")
+        colnames(medInc) <- c("Range","Geo","HH_Count")
+        
+        levels(medInc$Geo)[5:8] <- c("CID","YTLS","SEA", "KC") 
         
         medInc <- 
                 medInc %>% 
                 mutate(Range = gsub("Household\\sIncome:\\s","",x = Range),
-                       Nhood = as.character(Nhood),
-                       Nhood = ifelse(grepl("\\s2",x = Nhood),
-                                      "CID",
-                                      ifelse(grepl("\\s1",x = Nhood),
-                                             "YTLS",
-                                             Nhood))) %>% 
+                       Geo = as.character(Geo)) %>% 
                 filter(!grepl("Total",Range)) %>% 
                 mutate(RangeNum = as.numeric(gsub("[^\\d]+", "", Range, perl=TRUE))) %>% 
                 mutate(RangeStr = as.character(RangeNum),
@@ -953,9 +950,9 @@ medianIncome2014_plus <- {
                 select(RangeDesc = Range,
                        RangeLower,
                        RangeUpper,
-                       Nhood,
+                       Geo,
                        HH_Count) %>% 
-                group_by(Nhood) %>% 
+                group_by(Geo) %>% 
                 mutate(RangeLower = as.numeric(RangeLower),
                        RangeUpper = as.numeric(RangeUpper),
                        CumSum = cumsum(HH_Count)) %>% 
@@ -984,49 +981,88 @@ medianIncome2014_plus <- {
                 }) %>% 
                 summarise(first(medianEst))
         
-        colnames(medInc) <- c("NHOOD.ABBR","MEDIAN")
+        colnames(medInc) <- c("GEO","MEDIAN")
         
         medInc
         
 } # Note: this uses Pareto interpolation to estimate the median income value
 
-
-
-medHhInc_bar <- {
-        myBuPu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,name = "BuPu"), 
-                                   space = "Lab",
-                                   bias = 3)
+medHhInc_bar <- function(){
         
         blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
         
         pal <- colorNumeric(palette = blues,
                             domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
         
-        brks.qt <-  classIntervals(medianIncome2014_plus$MEDIAN, n = 7, style = "quantile") %>% 
-                .[["brks"]] %>% 
-                round(digits = -3)
-        
-        
-        mypal <- pal(brks.qt)
-        ggplot(medianIncome2014_plus, aes(x=reorder(NHOOD.ABBR, MEDIAN), y=MEDIAN)) +
-                geom_bar(stat='identity',fill = mypal, alpha = 1) +
-                geom_text(data = medianIncome2014_plus,label = medianIncome2014_plus$NHOOD.ABBR, hjust = 1.5) +
+        mypal <- medianIncome2014_plus$MEDIAN %>% 
+                sort() %>% 
+                pal()
+       
+        ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
+                geom_bar(stat='identity',fill = mypal) +
+                geom_text(data = medianIncome2014_plus,label = medianIncome2014_plus$GEO, hjust = 1.5) +
+                scale_y_continuous(labels = scales::dollar) +
+                coord_flip() +
                 theme(
                         panel.background = element_blank(),
                         panel.grid.minor = element_blank(), 
                         panel.grid.major = element_blank(),
                         plot.background = element_blank(),
-                        axis.ticks = element_blank(),
-                        axis.title.x = element_blank(),
                         axis.title.y = element_blank(),
-                        axis.text = element_blank()) +
-                coord_flip()
+                        axis.title.x = element_blank(),
+                        axis.ticks.y = element_blank(),
+                        axis.text.y = element_blank(),
+                        axis.text.x = element_text())
+        
         
 }
 
+medHhInc_bar_labels <- function(){
+        
+        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
+        
+        pal <- colorNumeric(palette = blues,
+                            domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
+        
+        mypal <- medianIncome2014_plus$MEDIAN %>% 
+                sort() %>% 
+                pal()
+        
+        ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
+                geom_bar(stat='identity',fill = mypal, alpha = 0) +
+                geom_text(data = medianIncome2014_plus,label = medianIncome2014_plus$GEO, hjust = 1.5) +
+                scale_y_continuous(labels = scales::dollar) +
+                coord_flip() +
+                theme(
+                        panel.background = element_blank(),
+                        panel.grid.minor = element_blank(), 
+                        panel.grid.major = element_blank(),
+                        plot.background = element_blank(),
+                        axis.title.y = element_blank(),
+                        axis.title.x = element_blank(),
+                        axis.ticks.y = element_blank(),
+                        axis.text.y = element_blank(),
+                        axis.text.x = element_text())
+        
+        
+}
+
+{
+
+# Print Bar Plot       
+        
 png('~/Pictures/medHhInc_bar.png',width=170,height=170,res = 72,units="px",bg = "transparent")
-print(medHhInc_bar)
+medHhInc_bar()
 dev.off()
+
+# Print Bar Plot labels      
+
+png('~/Pictures/medHhInc_bar_labels.png',width=170,height=170,res = 72,units="px",bg = "transparent")
+medHhInc_bar_labels()
+dev.off()
+
+}
+
 
 
 myLflt_medInc <- function(){
@@ -1035,15 +1071,17 @@ myLflt_medInc <- function(){
                            data_frame = medianIncome2014,
                            by_sp = "NHOOD.ABBR",by_df = "NHOOD.ABBR")
         
-        myBuPu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,name = "BuPu"), 
-                         space = "Lab",
-                         bias = 3)
+        # myBuPu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,name = "BuPu"), 
+        #                  space = "Lab",
+        #                  bias = 3)
         
         blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
         
         pal <- colorNumeric(palette = blues,
-                            domain = c(round(min(shp_df@data$MEDIAN),-4),round(max(shp_df@data$MEDIAN),-3)))
+                            domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
         
+        pal <- colorNumeric(palette = blues,
+                            domain = c(0,round(max(medianIncome2014_plus$MEDIAN),-3)))
         
         
         leaflet() %>% 
@@ -1053,15 +1091,16 @@ myLflt_medInc <- function(){
                             color = col2hex("white"), weight = 2, opacity = .5) %>% 
                 addPolygons(data = shp_df,
                             smoothFactor = 0,
-                            weight = 1, color = ~pal(shp_df@data[,"MEDIAN"]), opacity = .1,
-                            fillColor = ~pal(shp_df@data[,"MEDIAN"]), fillOpacity = .5,
+                            stroke = F,
+                            fillColor = ~pal(shp_df@data[["MEDIAN"]]), fillOpacity = .5,
                             popup = paste0("Median Household Income",": $",shp_df@data[["MEDIAN"]],"<br>",
                                            shp_df@data[["NHOOD.FULL"]])) %>% 
                 addPolylines(data = nhoods_census_outline,
                              color = col2hex("white"), weight = 3, opacity = .5,stroke = T,
                              fill = F)  %>%
                 addLegend(pal = pal, 
-                          values = range(shp_df@data$MEDIAN), 
+                          values = range(c(0,round(max(medianIncome2014_plus$MEDIAN),-3))),
+                          labFormat = labelFormat(prefix = "$"),
                           position = "topright", 
                           title = "Median Household Income",
                           opacity = .5) 
