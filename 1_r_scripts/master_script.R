@@ -519,7 +519,7 @@ myLflt_tractTest <- function(){
         
 }
 
-myLflt_tractTest()
+# myLflt_tractTest()
 
 # SPATIAL DATA: TRACT SELECTION, REVISION OF BLOCK GROUP + BLOCK SELECTION ------------------------
 
@@ -602,7 +602,7 @@ myLflt_TractPopTest <- function(){
         
 }
 
-myLflt_TractPopTest()
+# myLflt_TractPopTest()
 
 # Revise the tract selection to include Tract 79 (Capitol Hill)
 
@@ -686,7 +686,7 @@ myLflt_censusSel <- function(){
                                  options = layersControlOptions(collapsed = FALSE))
 }
 
-myLflt_censusSel()
+# myLflt_censusSel()
 
 # Shows the population density by block in the CAC study area
 
@@ -719,7 +719,7 @@ myLflt_blockPop <- function(){
                                  options = layersControlOptions(collapsed = FALSE))
 }
 
-myLflt_blockPop()
+# myLflt_blockPop()
 
 # SPATIAL DATA: SCALES OF ANALYSIS ----------------------------------------------------------------
 
@@ -783,7 +783,7 @@ myLflt_tractRevTest <- function(){
                 
 } # Map with block pop. density, nhood boundaries, and popups 
 
-myLflt_tractRevTest()
+# myLflt_tractRevTest()
 
 myLflt_nhoodTract <- function(){
         
@@ -813,7 +813,7 @@ myLflt_nhoodTract <- function(){
                           opacity = 1)
 } # Map with tracts colored by neighborhood
 
-myLflt_nhoodTract()
+# myLflt_nhoodTract()
 
 bg_rev <- {
         bg_rev <-
@@ -867,7 +867,7 @@ myLflt_bgRevTest <- function(){
         
 }
 
-myLflt_bgRevTest()
+# myLflt_bgRevTest()
 
 myLflt_nhoodBg <- function(){
         
@@ -898,7 +898,7 @@ myLflt_nhoodBg <- function(){
                           opacity = 1)
 } # Map with block groups colored by neighborhood
 
-myLflt_nhoodBg()
+# myLflt_nhoodBg()
 
 # An outline of the study area neighborhoods 
 # (as defined by the census tracts associated with them in this project)
@@ -937,7 +937,7 @@ myLflt_nhoods <- function(){
         
 }
 
-myLflt_nhoods()
+# myLflt_nhoods()
 
 # -------------------------------------------------------------------------------------------------        
 
@@ -1280,7 +1280,7 @@ medHhInc_bar_labels <- function(){
 # set the plot result back: dev.set(which = 1)
         
 # Print Bar Plot       
-        
+       
 png('./4_webcontent/images/medHhInc_bar.png',width=400,height=400,res = 72,units="px",bg = "transparent")
 medHhInc_bar()
 dev.off()
