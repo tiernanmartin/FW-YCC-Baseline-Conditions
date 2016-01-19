@@ -1283,6 +1283,7 @@ myLflt_medInc <- function(){
         
         leaflet() %>% 
                 addProviderTiles("CartoDB.Positron") %>% 
+                setView(lng = myCACbound_cntr@coords[[1]],lat = myCACbound_cntr@coords[[2]],zoom = 13) %>% 
                 addPolygons(data = shp_df,
                             smoothFactor = 0,
                             stroke = F,
