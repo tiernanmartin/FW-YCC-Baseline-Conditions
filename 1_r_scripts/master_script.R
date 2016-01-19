@@ -26,6 +26,8 @@ require(rapport)        # for creating a camel case string
 require(VGAM)           # for creating estimate median values for neighborhoods
 require(htmlwidgets)
 require(classInt)       # for setting breaks in graphs (http://bit.ly/1QexSEP)
+require(spdep)          # for identifying spatial neighbors
+require(maptools)       # for combine SpatialPolygonsDataFrames
 
 
 options(scipen=999,stringsAsFactors = FALSE)
@@ -210,22 +212,106 @@ myCACbound <- {
 
 # SPATIAL DATA: CENSUS TRACTS, BLOCK GROUPS, BLOCKS -----------------------------------------------
 
+# 'tract_CAC' and 'bg_CAC' are TIGER shapefiles that are clipped to remove waterbodies (for visual clarity)
 tract_CAC <- {
         if(!file.exists("./2_inputs/tracts.shp")){
-                tigris::tracts(state = "WA", county = "King") %>% 
-                        spTransform(CRSobj = crs_proj) %>% 
-                        writeOGR(dsn = "./2_inputs/",layer = "tracts", driver = "ESRI Shapefile")
+                tracts_orig <- 
+                        tigris::tracts(state = "WA", county = "King") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+                if(!file.exists("./2_inputs/NHDMajor.gdb")){  # check if the file already exists, if not then download it
+                        url <- "ftp://www.ecy.wa.gov/gis_a/inlandWaters/NHD/NHDmajor.gdb.zip" # save the URL for the waterbodies data
+                        
+                        temp <- tempfile() # create a temporary file to hold the compressed download
+                        
+                        download(url, dest = temp, mode="wb") # download the file
+                        
+                        unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
+                        
+                        dateDownloaded <- date()
+                }
+                
+                path_gdb <- "./2_inputs/NHDMajor.gdb/" # path to the geodatabase folder
+                
+                waterbodies.shp <- 
+                        readOGR(dsn = path_gdb,      # create a waterbodies shape
+                                           layer = "NHD_MajorWaterbodies") %>%
+                        gBuffer(byid=TRUE, width=0) %>% # clean up self-intersecting polygons
+                        spTransform(CRSobj = crs_proj) # transform the projection to match the project projection
+                
+                tracts_big <- gUnaryUnion(tracts_orig) # simplify the tract polygons by merging them into one polygon
+                
+                waterbodies_cntr <- gCentroid(spgeom = waterbodies.shp,byid = TRUE) # create a set of center points for the waterbodies shapes
+                
+                intersect <- over(x = waterbodies_cntr,y = tracts_big,returnList = TRUE) %>%  # find the indices of all waterbodies whose center point overlaps the merged tracts shape
+                        .[which(. == 1)] %>% 
+                        names()
+                
+                # some of the Puget Sound polygon centroids aren't overlapped by tracts, so we'll added them manually
+                ps <- 
+                        waterbodies.shp@data %>% 
+                        mutate(RN = rownames(.)) %>% 
+                        as.data.frame %>% 
+                        filter(GNIS_Name %in% "Puget Sound" & AreaSqKm > 100) %>% 
+                        select(RN) %>% 
+                        unlist()
+                
+                waterbodies_sel.shp <- waterbodies.shp[c(ps,intersect),] %>%  # refine the subset of the spatial data
+                        spTransform(CRSobj = crs_proj) %>%  # change the CRS from geographic to projected
+                        gUnaryUnion()
+                
+                tracts <- gDifference(spgeom1 = tracts_orig, spgeom2 = waterbodies_sel.shp, 
+                                      byid = TRUE) # Remove the waterbodies from the tract shapes
+                
+                # tracts_all <- gUnaryUnion(tracts)
+                # 
+                # trt_cent <- gCentroid(tracts_orig, byid = TRUE)
+                # 
+                # test <- over(x = trt_cent,y = tracts_orig,returnList = TRUE)
+                # 
+                # 53033990100
+                # test[which(test == 0)]
+                # 
+                # 
+                # myLeaflet(tracts_orig) %>%
+                #         addPolygons(data = tracts_orig,popup = tracts_orig$GEOID, stroke = F, fillOpacity = 0) %>% 
+                #         addCircles(data = trt_cent,color = "orange", radius = 2) %>% 
+                #         addPolygons(data = tracts,smoothFactor = 0,stroke = FALSE, fillColor = "black",fillOpacity = 1)
+                # 
+                # 
+                # 
+                # GEOIDS <- over(x = trt_cent,y = tracts_orig,returnList = TRUE)
+                # 
+                # 
+                # myLeaflet(tracts) %>% 
+                #         addCircleMarkers(data = trt_cent)
+                
+                # This (annoying) tract was completely removed during the waterbody clip, 
+                # so it must also be removed from the original SpPolyDF
+                
+                PugetSoundTract <- "53033990100" 
+                
+                df <- tracts_orig@data %>% filter(GEOID %!in% PugetSoundTract)
+                
+                rn <- rownames(df)
+                
+                tracts <- spChFIDs(obj = tracts,x = rn) %>% # change the row IDs to match those in 'tracts_orig'
+                        SpatialPolygonsDataFrame(Sr = .,data = df) %>% 
+                        spTransform(.,CRSobj = crs_proj) %>% 
+                        writeOGR(dsn = "./2_inputs/",layer = "tracts_noWtrbds", driver = "ESRI Shapefile")
         }
         
+        
+        
         if(!file.exists("./2_inputs/tract_CAC.shp")){
-                tract_wa <- readOGR(dsn = "./2_inputs/", layer = "tracts") %>% 
+                tract_wa <- readOGR(dsn = "./2_inputs/", layer = "tracts_noWtrbds") %>% 
                         spTransform(CRSobj = crs_proj)
                 
                 overlap <- gIntersects(spgeom1 = tract_wa,spgeom2 = myCACbound, byid = T) %>%
                         which(. == T)
                 
                 tract_CAC <- tract_wa[overlap,] %>% 
-                        writeOGR(dsn = "./2_inputs/", layer = "tract_CAC", driver = "ESRI Shapefile")
+                        writeOGR(dsn = "./2_inputs/", layer = "tract_CAC", driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 
         }
         
@@ -235,19 +321,74 @@ tract_CAC <- {
 
 bg_CAC <- {
         if(!file.exists("./2_inputs/bg.shp")){
-                tigris::block_groups(state = "WA", county = "King") %>% 
-                        spTransform(CRSobj = crs_proj) %>% 
-                        writeOGR(dsn = "./2_inputs/",layer = "bg", driver = "ESRI Shapefile")
+                bg_orig <- tigris::block_groups(state = "WA", county = "King") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+                if(!file.exists("./2_inputs/NHDMajor.gdb")){  # check if the file already exists, if not then download it
+                        url <- "ftp://www.ecy.wa.gov/gis_a/inlandWaters/NHD/NHDmajor.gdb.zip" # save the URL for the waterbodies data
+                        
+                        temp <- tempfile() # create a temporary file to hold the compressed download
+                        
+                        download(url, dest = temp, mode="wb") # download the file
+                        
+                        unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
+                        
+                        dateDownloaded <- date()
+                }
+                
+                path_gdb <- "./2_inputs/NHDMajor.gdb/" # path to the geodatabase folder
+                
+                waterbodies.shp <- 
+                        readOGR(dsn = path_gdb,      # create a waterbodies shape
+                                layer = "NHD_MajorWaterbodies") %>%
+                        gBuffer(byid=TRUE, width=0) %>% # clean up self-intersecting polygons
+                        spTransform(CRSobj = crs_proj) # transform the projection to match the project projection
+                
+                bg_big <- gUnaryUnion(bg_orig) # simplify the tract polygons by merging them into one polygon
+                
+                waterbodies_cntr <- gCentroid(spgeom = waterbodies.shp,byid = TRUE) # create a set of center points for the waterbodies shapes
+                
+                intersect <- over(x = waterbodies_cntr,y = bg_big,returnList = TRUE) %>%  # find the indices of all waterbodies whose center point overlaps the merged bg shape
+                        .[which(. == 1)] %>% 
+                        names()
+                
+                # some of the Puget Sound polygon centroids aren't overlapped by bg, so we'll added them manually
+                ps <- 
+                        waterbodies.shp@data %>% 
+                        mutate(RN = rownames(.)) %>% 
+                        as.data.frame %>% 
+                        filter(GNIS_Name %in% "Puget Sound" & AreaSqKm > 100) %>% 
+                        select(RN) %>% 
+                        unlist()
+                
+                waterbodies_sel.shp <- waterbodies.shp[c(ps,intersect),] %>%  # refine the subset of the spatial data
+                        spTransform(CRSobj = crs_proj) %>%  # change the CRS from geographic to projected
+                        gUnaryUnion()
+                
+                bg <- gDifference(spgeom1 = bg_orig, spgeom2 = waterbodies_sel.shp, 
+                                      byid = TRUE) # Remove the waterbodies from the tract shapes
+                
+                PugetSoundTract <- "990100" 
+                
+                df <- bg_orig@data %>% filter(TRACTCE %!in% PugetSoundTract)
+                
+                rn <- rownames(df)
+                
+                bg <- spChFIDs(obj = bg,x = rn) %>% # change the row IDs to match those in 'bg_orig'
+                        SpatialPolygonsDataFrame(Sr = .,data = df) %>% 
+                        spTransform(.,CRSobj = crs_proj) %>% 
+                        writeOGR(dsn = "./2_inputs/",layer = "bg_noWtrbds", driver = "ESRI Shapefile")
+                
         }
         
         if(!file.exists("./2_inputs/bg_CAC.shp")){
                 
                 sel <- tract_CAC@data$TRACTCE
                 
-                bg_CAC <- readOGR(dsn = "./2_inputs/", layer = "bg") %>% 
+                bg_CAC <- readOGR(dsn = "./2_inputs/", layer = "bg_noWtrbds") %>% 
                         spTransform(CRSobj = crs_proj) %>% 
                         .[.@data$TRACTCE %in% sel,] %>% 
-                        writeOGR(dsn = "./2_inputs/", layer = "bg_CAC", driver = "ESRI Shapefile")
+                        writeOGR(dsn = "./2_inputs/", layer = "bg_CAC", driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 
         }
         
@@ -270,6 +411,57 @@ blk_CAC <- {
                 blk_CAC <- readOGR(dsn = "./2_inputs/", layer = "blk") %>% 
                         spTransform(CRSobj = crs_proj) %>% 
                         .[.@data$TRACTCE %in% sel,] 
+                
+                if(!file.exists("./2_inputs/NHDMajor.gdb")){  # check if the file already exists, if not then download it
+                        url <- "ftp://www.ecy.wa.gov/gis_a/inlandWaters/NHD/NHDmajor.gdb.zip" # save the URL for the waterbodies data
+                        
+                        temp <- tempfile() # create a temporary file to hold the compressed download
+                        
+                        download(url, dest = temp, mode="wb") # download the file
+                        
+                        unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
+                        
+                        dateDownloaded <- date()
+                }
+                
+                path_gdb <- "./2_inputs/NHDMajor.gdb/" # path to the geodatabase folder
+                
+                waterbodies.shp <- 
+                        readOGR(dsn = path_gdb,      # create a waterbodies shape
+                                layer = "NHD_MajorWaterbodies") %>%
+                        gBuffer(byid=TRUE, width=0) %>% # clean up self-intersecting polygons
+                        spTransform(CRSobj = crs_proj) # transform the projection to match the project projection
+                
+                blk_big <- gUnaryUnion(blk_CAC) # simplify the tract polygons by merging them into one polygon
+                
+                waterbodies_cntr <- gCentroid(spgeom = waterbodies.shp,byid = TRUE) # create a set of center points for the waterbodies shapes
+                
+                intersect <- over(x = waterbodies_cntr,y = blk_big,returnList = TRUE) %>%  # find the indices of all waterbodies whose center point overlaps the merged bg shape
+                        .[which(. == 1)] %>% 
+                        names()
+                ps <- 
+                        waterbodies.shp@data %>% 
+                        mutate(RN = rownames(.)) %>% 
+                        as.data.frame %>% 
+                        filter(GNIS_Name %in% "Puget Sound") %>% 
+                        select(RN) %>% 
+                        unlist()
+                
+                waterbodies_sel.shp <- waterbodies.shp[c(ps),] %>%  # refine the subset of the spatial data
+                        spTransform(CRSobj = crs_proj) %>%  # change the CRS from geographic to projected
+                        gUnaryUnion()
+                
+                blk_CAC_noWtrbds <- gDifference(spgeom1 = blk_CAC, spgeom2 = waterbodies_sel.shp, 
+                                       byid = TRUE) 
+                rn <- row.names(blk_CAC_noWtrbds)
+                
+                nodata <- rep(NA, times = 1262) %>% as.data.frame()
+                
+                rownames(nodata) <- rn
+                
+                blk_CAC_noWtrbds %>% 
+                        SpatialPolygonsDataFrame(data = nodata) %>% 
+                        writeOGR(dsn = "./2_inputs/",layer = "blk_CAC_noWtrbds",driver = "ESRI Shapefile") # Remove the waterbodies from the tract shapes
                 
                 # Must download the block-level data directly from American Commmunity Survery b/c 
                 # the smallest scale of data provided by the Census API is the block-group level.
@@ -299,6 +491,10 @@ blk_CAC <- {
                 spTransform(CRSobj = crs_proj)
 }
 
+blk_CAC_noWtrbds <- {
+        readOGR(dsn = "./2_inputs/",layer = "blk_CAC_noWtrbds") %>% 
+                spTransform(CRSobj = crs_proj)
+}
 
 # This function allows me to easily find the GEOID of tracts that I'm considering excluding 
 # (e.g. Tract 93, the majority of which is in SODO)
@@ -703,7 +899,6 @@ nhoods_census_outline <-
         gUnaryUnion(id = as.factor(.@data$NHOOD.ABBR)) %>% 
         as('SpatialLines') 
         
-        
 
 myLflt_nhoods <- function(){
         pal <- colorFactor(palette = "Set2",
@@ -1063,17 +1258,11 @@ dev.off()
 
 }
 
-
-
 myLflt_medInc <- function(){
         
         shp_df <- geo_join(spatial_data = bg_rev,
                            data_frame = medianIncome2014,
                            by_sp = "NHOOD.ABBR",by_df = "NHOOD.ABBR")
-        
-        # myBuPu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,name = "BuPu"), 
-        #                  space = "Lab",
-        #                  bias = 3)
         
         blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
         
@@ -1086,9 +1275,6 @@ myLflt_medInc <- function(){
         
         leaflet() %>% 
                 addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(data = blk_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 2, opacity = .5) %>% 
                 addPolygons(data = shp_df,
                             smoothFactor = 0,
                             stroke = F,
@@ -1106,8 +1292,7 @@ myLflt_medInc <- function(){
                           opacity = .5) 
 }
 
-# myLflt_medInc() %>% saveWidget(file = "lflt_medHhInc.html")
-
+myLflt_medInc() %>% saveWidget(file = "lflt_medHhInc.html")
 
 
 # Census data functions
@@ -1279,5 +1464,5 @@ myLflt_test(df = hhIncomeMedian_bg,
             legTitle = "Median Household Income (2014)")
 
 # ------------------------------------------------------------------------------------------------- 
-# 
+#  
 
