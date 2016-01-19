@@ -1016,24 +1016,6 @@ geo_bg_plus <- c(acs_bg_CD,
 
 # Median Income
 
-FH_medianIncome2014 <- {
-        Sys.sleep(1)
-
-        medInc <- acs.fetch(
-                endyear = 2014,
-                span = 5,
-                geography = geo.make(
-                        state = "WA",
-                        county = "King",
-                        tract = "008500"
-                ),
-                table.number = "B19013",
-                col.names = "pretty"
-        )
-        
-        medInc@estimate %>% as.numeric()
-} # Save the Median income for First Hill (Tract 85) for reference
-
 medianIncome2014 <- {
         if(!file.exists("./2_inputs/medianIncome2014.csv")){
                 Sys.sleep(1)
