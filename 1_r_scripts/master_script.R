@@ -1138,10 +1138,15 @@ medianIncome2014_plus <- {
                 
                 colnames(medInc) <- c("Range","Geo","HH_Count")
                 
-                levels(medInc$Geo)[5:8] <- c("CID","YTLS","SEA", "KC") 
-                
                 medInc <- 
                         medInc %>% 
+                        mutate(NewGeo = Geo) %>% 
+                        mutate(NewGeo = replace(x = NewGeo, grep("\\s2",NewGeo, perl = TRUE),values = "CID")) %>% 
+                        mutate(NewGeo = replace(x = NewGeo, grep("\\s1",NewGeo, perl = TRUE),values = "YTLS")) %>% 
+                        mutate(NewGeo = replace(x = NewGeo, grep("^Seattle",NewGeo, perl = TRUE),values = "SEA")) %>% 
+                        mutate(NewGeo = replace(x = NewGeo, grep("^King",NewGeo, perl = TRUE),values = "KC")) %>% 
+                        select(-Geo) %>% 
+                        select(Range,Geo = NewGeo,HH_Count) %>% 
                         mutate(Range = gsub("Household\\sIncome:\\s","",x = Range),
                                Geo = as.character(Geo)) %>% 
                         filter(!grepl("Total",Range)) %>% 

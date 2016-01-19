@@ -1,9 +1,9 @@
 GEO,MEDIAN
 12AV,41280
-"Block Group 1, Census Tract 91, King County, Washington",26240
-"Block Group 2, Census Tract 91, King County, Washington",26390
 CD,51570
+CID,26390
 FH,23150
-"King County, Washington",72830
+KC,72830
 PS,23460
-"Seattle city, Washington",66910
+SEA,66910
+YTLS,26240
