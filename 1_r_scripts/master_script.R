@@ -1184,7 +1184,7 @@ medianIncome2014_plus <- {
 
 medHhInc_bar <- function(){
         
-        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
+        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues")
         
         pal <- colorNumeric(palette = blues,
                             domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
@@ -1252,7 +1252,7 @@ dev.off()
 
 # Print Bar Plot labels      
 
-png('~/Pictures/medHhInc_bar_labels.png',width=170,height=170,res = 72,units="px",bg = "transparent")
+png('~/Pictures/medHhInc_bar_labels.png',width=400,height=400,res = 72,units="px",bg = "transparent")
 medHhInc_bar_labels()
 dev.off()
 
@@ -1264,7 +1264,7 @@ myLflt_medInc <- function(){
                            data_frame = medianIncome2014,
                            by_sp = "NHOOD.ABBR",by_df = "NHOOD.ABBR")
         
-        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
+        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues")
         
         pal <- colorNumeric(palette = blues,
                             domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
