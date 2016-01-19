@@ -28,6 +28,8 @@ require(htmlwidgets)
 require(classInt)       # for setting breaks in graphs (http://bit.ly/1QexSEP)
 require(spdep)          # for identifying spatial neighbors
 require(maptools)       # for combine SpatialPolygonsDataFrames
+require(grid)
+require(gridExtra)
 
 
 options(scipen=999,stringsAsFactors = FALSE)
@@ -214,7 +216,6 @@ myCACbound_cntr <- {
         gCentroid(myCACbound) %>% 
                 spTransform(CRSobj = crs_proj)
 }
-
 
 # SPATIAL DATA: CENSUS TRACTS, BLOCK GROUPS, BLOCKS -----------------------------------------------
 
@@ -1201,13 +1202,15 @@ medHhInc_bar <- function(){
                 sort() %>% 
                 pal()
        
-        ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
+        g <- ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
                 geom_bar(stat='identity',fill = mypal,alpha = .5) +
                 geom_text(data = medianIncome2014_plus,label = paste0(medianIncome2014_plus$GEO,": $",medianIncome2014_plus$MEDIAN), hjust = 1.1) +
                 scale_y_continuous(labels = scales::dollar) +
                 coord_flip() +
                 theme(
+                        plot.margin = unit(c(-10,0,0,0), "points"),
                         panel.background = element_blank(),
+                        panel.grid = element_blank(),
                         panel.grid.minor = element_blank(), 
                         panel.grid.major = element_blank(),
                         plot.background = element_blank(),
@@ -1215,7 +1218,14 @@ medHhInc_bar <- function(){
                         axis.title.x = element_blank(),
                         axis.ticks.y = element_blank(),
                         axis.text.y = element_blank(),
-                        axis.text.x = element_text())
+                        axis.text.x = element_text(),
+                        strip.background = element_blank()
+                        )
+        
+        gg <- grid.arrange(g, ncol=1, bottom = textGrob("Source: U.S. Census Bureau; American Community Survey,\n2014 American Community Survey 5-Year Estimates, Table B19001",x = 0.05,
+                                                        hjust = 0, vjust = .5,
+                                                        gp = gpar(fontface = "italic",
+                                                                  fontsize = 10)))
         
         
 }
@@ -1252,6 +1262,8 @@ medHhInc_bar_labels <- function(){
 
 {
 
+# set the plot result back: dev.set(which = 1)
+        
 # Print Bar Plot       
         
 png('./4_webcontent/images/medHhInc_bar.png',width=400,height=400,res = 72,units="px",bg = "transparent")
