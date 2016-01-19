@@ -1288,7 +1288,7 @@ myLflt_medInc <- function(){
                           values = range(c(0,round(max(medianIncome2014_plus$MEDIAN),-3))),
                           labFormat = labelFormat(prefix = "$"),
                           position = "topright", 
-                          title = "Median Household Income",
+                          title = "Median<br>Household<br>Income",
                           opacity = .5) 
 }
 
