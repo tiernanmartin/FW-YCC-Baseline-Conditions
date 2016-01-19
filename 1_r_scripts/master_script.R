@@ -1035,159 +1035,169 @@ FH_medianIncome2014 <- {
 } # Save the Median income for First Hill (Tract 85) for reference
 
 medianIncome2014 <- {
-        Sys.sleep(1)
-        acs <- acs.fetch(endyear = 2014, span = 5,
-                              geography = geo_bg,
-                              table.number = "B19001", col.names = "pretty")
+        if(!file.exists("./2_inputs/medianIncome2014.csv")){
+                Sys.sleep(1)
+                acs <- acs.fetch(endyear = 2014, span = 5,
+                                 geography = geo_bg,
+                                 table.number = "B19001", col.names = "pretty")
+                
+                rnames <- acs@estimate %>% t()  %>% as.data.frame() %>% rownames() %>% as.data.frame()
+                
+                medInc <- 
+                        acs@estimate %>% 
+                        t() %>% 
+                        as.data.frame() %>% 
+                        bind_cols(rnames) %>% 
+                        gather(geo,count,-.) 
+                
+                colnames(medInc) <- c("Range","Nhood","HH_Count")
+                
+                medInc <- 
+                        medInc %>% 
+                        mutate(Range = gsub("Household\\sIncome:\\s","",x = Range),
+                               Nhood = as.character(Nhood),
+                               Nhood = ifelse(grepl("\\s2",x = Nhood),
+                                              "CID",
+                                              ifelse(grepl("\\s1",x = Nhood),
+                                                     "YTLS",
+                                                     Nhood))) %>% 
+                        filter(!grepl("Total",Range)) %>% 
+                        mutate(RangeNum = as.numeric(gsub("[^\\d]+", "", Range, perl=TRUE))) %>% 
+                        mutate(RangeStr = as.character(RangeNum),
+                               RangeStrLen = round(str_length(RangeStr)/2)) %>% 
+                        mutate(RangeLower = ifelse(str_length(RangeStr) == 6,
+                                                   RangeNum,
+                                                   ifelse(str_length(RangeStr) < 6,
+                                                          1,
+                                                          str_extract(RangeStr,paste0("^\\d{",RangeStrLen,"}"))))) %>% 
+                        mutate(RangeUpper = ifelse(str_length(RangeStr) == 6,
+                                                   500000,
+                                                   ifelse(str_length(RangeStr) < 6,
+                                                          RangeNum,
+                                                          str_extract(RangeStr,paste0("\\d{",RangeStrLen,"}$"))))) %>% 
+                        select(RangeDesc = Range,
+                               RangeLower,
+                               RangeUpper,
+                               Nhood,
+                               HH_Count) %>% 
+                        group_by(Nhood) %>% 
+                        mutate(RangeLower = as.numeric(RangeLower),
+                               RangeUpper = as.numeric(RangeUpper),
+                               CumSum = cumsum(HH_Count)) %>% 
+                        do({
+                                cs <- .["CumSum"] %>% unlist() %>% as.numeric() %>% as.vector()
+                                midRow <- findInterval(max(cs)/2, cs) + 1
+                                
+                                a <- .[midRow,"RangeLower"]
+                                b <- .[midRow,"RangeUpper"]
+                                Pa <- .[midRow-1,"CumSum"] / .[nrow(.),"CumSum"]
+                                Pb <- .[midRow,"CumSum"] / .[nrow(.),"CumSum"]
+                                
+                                thedaNum <- log(1-Pa)-log(1-Pb)
+                                thedaDen <- log(b)-log(a)
+                                theda <- thedaNum/thedaDen
+                                
+                                kNum <- Pb - Pa
+                                kDen <- 1 / (a^theda) - 1 / (b^theda)
+                                k <- (kNum / kDen) ^ (1 / theda) 
+                                
+                                medianEst <- k * (2^(1 / theda))
+                                
+                                medianEst <- as.vector(medianEst) %>% round(digits = -1)
+                                
+                                data.frame(.,medianEst)
+                        }) %>% 
+                        summarise(first(medianEst))
+                
+                colnames(medInc) <- c("NHOOD.ABBR","MEDIAN")
+                
+                readr::write_csv(x = medInc,path = "./2_inputs/medianIncome2014.csv")
+        }
         
-        rnames <- acs@estimate %>% t()  %>% as.data.frame() %>% rownames() %>% as.data.frame()
+        medianIncome2014 <- readr::read_csv("./2_inputs/medianIncome2014.csv")
         
-        medInc <- 
-                acs@estimate %>% 
-                t() %>% 
-                as.data.frame() %>% 
-                bind_cols(rnames) %>% 
-                gather(geo,count,-.) 
-        
-        colnames(medInc) <- c("Range","Nhood","HH_Count")
-        
-        medInc <- 
-                medInc %>% 
-                mutate(Range = gsub("Household\\sIncome:\\s","",x = Range),
-                       Nhood = as.character(Nhood),
-                       Nhood = ifelse(grepl("\\s2",x = Nhood),
-                                      "CID",
-                                      ifelse(grepl("\\s1",x = Nhood),
-                                             "YTLS",
-                                             Nhood))) %>% 
-                filter(!grepl("Total",Range)) %>% 
-                mutate(RangeNum = as.numeric(gsub("[^\\d]+", "", Range, perl=TRUE))) %>% 
-                mutate(RangeStr = as.character(RangeNum),
-                       RangeStrLen = round(str_length(RangeStr)/2)) %>% 
-                mutate(RangeLower = ifelse(str_length(RangeStr) == 6,
-                                           RangeNum,
-                                           ifelse(str_length(RangeStr) < 6,
-                                                  1,
-                                                  str_extract(RangeStr,paste0("^\\d{",RangeStrLen,"}"))))) %>% 
-                mutate(RangeUpper = ifelse(str_length(RangeStr) == 6,
-                                           500000,
-                                           ifelse(str_length(RangeStr) < 6,
-                                                  RangeNum,
-                                                  str_extract(RangeStr,paste0("\\d{",RangeStrLen,"}$"))))) %>% 
-                select(RangeDesc = Range,
-                       RangeLower,
-                       RangeUpper,
-                       Nhood,
-                       HH_Count) %>% 
-                group_by(Nhood) %>% 
-                mutate(RangeLower = as.numeric(RangeLower),
-                       RangeUpper = as.numeric(RangeUpper),
-                       CumSum = cumsum(HH_Count)) %>% 
-                do({
-                        cs <- .["CumSum"] %>% unlist() %>% as.numeric() %>% as.vector()
-                        midRow <- findInterval(max(cs)/2, cs) + 1
-                        
-                        a <- .[midRow,"RangeLower"]
-                        b <- .[midRow,"RangeUpper"]
-                        Pa <- .[midRow-1,"CumSum"] / .[nrow(.),"CumSum"]
-                        Pb <- .[midRow,"CumSum"] / .[nrow(.),"CumSum"]
-                        
-                        thedaNum <- log(1-Pa)-log(1-Pb)
-                        thedaDen <- log(b)-log(a)
-                        theda <- thedaNum/thedaDen
-                        
-                        kNum <- Pb - Pa
-                        kDen <- 1 / (a^theda) - 1 / (b^theda)
-                        k <- (kNum / kDen) ^ (1 / theda) 
-                        
-                        medianEst <- k * (2^(1 / theda))
-                        
-                        medianEst <- as.vector(medianEst) %>% round(digits = -1)
-                        
-                        data.frame(.,medianEst)
-                }) %>% 
-                summarise(first(medianEst))
-        
-        colnames(medInc) <- c("NHOOD.ABBR","MEDIAN")
-        
-        medInc
             
 } # Note: this uses Pareto interpolation to estimate the median income value
 
 medianIncome2014_plus <- {
-        Sys.sleep(1)
-        acs <- acs.fetch(endyear = 2014, span = 5,
-                         geography = geo_bg_plus,
-                         table.number = "B19001", col.names = "pretty")
         
-        rnames <- acs@estimate %>% t()  %>% as.data.frame() %>% rownames() %>% as.data.frame()
+        if(!file.exists("./2_inputs/medianIncome2014_plus.csv")){
+                Sys.sleep(1)
+                acs <- acs.fetch(endyear = 2014, span = 5,
+                                 geography = geo_bg_plus,
+                                 table.number = "B19001", col.names = "pretty")
+                
+                rnames <- acs@estimate %>% t()  %>% as.data.frame() %>% rownames() %>% as.data.frame()
+                
+                medInc <- 
+                        acs@estimate %>% 
+                        t() %>% 
+                        as.data.frame() %>% 
+                        bind_cols(rnames) %>% 
+                        gather(geo,count,-.) 
+                
+                colnames(medInc) <- c("Range","Geo","HH_Count")
+                
+                levels(medInc$Geo)[5:8] <- c("CID","YTLS","SEA", "KC") 
+                
+                medInc <- 
+                        medInc %>% 
+                        mutate(Range = gsub("Household\\sIncome:\\s","",x = Range),
+                               Geo = as.character(Geo)) %>% 
+                        filter(!grepl("Total",Range)) %>% 
+                        mutate(RangeNum = as.numeric(gsub("[^\\d]+", "", Range, perl=TRUE))) %>% 
+                        mutate(RangeStr = as.character(RangeNum),
+                               RangeStrLen = round(str_length(RangeStr)/2)) %>% 
+                        mutate(RangeLower = ifelse(str_length(RangeStr) == 6,
+                                                   RangeNum,
+                                                   ifelse(str_length(RangeStr) < 6,
+                                                          1,
+                                                          str_extract(RangeStr,paste0("^\\d{",RangeStrLen,"}"))))) %>% 
+                        mutate(RangeUpper = ifelse(str_length(RangeStr) == 6,
+                                                   500000,
+                                                   ifelse(str_length(RangeStr) < 6,
+                                                          RangeNum,
+                                                          str_extract(RangeStr,paste0("\\d{",RangeStrLen,"}$"))))) %>% 
+                        select(RangeDesc = Range,
+                               RangeLower,
+                               RangeUpper,
+                               Geo,
+                               HH_Count) %>% 
+                        group_by(Geo) %>% 
+                        mutate(RangeLower = as.numeric(RangeLower),
+                               RangeUpper = as.numeric(RangeUpper),
+                               CumSum = cumsum(HH_Count)) %>% 
+                        do({
+                                cs <- .["CumSum"] %>% unlist() %>% as.numeric() %>% as.vector()
+                                midRow <- findInterval(max(cs)/2, cs) + 1
+                                
+                                a <- .[midRow,"RangeLower"]
+                                b <- .[midRow,"RangeUpper"]
+                                Pa <- .[midRow-1,"CumSum"] / .[nrow(.),"CumSum"]
+                                Pb <- .[midRow,"CumSum"] / .[nrow(.),"CumSum"]
+                                
+                                thedaNum <- log(1-Pa)-log(1-Pb)
+                                thedaDen <- log(b)-log(a)
+                                theda <- thedaNum/thedaDen
+                                
+                                kNum <- Pb - Pa
+                                kDen <- 1 / (a^theda) - 1 / (b^theda)
+                                k <- (kNum / kDen) ^ (1 / theda) 
+                                
+                                medianEst <- k * (2^(1 / theda))
+                                
+                                medianEst <- as.vector(medianEst) %>% round(digits = -1)
+                                
+                                data.frame(.,medianEst)
+                        }) %>% 
+                        summarise(first(medianEst))
+                
+                colnames(medInc) <- c("GEO","MEDIAN")
+                
+                readr::write_csv(x = medInc,path = "./2_inputs/medianIncome2014_plus.csv")
+        }
         
-        medInc <- 
-                acs@estimate %>% 
-                t() %>% 
-                as.data.frame() %>% 
-                bind_cols(rnames) %>% 
-                gather(geo,count,-.) 
-        
-        colnames(medInc) <- c("Range","Geo","HH_Count")
-        
-        levels(medInc$Geo)[5:8] <- c("CID","YTLS","SEA", "KC") 
-        
-        medInc <- 
-                medInc %>% 
-                mutate(Range = gsub("Household\\sIncome:\\s","",x = Range),
-                       Geo = as.character(Geo)) %>% 
-                filter(!grepl("Total",Range)) %>% 
-                mutate(RangeNum = as.numeric(gsub("[^\\d]+", "", Range, perl=TRUE))) %>% 
-                mutate(RangeStr = as.character(RangeNum),
-                       RangeStrLen = round(str_length(RangeStr)/2)) %>% 
-                mutate(RangeLower = ifelse(str_length(RangeStr) == 6,
-                                           RangeNum,
-                                           ifelse(str_length(RangeStr) < 6,
-                                                  1,
-                                                  str_extract(RangeStr,paste0("^\\d{",RangeStrLen,"}"))))) %>% 
-                mutate(RangeUpper = ifelse(str_length(RangeStr) == 6,
-                                           500000,
-                                           ifelse(str_length(RangeStr) < 6,
-                                                  RangeNum,
-                                                  str_extract(RangeStr,paste0("\\d{",RangeStrLen,"}$"))))) %>% 
-                select(RangeDesc = Range,
-                       RangeLower,
-                       RangeUpper,
-                       Geo,
-                       HH_Count) %>% 
-                group_by(Geo) %>% 
-                mutate(RangeLower = as.numeric(RangeLower),
-                       RangeUpper = as.numeric(RangeUpper),
-                       CumSum = cumsum(HH_Count)) %>% 
-                do({
-                        cs <- .["CumSum"] %>% unlist() %>% as.numeric() %>% as.vector()
-                        midRow <- findInterval(max(cs)/2, cs) + 1
-                        
-                        a <- .[midRow,"RangeLower"]
-                        b <- .[midRow,"RangeUpper"]
-                        Pa <- .[midRow-1,"CumSum"] / .[nrow(.),"CumSum"]
-                        Pb <- .[midRow,"CumSum"] / .[nrow(.),"CumSum"]
-                        
-                        thedaNum <- log(1-Pa)-log(1-Pb)
-                        thedaDen <- log(b)-log(a)
-                        theda <- thedaNum/thedaDen
-                        
-                        kNum <- Pb - Pa
-                        kDen <- 1 / (a^theda) - 1 / (b^theda)
-                        k <- (kNum / kDen) ^ (1 / theda) 
-                        
-                        medianEst <- k * (2^(1 / theda))
-                        
-                        medianEst <- as.vector(medianEst) %>% round(digits = -1)
-                        
-                        data.frame(.,medianEst)
-                }) %>% 
-                summarise(first(medianEst))
-        
-        colnames(medInc) <- c("GEO","MEDIAN")
-        
-        medInc
+        medianIncome2014_plus <- readr::read_csv(file = "./2_inputs/medianIncome2014_plus.csv")
         
 } # Note: this uses Pareto interpolation to estimate the median income value
 
@@ -1294,7 +1304,7 @@ myLflt_medInc <- function(){
         
         
         leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
+                addProviderTiles("CartoDB.PositronNoLabels") %>% 
                 setView(lng = myCACbound_cntr@coords[[1]],lat = myCACbound_cntr@coords[[2]],zoom = 13) %>% 
                 addPolygons(data = shp_df,
                             smoothFactor = 0,
