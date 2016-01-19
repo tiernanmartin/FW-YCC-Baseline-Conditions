@@ -210,6 +210,12 @@ myCACbound <- {
         
         }
 
+myCACbound_cntr <- {
+        gCentroid(myCACbound) %>% 
+                spTransform(CRSobj = crs_proj)
+}
+
+
 # SPATIAL DATA: CENSUS TRACTS, BLOCK GROUPS, BLOCKS -----------------------------------------------
 
 # 'tract_CAC' and 'bg_CAC' are TIGER shapefiles that are clipped to remove waterbodies (for visual clarity)
@@ -495,6 +501,8 @@ blk_CAC_noWtrbds <- {
         readOGR(dsn = "./2_inputs/",layer = "blk_CAC_noWtrbds") %>% 
                 spTransform(CRSobj = crs_proj)
 }
+
+
 
 # This function allows me to easily find the GEOID of tracts that I'm considering excluding 
 # (e.g. Tract 93, the majority of which is in SODO)
@@ -1195,7 +1203,7 @@ medHhInc_bar <- function(){
        
         ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
                 geom_bar(stat='identity',fill = mypal,alpha = .5) +
-                geom_text(data = medianIncome2014_plus,label = medianIncome2014_plus$GEO, hjust = 1.5) +
+                geom_text(data = medianIncome2014_plus,label = paste0(medianIncome2014_plus$GEO,": $",medianIncome2014_plus$MEDIAN), hjust = 1.1) +
                 scale_y_continuous(labels = scales::dollar) +
                 coord_flip() +
                 theme(
