@@ -120,6 +120,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 <iframe  title="Median Household Income" width="600" height="400" src="http://tiernanmartin.github.io/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_medHhInc.html" frameborder="0" allowfullscreen></iframe>
 
+![medHhInc_bar](images/medHhInc_bar.png)
 </div>
 
 ## PROGRESS UPDATE: Data We Want

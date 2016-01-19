@@ -1194,7 +1194,7 @@ medHhInc_bar <- function(){
                 pal()
        
         ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
-                geom_bar(stat='identity',fill = mypal) +
+                geom_bar(stat='identity',fill = mypal,alpha = .5) +
                 geom_text(data = medianIncome2014_plus,label = medianIncome2014_plus$GEO, hjust = 1.5) +
                 scale_y_continuous(labels = scales::dollar) +
                 coord_flip() +
@@ -1246,7 +1246,7 @@ medHhInc_bar_labels <- function(){
 
 # Print Bar Plot       
         
-png('~/Pictures/medHhInc_bar.png',width=170,height=170,res = 72,units="px",bg = "transparent")
+png('./4_webcontent/images/medHhInc_bar.png',width=170,height=170,res = 72,units="px",bg = "transparent")
 medHhInc_bar()
 dev.off()
 
