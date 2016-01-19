@@ -1246,13 +1246,13 @@ medHhInc_bar_labels <- function(){
 
 # Print Bar Plot       
         
-png('./4_webcontent/images/medHhInc_bar.png',width=170,height=170,res = 72,units="px",bg = "transparent")
+png('./4_webcontent/images/medHhInc_bar.png',width=400,height=400,res = 72,units="px",bg = "transparent")
 medHhInc_bar()
 dev.off()
 
 # Print Bar Plot labels      
 
-png('~/Pictures/medHhInc_bar_labels.png',width=400,height=400,res = 72,units="px",bg = "transparent")
+png('~/Pictures/medHhInc_bar_labels.png',width=170,height=170,res = 72,units="px",bg = "transparent")
 medHhInc_bar_labels()
 dev.off()
 
