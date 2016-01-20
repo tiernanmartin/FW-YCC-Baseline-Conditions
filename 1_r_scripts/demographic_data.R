@@ -77,7 +77,7 @@ geo_bg_plus <- c(acs_bg_CD,
                  acs_sea,
                  acs_KC)
 
-# DEMOGRAPHIC DATA: COMMUNITY CHARACTERISTICS -----------------------------------------------------
+# DEMOGRAPHIC DATA: MEDIAN INCOME -----------------------------------------------------------------
 
 # Median Income
 
@@ -390,6 +390,9 @@ myLflt_medInc <- function(){
 
 # myLflt_medInc() %>% saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_medHhInc.html")
 
+# DEMOGRAPHIC DATA: XXX ---------------------------------------------------------------------------
+
+# ARCHIVED CODE -----------------------------------------------------------------------------------
 
 # Census data functions
 
@@ -509,7 +512,7 @@ hhIncomeMedian_bg <- {
         readr::read_csv(file = path,col_types = "cn")
 }
 
-# DEMOGRAPHIC TEST --------------------------------------------------------------------------------
+# create a map to test the validity of the data
 
 myLflt_test <- function(sp = bg_rev,df,colName,popupHeading,legTitle){
         
