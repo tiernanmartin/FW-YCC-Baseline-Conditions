@@ -79,8 +79,6 @@ geo_bg_plus <- c(acs_bg_CD,
 
 # DEMOGRAPHIC DATA: MEDIAN INCOME -----------------------------------------------------------------
 
-# Median Income
-
 medianIncome2014 <- {
         if(!file.exists("./2_inputs/medianIncome2014.csv")){
                 Sys.sleep(1)
@@ -293,51 +291,21 @@ medHhInc_bar <- function(){
         
 }
 
-medHhInc_bar_labels <- function(){
-        
-        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues") %>% .[3:9]
-        
-        pal <- colorNumeric(palette = blues,
-                            domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
-        
-        mypal <- medianIncome2014_plus$MEDIAN %>% 
-                sort() %>% 
-                pal()
-        
-        ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
-                geom_bar(stat='identity',fill = mypal, alpha = 0) +
-                geom_text(data = medianIncome2014_plus,label = medianIncome2014_plus$GEO, hjust = 1.5) +
-                scale_y_continuous(labels = scales::dollar) +
-                coord_flip() +
-                theme(
-                        panel.background = element_blank(),
-                        panel.grid.minor = element_blank(), 
-                        panel.grid.major = element_blank(),
-                        plot.background = element_blank(),
-                        axis.title.y = element_blank(),
-                        axis.title.x = element_blank(),
-                        axis.ticks.y = element_blank(),
-                        axis.text.y = element_blank(),
-                        axis.text.x = element_text())
-        
-        
-}
-
 {
 
 # set the plot result back: dev.set(which = 1)
         
 # Print Bar Plot       
        
-png('./4_webcontent/images/medHhInc_bar.png',width=400,height=400,res = 72,units="px",bg = "transparent")
-medHhInc_bar()
-dev.off()
+# png('./4_webcontent/images/medHhInc_bar.png',width=400,height=400,res = 72,units="px",bg = "transparent")
+# medHhInc_bar()
+# dev.off()
 
 # Print Bar Plot labels      
 
-png('~/Pictures/medHhInc_bar_labels.png',width=170,height=170,res = 72,units="px",bg = "transparent")
-medHhInc_bar_labels()
-dev.off()
+# png('~/Pictures/medHhInc_bar_labels.png',width=170,height=170,res = 72,units="px",bg = "transparent")
+# medHhInc_bar_labels()
+# dev.off()
 
 }
 
@@ -390,7 +358,25 @@ myLflt_medInc <- function(){
 
 # myLflt_medInc() %>% saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_medHhInc.html")
 
-# DEMOGRAPHIC DATA: XXX ---------------------------------------------------------------------------
+# DEMOGRAPHIC DATA: LESS THAN 200% POVERTY --------------------------------------------------------
+
+below200PctPov <- {
+        
+        make_below200PctPov <- function(){
+                
+                
+                
+                
+        }
+        
+        below200PctPov <- make_below200PctPov()
+        
+        rm(make_below200PctPov)
+        
+        below200PctPov
+        
+}
+
 
 # ARCHIVED CODE -----------------------------------------------------------------------------------
 

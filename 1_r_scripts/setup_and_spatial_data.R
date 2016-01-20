@@ -187,6 +187,12 @@ seaNhoods_CAC <- {
         
 }
 
+# Note: these boundaries are editted versions of the Seattle Urban Village bounaries,
+# which can be downloaded here: https://data.seattle.gov/download/ugw3-tp9e/application/zip
+seaUVs_CAC <- readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
+        spTransform(CRSobj = crs_proj)
+
+
 bgatz <- {
         
         if(!file.exists("./2_inputs/bgatz.shp")){
@@ -701,7 +707,7 @@ blk_rev <- {
                         spTransform(CRSobj = crs_proj)
         }
         
-        blk_revz <- make_blk_rev()
+        blk_rev <- make_blk_rev()
         
         rm(make_blk_rev)
         
