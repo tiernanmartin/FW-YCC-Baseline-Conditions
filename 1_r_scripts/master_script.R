@@ -1233,11 +1233,12 @@ medHhInc_bar <- function(){
                 scale_y_continuous(labels = scales::dollar) +
                 coord_flip() +
                 theme(
-                        plot.margin = unit(c(-10,0,0,0), "points"),
-                        panel.background = element_blank(),
-                        panel.grid = element_blank(),
-                        panel.grid.minor = element_blank(), 
-                        panel.grid.major = element_blank(),
+                        # plot.margin = unit(c(-10,0,0,0), "points"),
+                        plot.margin = unit(c(0,0,0,0), "points"),
+                        panel.background = element_rect(fill = "grey95"),
+                        # panel.grid = element_blank(),
+                        # panel.grid.minor = element_blank(), 
+                        # panel.grid.major = element_blank(),
                         plot.background = element_blank(),
                         axis.title.y = element_blank(),
                         axis.title.x = element_blank(),
