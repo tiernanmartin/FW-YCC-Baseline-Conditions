@@ -1348,7 +1348,7 @@ myLflt_medInc <- function(){
                                           labelOptions(opacity = .5,noHide = TRUE, offset = c(0,-20))
                                   })) %>% 
                 addLayersControl(overlayGroups = c(basemapLab,nhoodLab),position = "topright",
-                                 options = layersControlOptions(collapsed = FALSE))
+                                 options = layersControlOptions(collapsed = TRUE))
 }
 
 myLflt_medInc() %>% saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_medHhInc.html")
