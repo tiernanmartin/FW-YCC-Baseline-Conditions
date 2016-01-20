@@ -1229,7 +1229,7 @@ medHhInc_bar <- function(){
        
         g <- ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
                 geom_bar(stat='identity',fill = mypal,alpha = .5) +
-                geom_text(data = medianIncome2014_plus,label = paste0(medianIncome2014_plus$GEO,": $",medianIncome2014_plus$MEDIAN), hjust = 1.1) +
+                geom_text(data = medianIncome2014_plus,label = paste0(medianIncome2014_plus$GEO,": $",format(medianIncome2014_plus$MEDIAN,big.mark=",")), hjust = 1.1) +
                 scale_y_continuous(labels = scales::dollar) +
                 coord_flip() +
                 theme(
@@ -1317,10 +1317,13 @@ myLflt_medInc <- function(){
         
         pal <- colorNumeric(palette = blues,
                             domain = c(0,round(max(medianIncome2014_plus$MEDIAN),-3)))
+        basemapLab <- paste0(paste(rep("&nbsp;",times = 7),collapse = ""),"Basemap<br><div align=\"right\">Labels</div>")
+        nhoodLab   <- paste0("Neighborhood<br><div align=\"right\">Labels</div>")
         
         
         leaflet() %>% 
                 addProviderTiles("CartoDB.PositronNoLabels") %>% 
+                addProviderTiles("CartoDB.Positron",group = basemapLab) %>% 
                 setView(lng = myCACbound_cntr@coords[[1]],lat = myCACbound_cntr@coords[[2]],zoom = 13) %>% 
                 addPolygons(data = shp_df,
                             smoothFactor = 0,
@@ -1339,12 +1342,12 @@ myLflt_medInc <- function(){
                           opacity = .5) %>% 
                 addCircleMarkers(lng = bg_hood_cntrs@coords[,1],lat = bg_hood_cntrs@coords[,2],
                                  stroke = FALSE, fillOpacity = 0,
-                                 group = "Labels",
+                                 group = nhoodLab,
                                   label = bg_hood_cntrs$NHOOD,
                                   labelOptions = lapply(1:nrow(bg_hood_cntrs),function(x){
                                           labelOptions(opacity = .5,noHide = TRUE, offset = c(0,-20))
                                   })) %>% 
-                addLayersControl(overlayGroups = c("Labels"),position = "bottomright",
+                addLayersControl(overlayGroups = c(basemapLab,nhoodLab),position = "topright",
                                  options = layersControlOptions(collapsed = FALSE))
 }
 
