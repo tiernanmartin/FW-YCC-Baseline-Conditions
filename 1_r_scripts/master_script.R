@@ -869,6 +869,34 @@ myLflt_bgRevTest <- function(){
 
 # myLflt_bgRevTest()
 
+
+bg_hood_cntrs <- {
+        cntr <- bg_rev %>% 
+                raster::aggregate(by = "NHOOD.ABBR") %>% 
+                gCentroid(byid = TRUE)
+        
+        rn <- row.names(cntr)
+        
+        df <- bg_rev@data %>% 
+                mutate(NHOOD.ABBR = as.factor(NHOOD.ABBR)) %>% 
+                group_by(NHOOD.ABBR) %>% 
+                summarise(NHOOD = first(NHOOD.ABBR)) %>% 
+                dplyr::select(NHOOD) %>% 
+                as.data.frame()
+        
+        rownames(df) <- rn
+        
+        bg_hood_cntrs <-
+                SpatialPointsDataFrame(coords = cntr,data = df) %>% 
+                spTransform(CRSobj = crs_proj)
+        
+        
+        
+        
+} # For labeling the neighborhoods
+
+
+
 myLflt_nhoodBg <- function(){
         
         pal <- colorFactor(palette = "Set2",
@@ -1297,8 +1325,8 @@ myLflt_medInc <- function(){
                             smoothFactor = 0,
                             stroke = F,
                             fillColor = ~pal(shp_df@data[["MEDIAN"]]), fillOpacity = .5,
-                            popup = paste0("Median Household Income",": $",shp_df@data[["MEDIAN"]],"<br>",
-                                           shp_df@data[["NHOOD.FULL"]])) %>% 
+                            popup = paste0("<h3>",shp_df@data[["NHOOD.FULL"]],"</h3>",
+                                           "Median Household Income",": $",format(shp_df@data[["MEDIAN"]],big.mark=","))) %>% 
                 addPolylines(data = nhoods_census_outline,
                              color = col2hex("white"), weight = 3, opacity = .5,stroke = T,
                              fill = F)  %>%
@@ -1307,7 +1335,16 @@ myLflt_medInc <- function(){
                           labFormat = labelFormat(prefix = "$"),
                           position = "topright", 
                           title = "Median<br>Household<br>Income",
-                          opacity = .5) 
+                          opacity = .5) %>% 
+                addCircleMarkers(lng = bg_hood_cntrs@coords[,1],lat = bg_hood_cntrs@coords[,2],
+                                 stroke = FALSE, fillOpacity = 0,
+                                 group = "Labels",
+                                  label = bg_hood_cntrs$NHOOD,
+                                  labelOptions = lapply(1:nrow(bg_hood_cntrs),function(x){
+                                          labelOptions(opacity = .5,noHide = TRUE, offset = c(0,-20))
+                                  })) %>% 
+                addLayersControl(overlayGroups = c("Labels"),position = "bottomright",
+                                 options = layersControlOptions(collapsed = FALSE))
 }
 
 myLflt_medInc() %>% saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_medHhInc.html")
