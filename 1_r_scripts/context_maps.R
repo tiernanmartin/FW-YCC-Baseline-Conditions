@@ -22,7 +22,7 @@ mylflt_seaNhoods <- function(){
                             popup = paste0(seaNhoods@data$S_HOOD))
 }
 
-# mylflt_seaNhoods() %>% 
+# mylflt_seaNhoods() %>%
 #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaNhoods.html")
 
 mylflt_seaUVs <- function(){
@@ -51,11 +51,11 @@ mylflt_seaUVs <- function(){
                           opacity = .5)
 }
 
-mylflt_seaUVs() %>%
-        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs.html")
+# mylflt_seaUVs() %>%
+#         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs.html")
 
 mylflt_seaUVs() %>% addPolylines(data = seaNhoods_outline,
                                  color = col2hex("dodgerblue"), weight = 1, opacity = .75,stroke = T,
                                  fill = F) %>% 
-        # saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs_nhoods.html")
+        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs_nhoods.html")
         
