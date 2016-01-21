@@ -196,6 +196,12 @@ knitr::opts_chunk$set(echo = FALSE)
 
 <iframe  title="Seattle Neighborhoods" width="980" height="400" src="https://tiernanmartin.github.io/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_CAC_bounds.html" frameborder="0" allowfullscreen></iframe>
   
+## METHODS DISCUSSION: Boundaries
+
+<iframe  title="Seattle Neighborhoods" width="980" height="400" src="https://tiernanmartin.github.io/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_uvs_vs_census.html" frameborder="0" allowfullscreen></iframe>
+  
+
+
 
 ## METHODS DISCUSSION: Boundaries
 
@@ -205,6 +211,8 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ![medHhInc_bar](images/medHhInc_bar.png)
 </div>
+
+
 
 ## PROGRESS UPDATE: Data We Want
 

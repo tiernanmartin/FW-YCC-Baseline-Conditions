@@ -100,5 +100,10 @@ mylflt_CAC_bounds <- function(){
         
 }
 
-mylflt_CAC_bounds() %>% 
-        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_CAC_bounds.html")
+# mylflt_CAC_bounds() %>% 
+#         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_CAC_bounds.html")
+
+myLflt_uvs() %>% 
+        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_uvs_vs_census.html")
+
+

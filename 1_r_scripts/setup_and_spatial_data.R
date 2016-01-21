@@ -475,6 +475,8 @@ blk_CAC <- {
                                 spTransform(CRSobj = crs_proj) %>%  # change the CRS from geographic to projected
                                 gUnaryUnion()
                         
+                        writeOGR(obj = waterbodies_sel.shp,dsn = "./2_inputs/",layer = "waterbodies_sel",driver = "ESRI Shapefile")
+                        
                         blk_CAC_noWtrbds <- gDifference(spgeom1 = blk_CAC, spgeom2 = waterbodies_sel.shp, 
                                                         byid = TRUE) 
                         rn <- row.names(blk_CAC_noWtrbds)
@@ -711,7 +713,11 @@ blk_rev <- {
                         spTransform(CRSobj = crs_proj)
         }
         
+        
         blk_rev <- make_blk_rev()
+        
+        blk_CAC_noWtrbds <<- gDifference(spgeom1 = blk_rev, spgeom2 = waterbodies_sel.shp, 
+                                        byid = TRUE)
         
         rm(make_blk_rev)
         
