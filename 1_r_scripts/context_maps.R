@@ -58,6 +58,6 @@ mylflt_seaUVs() %>% addPolylines(data = seaNhoods_outline,
                                  group = "Neighborhoods",
                                  color = col2hex("dodgerblue"), weight = 1, opacity = 1,stroke = T,
                                  fill = F) %>% 
-        addLayersControl(overlayGroups = c("Neighborhoods"))
+        addLayersControl(overlayGroups = c("Neighborhoods")) %>% 
         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs_nhoods.html")
         
