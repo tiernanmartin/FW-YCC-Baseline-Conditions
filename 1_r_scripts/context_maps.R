@@ -14,7 +14,7 @@ mylflt_seaNhoods <- function(){
                            domain = seaNhoods@data$S_HOOD)
         
         leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
+                addProviderTiles("CartoDB.PositronNoLabels") %>% 
                 addPolygons(data = seaNhoods,
                             smoothFactor = 0,
                             fillColor = ~pal(seaNhoods@data$S_HOOD), fillOpacity = .5,
@@ -34,7 +34,7 @@ mylflt_seaUVs <- function(){
                            domain = seaUVs@data$TYPE_NAME)
         
         leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
+                addProviderTiles("CartoDB.PositronNoLabels") %>% 
                 addPolygons(data = seaUVs,
                             smoothFactor = 0,
                             fillColor = ~pal(seaUVs@data$UV_TYPE), fillOpacity = .5,

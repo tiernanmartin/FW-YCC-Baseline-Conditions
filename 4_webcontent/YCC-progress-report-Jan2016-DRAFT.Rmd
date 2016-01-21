@@ -180,7 +180,9 @@ knitr::opts_chunk$set(echo = FALSE)
  <br>  
   ![report icon](images/q_large-01.png)
 
+## METHODS DISCUSSION: Boundaries
 
+<iframe  title="Seattle Neighborhoods" width="980" height="400" src="https://tiernanmartin.github.io/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaNhoods.html" frameborder="0" allowfullscreen></iframe>
   
 ## EXAMPLE MAP
 
