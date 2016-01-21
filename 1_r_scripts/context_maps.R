@@ -42,7 +42,7 @@ mylflt_seaUVs <- function(){
                             popup = paste0("<h3>",seaUVs@data$UV_NAME,"</h3>",
                                            seaUVs@data$TYPE_NAME)) %>% 
                 addPolylines(data = seaUVs_outline,
-                             color = col2hex("white"), weight = 1, opacity = .25,stroke = T,
+                             color = col2hex("white"), weight = 2, opacity = .5,stroke = T,
                              fill = F) %>% 
                 addLegend(pal = palLeg, 
                           values = seaUVs@data$TYPE_NAME,
@@ -55,7 +55,9 @@ mylflt_seaUVs <- function(){
 #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs.html")
 
 mylflt_seaUVs() %>% addPolylines(data = seaNhoods_outline,
-                                 color = col2hex("dodgerblue"), weight = 1, opacity = .75,stroke = T,
+                                 group = "Neighborhoods",
+                                 color = col2hex("dodgerblue"), weight = 1, opacity = 1,stroke = T,
                                  fill = F) %>% 
+        addLayersControl(overlayGroups = c("Neighborhoods"))
         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs_nhoods.html")
         
