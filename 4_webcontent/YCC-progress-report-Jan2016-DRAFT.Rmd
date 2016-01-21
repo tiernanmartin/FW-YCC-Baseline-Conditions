@@ -226,15 +226,6 @@ knitr::opts_chunk$set(echo = FALSE)
 </div>
 
 
-
-## PROGRESS UPDATE: Data We Want
-
-- Better neighborhood boundaries
-- More useful education metrics
-- Granular environmental data
-- Illicit Discharge Detection and Elimination site
-- Obesity, activity levels, 
-
 ## QUESTIONS {.build}
 > - Do any of these boundaries need revision?
 > - Which option would be more useful:
@@ -244,3 +235,9 @@ knitr::opts_chunk$set(echo = FALSE)
 > - Who should be reach out to with specific data requests?
 
 ## NEXT STEPS
+
+- Make revisions based on today's feedback
+- Collect more data <font color="#CCCCCC">(niche data sets)</font>
+- Generate maps and graphs
+- Produce draft report <font color="#CCCCCC">(PDF, webpage)</font>
+- Share draft with partners
