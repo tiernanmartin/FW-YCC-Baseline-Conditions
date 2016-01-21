@@ -61,3 +61,44 @@ mylflt_seaUVs() %>% addPolylines(data = seaNhoods_outline,
         addLayersControl(overlayGroups = c("Neighborhoods")) %>% 
         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs_nhoods.html")
         
+
+mylflt_CAC_bounds <- function(){
+        yt <- seaUVs_CAC[seaUVs_CAC$NHOOD_ABBR %in% c("YT"),]
+        
+        yt_choiceBound <- readOGR(dsn = "./2_inputs/",layer = "yt_choiceBound") %>% 
+                spTransform(CRSobj = crs_proj)
+        
+        pal <- RColorBrewer::brewer.pal(6,"Set2")
+        
+        yellow <- pal[[6]]
+        blue <- pal[[3]]
+        orange <- pal[[2]]
+        
+        leaflet() %>% 
+                addProviderTiles("CartoDB.Positron") %>% 
+                addPolygons(data = yt,
+                            group = "Yesler Terrace",
+                            stroke = F,
+                            fillColor = yellow, fillOpacity = .75) %>% 
+                addPolygons(data = yt_choiceBound,
+                            group = "YT Choice Boundary",
+                            fill = FALSE,
+                            color = yellow,weight = 3, opacity = .75, dashArray = "5, 5") %>% 
+                addPolygons(data = bgatz,
+                            group = "Bailey-Gatzert",
+                            fill = FALSE,
+                            color = blue, weight = 3, opacity = .75, dashArray = "2.5, 5, 10, 5") %>% 
+                addPolygons(data = myCACbound,
+                            group = "CAC Boundary",
+                            fill = FALSE,
+                            color = orange, weight = 4, opacity = 1, dashArray = "10, 5") %>% 
+                addLayersControl(overlayGroups = c("Yesler Terrace",
+                                                   "YT Choice Boundary",
+                                                   "Bailey-Gatzert",
+                                                   "CAC Boundary"))
+                
+        
+}
+
+mylflt_CAC_bounds() %>% 
+        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_CAC_bounds.html")
