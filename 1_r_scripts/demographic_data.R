@@ -170,7 +170,7 @@ medianIncome2014_plus <- {
                 Sys.sleep(1)
                 acs <- acs.fetch(endyear = 2014, span = 5,
                                  geography = geo_bg_plus,
-                                 table.number = "B19001", col.names = "pretty")
+                                 table.number = "S1903", col.names = "pretty")
                 
                 rnames <- acs@estimate %>% t()  %>% as.data.frame() %>% rownames() %>% as.data.frame()
                 
@@ -318,9 +318,6 @@ myLflt_medInc <- function(){
         blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues")
         
         pal <- colorNumeric(palette = blues,
-                            domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
-        
-        pal <- colorNumeric(palette = blues,
                             domain = c(0,round(max(medianIncome2014_plus$MEDIAN),-3)))
         basemapLab <- paste0(paste(rep("&nbsp;",times = 7),collapse = ""),"Basemap<br><div align=\"right\">Labels</div>")
         nhoodLab   <- paste0("Neighborhood<br><div align=\"right\">Labels</div>")
@@ -357,6 +354,69 @@ myLflt_medInc <- function(){
 }
 
 # myLflt_medInc() %>% saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_medHhInc.html")
+
+medianIncom2014_disag <- {
+        acs <- acs.fetch(endyear = 2014, span = 5,
+                         geography = geo_bg_plus,
+                         table.number = "B19001", col.names = "pretty")
+        
+        rnames <- acs@estimate %>% t()  %>% as.data.frame() %>% rownames() %>% as.data.frame()
+        
+        medInc <- 
+                acs@estimate %>% 
+                t() %>% 
+                as.data.frame() %>% 
+                bind_cols(rnames)
+}
+
+
+myLflt_medInc_disag <- function(){
+        
+        shp_df <- geo_join(spatial_data = bg_rev,
+                           data_frame = medianIncome2014,
+                           by_sp = "NHOOD.ABBR",by_df = "NHOOD.ABBR")
+        
+        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues")
+        
+        pal <- colorNumeric(palette = blues,
+                            domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
+        
+        pal <- colorNumeric(palette = blues,
+                            domain = c(0,round(max(medianIncome2014_plus$MEDIAN),-3)))
+        basemapLab <- paste0(paste(rep("&nbsp;",times = 7),collapse = ""),"Basemap<br><div align=\"right\">Labels</div>")
+        nhoodLab   <- paste0("Neighborhood<br><div align=\"right\">Labels</div>")
+        
+        
+        leaflet() %>% 
+                addProviderTiles("CartoDB.PositronNoLabels") %>% 
+                addProviderTiles("CartoDB.Positron",group = basemapLab) %>% 
+                setView(lng = myCACbound_cntr@coords[[1]],lat = myCACbound_cntr@coords[[2]],zoom = 13) %>% 
+                addPolygons(data = shp_df,
+                            smoothFactor = 0,
+                            stroke = F,
+                            fillColor = ~pal(shp_df@data[["MEDIAN"]]), fillOpacity = .5,
+                            popup = paste0("<h3>",shp_df@data[["NHOOD.FULL"]],"</h3>",
+                                           "Median Household Income",": $",format(shp_df@data[["MEDIAN"]],big.mark=","))) %>% 
+                addPolylines(data = nhoods_census_outline,
+                             color = col2hex("white"), weight = 3, opacity = .5,stroke = T,
+                             fill = F)  %>%
+                addLegend(pal = pal, 
+                          values = range(c(0,round(max(medianIncome2014_plus$MEDIAN),-3))),
+                          labFormat = labelFormat(prefix = "$"),
+                          position = "topright", 
+                          title = "Median<br>Household<br>Income",
+                          opacity = .5) %>% 
+                addCircleMarkers(lng = bg_hood_cntrs@coords[,1],lat = bg_hood_cntrs@coords[,2],
+                                 stroke = FALSE, fillOpacity = 0,
+                                 group = nhoodLab,
+                                 label = bg_hood_cntrs$NHOOD,
+                                 labelOptions = lapply(1:nrow(bg_hood_cntrs),function(x){
+                                         labelOptions(opacity = .5,noHide = TRUE, offset = c(0,-20))
+                                 })) %>% 
+                addLayersControl(overlayGroups = c(basemapLab,nhoodLab),position = "topright",
+                                 options = layersControlOptions(collapsed = TRUE))
+}
+
 
 # DEMOGRAPHIC DATA: LESS THAN 200% POVERTY --------------------------------------------------------
 
@@ -444,6 +504,58 @@ cleanBgData <- function(df, colNames){
         
         readr::write_csv(df,path = path)
 }
+
+
+# Median Income
+
+
+medianIncom2014_disag <- {
+        dfName <- "medianIncome_disag"
+        
+        path <- paste0("./2_inputs/",dfName,".csv")
+        
+        df <- getBgData(tableNumber = "B19013")
+        
+        colnames(df) <- c("GEOID","MEDIAN")
+        
+        shp <- geo_join(spatial_data = bg_rev,data_frame = df, by_sp = "GEOID", by_df = "GEOID")
+        
+}
+
+myLflt_medInc_disag <- function(){
+        
+        
+        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues")
+        
+        pal <- colorNumeric(palette = blues,
+                            domain = c(0,round(max(medianIncome2014_plus$MEDIAN),-3)))
+        basemapLab <- paste0(paste(rep("&nbsp;",times = 7),collapse = ""),"Basemap<br><div align=\"right\">Labels</div>")
+        nhoodLab   <- paste0("Neighborhood<br><div align=\"right\">Labels</div>")
+        
+        
+        leaflet() %>% 
+                addProviderTiles("CartoDB.PositronNoLabels") %>% 
+                addProviderTiles("CartoDB.Positron",group = basemapLab) %>%  
+                setView(lng = myCACbound_cntr@coords[[1]],lat = myCACbound_cntr@coords[[2]],zoom = 13) %>% 
+                addPolygons(data = medianIncom2014_disag,
+                            smoothFactor = 0,
+                            stroke = F,
+                            fillColor = ~pal(medianIncom2014_disag@data[["MEDIAN"]]), fillOpacity = .5,
+                            popup = paste0("<h3>",medianIncom2014_disag@data[["GEOID"]],"</h3>",
+                                           "Median Household Income",": $",format(medianIncom2014_disag@data[["MEDIAN"]],big.mark=","))) %>% 
+                addPolygons(data = bg_rev,
+                            fill = FALSE,
+                            weight = 3, color = col2hex("white"), opacity = .5)  %>%
+                addLegend(pal = pal, 
+                          values = range(c(0,round(max(medianIncome2014_plus$MEDIAN),-3))),
+                          labFormat = labelFormat(prefix = "$"),
+                          position = "topright", 
+                          title = "Median<br>Household<br>Income",
+                          opacity = .5)
+}
+
+myLflt_medInc_disag() %>% 
+        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/myLflt_medInc_disag.html")
 
 # Poverty
         
