@@ -232,7 +232,12 @@ knitr::opts_chunk$set(echo = FALSE)
 - Illicit Discharge Detection and Elimination site
 - Obesity, activity levels, 
 
-## QUESTIONS FOR YCC
-
+## QUESTIONS {.build}
+> - Do any of these boundaries need revision?
+> - Which option would be more useful:
+    + Use Urban Village boundaries whenever possible?
+    + Use only Census boundaries 
+> - What is our data list missing? 
+> - Who should be reach out to with specific data requests?
 
 ## NEXT STEPS
