@@ -557,6 +557,41 @@ myLflt_medInc_disag <- function(){
 myLflt_medInc_disag() %>% 
         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/myLflt_medInc_disag.html")
 
+myLflt_medInc_disag_regZoom <- function(){
+        
+        
+        blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues")
+        
+        pal <- colorNumeric(palette = blues,
+                            domain = c(0,round(max(medianIncome2014_plus$MEDIAN),-3)))
+        basemapLab <- paste0(paste(rep("&nbsp;",times = 7),collapse = ""),"Basemap<br><div align=\"right\">Labels</div>")
+        nhoodLab   <- paste0("Neighborhood<br><div align=\"right\">Labels</div>")
+        
+        
+        leaflet() %>% 
+                addProviderTiles("CartoDB.PositronNoLabels") %>% 
+                addProviderTiles("CartoDB.Positron",group = basemapLab) %>%  
+                addPolygons(data = medianIncom2014_disag,
+                            smoothFactor = 0,
+                            stroke = F,
+                            fillColor = ~pal(medianIncom2014_disag@data[["MEDIAN"]]), fillOpacity = .5,
+                            popup = paste0("<h3>",medianIncom2014_disag@data[["GEOID"]],"</h3>",
+                                           "Median Household Income",": $",format(medianIncom2014_disag@data[["MEDIAN"]],big.mark=","))) %>% 
+                addPolygons(data = bg_rev,
+                            fill = FALSE,
+                            weight = 3, color = col2hex("white"), opacity = .5)  %>%
+                addLegend(pal = pal, 
+                          values = range(c(0,round(max(medianIncome2014_plus$MEDIAN),-3))),
+                          labFormat = labelFormat(prefix = "$"),
+                          position = "topright", 
+                          title = "Median<br>Household<br>Income",
+                          opacity = .5)
+}
+
+myLflt_medInc_disag_regZoom() %>% 
+        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/myLflt_medInc_disagRegZoom.html")
+
+
 # Poverty
         
 below200PctPov <- {
