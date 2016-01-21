@@ -1,8 +1,8 @@
 ---
-title: 'Check In Meeting'
+title: 'Check-In Meeting'
 subtitle: "An update on the Central Area Crescent baseline conditions analysis"
 author: "FUTUREWISE | Chris Wierzbicki (<chris@futurewise.org>) , Tiernan Martin (<tiernan@futurewise.org>) "
-date: "January 21, 2016"
+date: "Thursday, January 21, 2016"
 output:
   ioslides_presentation:
     widescreen: true
@@ -14,16 +14,25 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## Today's Agenda
 
-1. Introductions <span > </span>
-2. Goal Setting
-3. Progress Report
-4. Methods Discussion
-5. Next Steps
+1. Introductions <font color="#CCCCCC"> ...who are we? </font>
+2. Goal Setting <font color="#CCCCCC"> ...what do we want to achieve? </font>
+3. Progress Update <font color="#CCCCCC"> ...what data do we have? what do we want? </font>
+4. Methods Discussion <font color="#CCCCCC"> ...how do can we best use all this information? </font>
+5. Next Steps <font color="#CCCCCC"> ...what's next? </font>
 
 # Introductions
 
+## GOAL SETTING
+
+- **The baseline conditions report should:**  
+    + provide a clear, data-driven overview of Yesler Terrace and the other Central Area Crescent neighborhoods
+    + offer comparisons between the neighborhoods and Seattle as a whole across a wide range of topics  
+    + simplify the interpretation of data through the use of maps, graphs and summary statistics  
+    + make the results easily shareable and accessible to all partners  
+
 
 ## PROGRESS UPDATE: Draft Report Outline {.columns-2}
+
 - **Introduction**
 - **Community Characteristics**  
 - **Housing**  
@@ -37,39 +46,43 @@ knitr::opts_chunk$set(echo = FALSE)
 - **Community & Culture**  
 <br>  
 <br>  
-  ![report icon](images/report-with-charts-icon.png)
+  ![report icon](images/report-with-charts-icon-01.png)
 
 
-## PROGRESS UPDATE: Data We Have{.columns-2}
+## PROGRESS UPDATE: Data We Have {.columns-2}
 
 - **Introduction**
-    + Study area
-    + Urban Centers/Villages (most realistic neighborhood boundaries?)
-    + Seattle neighborhood boundaries (City Clerk's unofficial boundaries)
+    + Area context <font color="#CCCCCC">(waterbodies, highways, urban vs rural land)</font>
+    + Urban Centers/Villages
+    + Seattle neighborhood boundaries <font color="#CCCCCC">(City Clerk's unofficial boundaries)</font>  
  <br>
- <br>
+ <br>  
+ <br>  
+ <br>  
+  ![report icon](images/check_solid_large-01.png)  
+
+## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}
+  
 - **Community Characteristics**
-    + Household Density  
-    + Racial and Ethnic Composition  <br>  
-    + Racial Diversity Index  
-    + % People of Color  
+    + Household Density 
+    + Race & Ethnicity <font color="#CCCCCC">(Diversity Index, %PoC)</font>  
     + Nativity  
     + English Proficiency  
-    + Median Age  
-    + Age Distribution (% children, % elders)  
+    + Age <font color="#CCCCCC">(Median Age, % children,<br>% elders) </font>  
     + Educational Attainment  
     + Median Household Income  
-    + % Low Income (below 200% Poverty)  
+    + % Low Income <font color="#CCCCCC">(below 200% Poverty)</font>  
+     ![report icon](images/check_solid_large-01.png)  
 
 ## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}
 
 - **Housing**
-    + Tenure(Rent vs. Own)
-    + Types (SF vs. MF)
+    + Tenure <font color="#CCCCCC">(Rent vs. Own)</font>  
+    + Types <font color="#CCCCCC">(SF vs. MF)</font>  
     + Age of Buildings
-    + Cost-Burdening (Renter vs. Owners)
+    + Cost-Burdening <font color="#CCCCCC">(Renter vs. Owners)</font>  
     + Median Gross Rent as % of HH Income
-    + Median Gross Rent for Studio, 2BR, 3+BR
+    + Median Gross Rent <font color="#CCCCCC">(Studio, 2BR, 3+BR)</font> 
  <br>  
  <br>  
   ![report icon](images/check_solid_large-01.png)
@@ -77,49 +90,97 @@ knitr::opts_chunk$set(echo = FALSE)
 ## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}
 - **Transportation**
     + Street network
-    + Transit network (% HH > 500ft from transit node)
-    + Transit frequency (% HH > 500ft from high freq. transit node)
-    + Pedestrian network (% streets with sidewalks)
-    + Bicycle network
+    + Transit network <font color="#CCCCCC">(% HH > 500ft from transit node)</font> 
+    + Transit frequency <font color="#CCCCCC">(% HH > 500ft from high freq. transit node)</font> 
+    + Pedestrian network <font color="#CCCCCC">(% streets with sidewalks)</font> 
+    + Bicycle network  
+ <br>    
+ <br>  
+  ![report icon](images/check_solid_large-01.png)
 
 ## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}
-
 - **Environment**
-    + Air quality (requires better understanding)
     + Tree canopy
-<br>
-<br>
+    + Proximity to freeways <font color="#CCCCCC">(acceptable range?)</font>
+
 - **Health & Wellbeing**
-    + Public health facilities (% HH within walking distance)  
-    + pea patches + fruit trees  
-    + farmers' markets  
-    + food stamp accepting businesses  
-<br>
-<br>
-<br>
+    + Public health facilities <font color="#CCCCCC">(% HH within walking distance)</font>
+    + Proximity to parks and recreation facilities
+    + Pea patches + fruit trees  
+    + Farmers' markets
 - **Economic Prosperity**
-    + unemployment rate  
-<br>   
-<br>  
+    + Unemployment rate <font color="#CCCCCC">(by race?)</font>
+ <br>  
+  ![report icon](images/check_solid_large-01.png)
+  
+## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}
 - **Education**
     + Schools  
-    + School Performance (WA Schools Report Card - Adequate Yearly Progress)  
-<br>
-<br>
+    + School Performance <font color="#CCCCCC">(WA Schools Report Card - Adequate Yearly Progress)</font>
+    + Proximity to computer/media centers
 - **Real Estate & Development**
-    + Dupre?  
-    + Building permits  
-    + Code violations  
-    + tax assessor value  
-<br>
-<br>
+    + Building height limits
+    + Land/Improvement Value <font color="#CCCCCC">(tax assessor)</font>
+    + Building permit density 
+    + Code violations density  
+ <br>  
+ ![report icon](images/check_solid_large-01.png)
+
+## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}  
 - **Urban Design & Placemaking**
-<br>
-<br>
+    + Historic Districts
+    + Pedestrian Zones
+    + Public spaces
+    + View points
+    + Public art installations
+- **Community & Culture**
+    + Public events <font color="#CCCCCC">(civic, arts, community)</font>
+<br>  
+<br>  
+ ![report icon](images/check_solid_large-01.png)
+
+## PROGRESS UPDATE: Data We Want {.columns-2}
+- **Housing**
+    + Median home value
+- **Environment**
+    + Air quality <font color="#CCCCCC">(requires better understanding)</font>
+    + Hydrology/Green Infrastructure
+    + Noise pollution, light pollution  
+- **Health & Wellbeing**
+    + Overweight/obesity prevalence <font color="#CCCCCC">(children, adults)</font>  
+    + Asthma prevalence  
+    + Food stamp-accepting businesses  
+ <br>  
+  ![report icon](images/q_large-01.png)
+  
+## PROGRESS UPDATE: Data We Want {.columns-2}
+- **Economic Prosperity**
+    + Major employers
+    + % businesses owner by women or minorities
+- **Education**
+    + Other measures of success <font color="#CCCCCC">(besides AYP)</font>
+- **Real Estate & Development**
+    + Property value estimates <font color="#CCCCCC">(Dupre + Scott?)</font>
+    + Development Capacity <font color="#CCCCCC">(source: Seattle OPCD)</font>
+    + Upcoming developments
+ <br>  
+ <br>  
+  ![report icon](images/q_large-01.png)
+  
+## PROGRESS UPDATE: Data We Want {.columns-2}
+- **Urban Design & Placemaking**
+    + Neighborhood character <font color="#CCCCCC">(photos)</font>
+    + Upcoming/propsed developments <font color="#CCCCCC">(photos)</font>
 - **Community & Culture**
     + Ethnic businesses
-    + Minority 
-    
+    + Cultural spaces & landmarks <font color="#CCCCCC">(religious, civic, etc.)</font>
+ <br>  
+ <br>  
+ <br>  
+ <br>  
+  ![report icon](images/q_large-01.png)
+
+
   
 ## EXAMPLE MAP
 
