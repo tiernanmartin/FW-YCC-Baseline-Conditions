@@ -187,10 +187,6 @@ seaNhoods_CAC <- {
         
 }
 
-# Note: these boundaries are editted versions of the Seattle Urban Village bounaries,
-# which can be downloaded here: https://data.seattle.gov/download/ugw3-tp9e/application/zip
-seaUVs_CAC <- readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
-        spTransform(CRSobj = crs_proj)
 
 
 bgatz <- {
@@ -796,6 +792,47 @@ myNhoods_geo <- data.frame(
                          "Central District","First Hill", "12 Ave & Capitol Hill"),
         "NHOOD.ABBR" = c("PS","CID","YT","LS","CD","FH","12AV"))
 
+
+# Note: these boundaries are editted versions of the Seattle Urban Village bounaries,
+# which can be downloaded here: https://data.seattle.gov/download/ugw3-tp9e/application/zip
+seaUVs_CAC <- {
+        
+        make_seaUVs_CAC <- function(){
+                if(!file.exists("./2_inputs/seaUVs_CAC.shp")){
+                        shp <- readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                .[order(.@data$UV_NAME),]
+                        
+                        shp@data %<>%
+                                cbind(myNhoods_geo[order(myNhoods_geo$NHOOD.FULL),]) %>% 
+                                select(NHOOD.FULL,NHOOD.ABBR,everything())
+                        
+                        writeOGR(obj = shp,dsn = "./2_inputs/",
+                                 layer = "seaUVs_CAC",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                        
+                }
+                
+                readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
+                        spTransform(CRSobj = crs_proj)
+        }
+        
+        seaUVs_CAC <- make_seaUVs_CAC()
+        
+        rm(make_seaUVs_CAC)
+        
+        seaUVs_CAC
+        
+        
+        
+}
+
+seaUVs_CAC_outline <- 
+        seaUVs_CAC %>% 
+        as('SpatialLines') 
+
+
 tract_rev <- {
         
         make_tract_rev <- function(){
@@ -1047,5 +1084,41 @@ myLflt_nhoods <- function(){
 }
 
 # myLflt_nhoods()
+
+
+myLflt_uvs <- function(){
+        pal <- colorFactor(palette = "Set2",
+                           domain = seaUVs_CAC@data$NHOOD_ABBR)
+        
+        leaflet() %>% 
+                addProviderTiles("CartoDB.Positron") %>% 
+                addPolygons(group = "Neighborhoods",
+                            data = seaUVs_CAC, 
+                            fillColor = ~pal(seaUVs_CAC@data$NHOOD_ABBR), fillOpacity = .5,
+                            stroke = F,
+                            popup = paste0(seaUVs_CAC@data$NHOOD_ABBR)) %>% 
+                addPolylines(group = "Neighborhoods",
+                             data = seaUVs_CAC_outline,
+                             color = "white", weight = 1, opacity = .75) %>% 
+                addPolygons(group = "Census Geometry",
+                            data = blk_rev,
+                            fill = FALSE,
+                            color = col2hex("dodgerblue"), weight = 1, opacity = .5) %>% 
+                addPolygons(group = "Census Geometry",
+                            data = bg_rev,
+                            fill = FALSE,
+                            color = col2hex("dodgerblue"), weight = 3, opacity = .75) %>% 
+                addPolygons(group = "Census Geometry",
+                            data = tract_rev,
+                            fill = FALSE,
+                            color = col2hex("dodgerblue"), weight = 5, opacity = .9) %>% 
+                addLayersControl(overlayGroups = c("Neighborhoods","Census Geometry"),
+                                 options = layersControlOptions(collapsed = FALSE))
+        
+        
+}
+
+myLflt_uvs()
+
 
 # -------------------------------------------------------------------------------------------------        

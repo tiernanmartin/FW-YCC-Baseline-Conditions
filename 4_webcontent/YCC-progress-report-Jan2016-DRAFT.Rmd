@@ -12,34 +12,36 @@ output:
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Toady's Agenda
+## Today's Agenda
 
-1. Introductions
-2. Progress Update
-3. Questions for YCC Staff
-4. Next Steps
+1. Introductions <span > </span>
+2. Goal Setting
+3. Progress Report
+4. Methods Discussion
+5. Next Steps
 
 # Introductions
 
 
 ## PROGRESS UPDATE: Draft Report Outline {.columns-2}
-- Introduction
-- Community Characteristics 
-- Housing
-- Transportation
-- Environment
-- Health & Wellbeing
-- Economic Prosperity
-- Education
-- Real Estate & Development
-- Urban Design & Placemaking 
-- Community & Culture  
+- **Introduction**
+- **Community Characteristics**  
+- **Housing**  
+- **Transportation**  
+- **Environment**  
+- **Health & Wellbeing**  
+- **Economic Prosperity**  
+- **Education**  
+- **Real Estate & Development**  
+- **Urban Design & Placemaking**  
+- **Community & Culture**  
 <br>  
 <br>  
   ![report icon](images/report-with-charts-icon.png)
 
 
-## PROGRESS UPDATE: Data We Have {.columns-2}
+## PROGRESS UPDATE: Data We Have{.columns-2}
+
 - **Introduction**
     + Study area
     + Urban Centers/Villages (most realistic neighborhood boundaries?)
@@ -47,18 +49,18 @@ knitr::opts_chunk$set(echo = FALSE)
  <br>
  <br>
 - **Community Characteristics**
-    + Household Density
-    + Racial and Ethnic Composition
-    + Racial Diversity Index
-    + % People of Color
-    + Nativity
-    + English Proficiency
-    + Median Age
-    + Age Distribution (% children, % elders)
-    + Educational Attainment
-    + Median Household Income
-    + % Low Income (below 200% Poverty)
- 
+    + Household Density  
+    + Racial and Ethnic Composition  <br>  
+    + Racial Diversity Index  
+    + % People of Color  
+    + Nativity  
+    + English Proficiency  
+    + Median Age  
+    + Age Distribution (% children, % elders)  
+    + Educational Attainment  
+    + Median Household Income  
+    + % Low Income (below 200% Poverty)  
+
 ## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}
 
 - **Housing**
@@ -68,8 +70,11 @@ knitr::opts_chunk$set(echo = FALSE)
     + Cost-Burdening (Renter vs. Owners)
     + Median Gross Rent as % of HH Income
     + Median Gross Rent for Studio, 2BR, 3+BR
- <br>
- <br>
+ <br>  
+ <br>  
+  ![report icon](images/check_solid_large-01.png)
+
+## PROGRESS UPDATE: Data We Have (cont.) {.columns-2}
 - **Transportation**
     + Street network
     + Transit network (% HH > 500ft from transit node)
@@ -85,25 +90,27 @@ knitr::opts_chunk$set(echo = FALSE)
 <br>
 <br>
 - **Health & Wellbeing**
-    + Public health facilities (% HH within walking distance)
-    + pea patches + fruit trees
-    + farmers' markets
-    + food stamp accepting businesses
+    + Public health facilities (% HH within walking distance)  
+    + pea patches + fruit trees  
+    + farmers' markets  
+    + food stamp accepting businesses  
+<br>
+<br>
 <br>
 - **Economic Prosperity**
-    + unemployment rate
-    
-<br>
+    + unemployment rate  
+<br>   
+<br>  
 - **Education**
-    + Schools
-    + School Performance (WA Schools Report Card - Adequate Yearly Progress)
+    + Schools  
+    + School Performance (WA Schools Report Card - Adequate Yearly Progress)  
 <br>
 <br>
 - **Real Estate & Development**
-    + Dupre?
-    + Building permits
-    + Code violations
-    + tax assessor value
+    + Dupre?  
+    + Building permits  
+    + Code violations  
+    + tax assessor value  
 <br>
 <br>
 - **Urban Design & Placemaking**
