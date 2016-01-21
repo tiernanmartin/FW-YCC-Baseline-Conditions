@@ -165,7 +165,7 @@ seaNhoods_CAC <- {
                         
                         unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
                         
-                        seaNhoods <<- readOGR(dsn = "./2_inputs/Neighborhoods/WGS84/",  # select YCC and adjacent neigborhood boundaries
+                        seaNhoods <- readOGR(dsn = "./2_inputs/Neighborhoods/WGS84/",  # select YCC and adjacent neigborhood boundaries
                                               layer = "Neighborhoods") %>% 
                                 spTransform(.,CRSobj = crs_proj)
                         
@@ -177,8 +177,18 @@ seaNhoods_CAC <- {
                         
                 }
                 
+                seaNhoods <<- readOGR(dsn = "./2_inputs/Neighborhoods/WGS84/",  # select YCC and adjacent neigborhood boundaries
+                                     layer = "Neighborhoods") %>% 
+                        spTransform(.,CRSobj = crs_proj)
+                
+                seaNhoods_outline <<- 
+                        seaNhoods %>% 
+                        as('SpatialLines') 
+                
                 seaNhoods_CAC <- readOGR(dsn = "./2_inputs/",layer = "seaNhoods_CAC") %>% 
                         spTransform(CRSobj = crs_proj)
+                
+                
         }
         
         seaNhoods_CAC <- make_seaNhoods_CAC()
@@ -186,8 +196,6 @@ seaNhoods_CAC <- {
         seaNhoods_CAC
         
 }
-
-
 
 bgatz <- {
         
@@ -793,8 +801,42 @@ myNhoods_geo <- data.frame(
         "NHOOD.ABBR" = c("PS","CID","YT","LS","CD","FH","12AV"))
 
 
+seaUVs <- {
+        make_seaUVs <- function(){
+                if(!file.exists("./2_inputs/Urban_Villages/StatePlane/DPD_uvmfg_polygon.shp")){
+                        url <- "https://data.seattle.gov/download/ugw3-tp9e/application/zip" # save the URL for the neighborhood boundaries
+                        
+                        temp <- tempfile() # create a temporary file to hold the compressed download
+                        
+                        download(url, dest = temp, mode="wb") # download the file
+                        
+                        unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
+                        
+                }
+                
+                seaUVs <- readOGR(dsn = "2_inputs/Urban_Villages/StatePlane/",layer = "DPD_uvmfg_polygon") %>% 
+                        spTransform(CRSobj = crs_proj)
+        
+                
+        }
+       
+        seaUVs <- make_seaUVs()
+        
+        rm(make_seaUVs)
+        
+        seaUVs_outline <<- 
+                seaUVs %>% 
+                as('SpatialLines') 
+        
+        seaUVs
+        
+        
+}
+
+
 # Note: these boundaries are editted versions of the Seattle Urban Village bounaries,
 # which can be downloaded here: https://data.seattle.gov/download/ugw3-tp9e/application/zip
+
 seaUVs_CAC <- {
         
         make_seaUVs_CAC <- function(){
@@ -1119,6 +1161,4 @@ myLflt_uvs <- function(){
 }
 
 myLflt_uvs()
-
-
-# -------------------------------------------------------------------------------------------------        
+      
