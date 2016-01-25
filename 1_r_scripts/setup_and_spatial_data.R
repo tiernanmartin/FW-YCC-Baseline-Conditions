@@ -30,6 +30,7 @@ require(spdep)          # for identifying spatial neighbors
 require(maptools)       # for combine SpatialPolygonsDataFrames
 require(grid)
 require(gridExtra)
+require(useful)         # for "$150K labeling 
 
 
 options(scipen=999,stringsAsFactors = FALSE)

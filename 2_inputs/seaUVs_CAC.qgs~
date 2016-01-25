@@ -3,13 +3,19 @@
   <title></title>
   <layer-tree-group expanded="1" checked="Qt::PartiallyChecked" name="">
     <customproperties/>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="Street_Network_Database20160120082804120" name="Street_Network_Database">
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="Street_Network_Database20160120082804120" name="Street_Network_Database">
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="yt_line_shp20160120085628537" name="yt_line.shp">
       <customproperties/>
     </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="Errors20160120110730134" name="Errors">
+      <customproperties/>
+    </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="nhoods_lines_shp20160120110126963" name="nhoods_lines.shp">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="Errors20160120111455056" name="Errors">
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="new_nhood20160120113135714" name="new_nhood">
@@ -30,10 +36,13 @@
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="uv_generalized20160120111313201" name="uv_generalized">
       <customproperties/>
     </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="Cleaned20160120114709918" name="Cleaned">
+      <customproperties/>
+    </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="test_slivers20160120114957742" name="test_slivers">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="0" checked="Qt::Unchecked" id="seaUVs_CAC20160120101015860" name="seaUVs_CAC">
+    <layer-tree-layer expanded="0" checked="Qt::Checked" id="seaUVs_CAC20160120101015860" name="seaUVs_CAC">
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="test320160120100705525" name="test3">
@@ -45,10 +54,7 @@
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="uvs_union20160120112254046" name="uvs_union">
       <customproperties/>
     </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="yt_choiceBound20160121093612639" name="yt_choiceBound">
-      <customproperties/>
-    </layer-tree-layer>
-    <layer-tree-layer expanded="1" checked="Qt::Checked" id="yt20160120091700878" name="yt">
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="yt20160120091700878" name="yt">
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="uvs_newCD20160120081726574" name="uvs_newCD">
@@ -64,6 +70,12 @@
       <customproperties/>
     </layer-tree-layer>
     <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="uv_union20160120080358728" name="uv_union">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="DPD_uvmfg_polygon20160120080258229" name="DPD_uvmfg_polygon">
+      <customproperties/>
+    </layer-tree-layer>
+    <layer-tree-layer expanded="1" checked="Qt::Unchecked" id="DPD_uvmfg_polygon_copy20160120080311409" name="DPD_uvmfg_polygon copy">
       <customproperties/>
     </layer-tree-layer>
   </layer-tree-group>
@@ -98,8 +110,8 @@
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="DPD_uvmfg_polygon_copy20160120080311409"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="DPD_uvmfg_polygon20160120080258229"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="DPD_uvmfg_polygon20160120065308052"/>
-      <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="EPSG:2285" srcDatumTransform="-1" destDatumTransform="-1" layerid="new_nhood20160120113135714"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="" srcDatumTransform="-1" destDatumTransform="-1" layerid="Cleaned20160120110729892"/>
+      <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="EPSG:2285" srcDatumTransform="-1" destDatumTransform="-1" layerid="new_nhood20160120113135714"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="yt20160120091700878"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="DPD_uvmfg_polygon_copy20160120065315997"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="yt20160120084727371"/>
@@ -116,7 +128,6 @@
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100002" srcDatumTransform="-1" destDatumTransform="-1" layerid="Polygons20160120112036091"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100002" srcDatumTransform="-1" destDatumTransform="-1" layerid="Generalized20160120111058452"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="DPD_uvmfg_polygon_CACedit_copy20160120065616425"/>
-      <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="EPSG:3690" srcDatumTransform="-1" destDatumTransform="-1" layerid="yt_choiceBound20160121093612639"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="" srcDatumTransform="-1" destDatumTransform="-1" layerid="uv_generalized20160120111313201"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100002" srcDatumTransform="-1" destDatumTransform="-1" layerid="Cleaned20160120111454901"/>
       <layer_coordinate_transform destAuthId="EPSG:2285" srcAuthId="USER:100000" srcDatumTransform="-1" destDatumTransform="-1" layerid="uvs_newCD20160120081726574"/>
@@ -140,137 +151,161 @@
   <visibility-presets/>
   <layer-tree-canvas>
     <custom-order enabled="1">
-      <item>Street_Network_Database20160120082804120</item>
-      <item>yt_choiceBound20160121093612639</item>
-      <item>yt_line_shp20160120085628537</item>
-      <item>nhoods_lines_shp20160120110126963</item>
-      <item>new_nhood20160120113135714</item>
-      <item>uv_lines_simple_diss20160120112714280</item>
-      <item>uv_lines_simple20160120111650111</item>
-      <item>Cleaned20160120111454901</item>
-      <item>uv_lines_gen_shp20160120111346876</item>
-      <item>uv_generalized20160120111313201</item>
       <item>test_slivers20160120114957742</item>
       <item>seaUVs_CAC20160120101015860</item>
+      <item>Street_Network_Database20160120082804120</item>
       <item>test320160120100705525</item>
       <item>test20160120095407329</item>
-      <item>uvs_union20160120112254046</item>
       <item>yt20160120091700878</item>
-      <item>uvs_newCD20160120081726574</item>
-      <item>cd20160120080916548</item>
-      <item>uv_union_120160120080510391</item>
       <item>temp_shp20160120070118816</item>
+      <item>DPD_uvmfg_polygon20160120080258229</item>
+      <item>DPD_uvmfg_polygon_copy20160120080311409</item>
       <item>uv_union20160120080358728</item>
+      <item>uv_union_120160120080510391</item>
+      <item>cd20160120080916548</item>
+      <item>uvs_newCD20160120081726574</item>
+      <item>yt_line_shp20160120085628537</item>
+      <item>nhoods_lines_shp20160120110126963</item>
+      <item>Errors20160120110730134</item>
+      <item>uv_generalized20160120111313201</item>
+      <item>uv_lines_gen_shp20160120111346876</item>
+      <item>Cleaned20160120111454901</item>
+      <item>Errors20160120111455056</item>
+      <item>uv_lines_simple20160120111650111</item>
+      <item>uvs_union20160120112254046</item>
+      <item>uv_lines_simple_diss20160120112714280</item>
+      <item>new_nhood20160120113135714</item>
+      <item>Cleaned20160120114709918</item>
     </custom-order>
   </layer-tree-canvas>
   <legend updateDrawingOrder="false">
-    <legendlayer drawingOrder="0" open="true" checked="Qt::Checked" name="Street_Network_Database" showFeatureCount="0">
+    <legendlayer drawingOrder="2" open="true" checked="Qt::Unchecked" name="Street_Network_Database" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="Street_Network_Database20160120082804120" visible="1"/>
+        <legendlayerfile isInOverview="0" layerid="Street_Network_Database20160120082804120" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="2" open="true" checked="Qt::Unchecked" name="yt_line.shp" showFeatureCount="0">
+    <legendlayer drawingOrder="13" open="true" checked="Qt::Unchecked" name="yt_line.shp" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="yt_line_shp20160120085628537" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="3" open="true" checked="Qt::Unchecked" name="nhoods_lines.shp" showFeatureCount="0">
+    <legendlayer drawingOrder="15" open="true" checked="Qt::Unchecked" name="Errors" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="Errors20160120110730134" visible="0"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="14" open="true" checked="Qt::Unchecked" name="nhoods_lines.shp" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="nhoods_lines_shp20160120110126963" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="4" open="true" checked="Qt::Unchecked" name="new_nhood" showFeatureCount="0">
+    <legendlayer drawingOrder="19" open="true" checked="Qt::Unchecked" name="Errors" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="Errors20160120111455056" visible="0"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="23" open="true" checked="Qt::Unchecked" name="new_nhood" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="new_nhood20160120113135714" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="5" open="true" checked="Qt::Unchecked" name="uv_lines_simple_diss" showFeatureCount="0">
+    <legendlayer drawingOrder="22" open="true" checked="Qt::Unchecked" name="uv_lines_simple_diss" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uv_lines_simple_diss20160120112714280" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="6" open="true" checked="Qt::Unchecked" name="uv_lines_simple" showFeatureCount="0">
+    <legendlayer drawingOrder="20" open="true" checked="Qt::Unchecked" name="uv_lines_simple" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uv_lines_simple20160120111650111" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="7" open="true" checked="Qt::Unchecked" name="Cleaned" showFeatureCount="0">
+    <legendlayer drawingOrder="18" open="true" checked="Qt::Unchecked" name="Cleaned" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="Cleaned20160120111454901" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="8" open="true" checked="Qt::Unchecked" name="uv_lines_gen.shp" showFeatureCount="0">
+    <legendlayer drawingOrder="17" open="true" checked="Qt::Unchecked" name="uv_lines_gen.shp" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uv_lines_gen_shp20160120111346876" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="9" open="true" checked="Qt::Unchecked" name="uv_generalized" showFeatureCount="0">
+    <legendlayer drawingOrder="16" open="true" checked="Qt::Unchecked" name="uv_generalized" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uv_generalized20160120111313201" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="10" open="true" checked="Qt::Unchecked" name="test_slivers" showFeatureCount="0">
+    <legendlayer drawingOrder="24" open="true" checked="Qt::Unchecked" name="Cleaned" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="Cleaned20160120114709918" visible="0"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="0" open="true" checked="Qt::Unchecked" name="test_slivers" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="test_slivers20160120114957742" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="11" open="false" checked="Qt::Unchecked" name="seaUVs_CAC" showFeatureCount="0">
+    <legendlayer drawingOrder="1" open="false" checked="Qt::Checked" name="seaUVs_CAC" showFeatureCount="0">
       <filegroup open="false" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="seaUVs_CAC20160120101015860" visible="0"/>
+        <legendlayerfile isInOverview="0" layerid="seaUVs_CAC20160120101015860" visible="1"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="12" open="true" checked="Qt::Unchecked" name="test3" showFeatureCount="0">
+    <legendlayer drawingOrder="3" open="true" checked="Qt::Unchecked" name="test3" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="test320160120100705525" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="13" open="true" checked="Qt::Unchecked" name="test" showFeatureCount="0">
+    <legendlayer drawingOrder="4" open="true" checked="Qt::Unchecked" name="test" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="test20160120095407329" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="14" open="true" checked="Qt::Unchecked" name="uvs_union" showFeatureCount="0">
+    <legendlayer drawingOrder="21" open="true" checked="Qt::Unchecked" name="uvs_union" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uvs_union20160120112254046" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="1" open="true" checked="Qt::Checked" name="yt_choiceBound" showFeatureCount="0">
+    <legendlayer drawingOrder="5" open="true" checked="Qt::Unchecked" name="yt" showFeatureCount="0">
       <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="yt_choiceBound20160121093612639" visible="1"/>
+        <legendlayerfile isInOverview="0" layerid="yt20160120091700878" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="15" open="true" checked="Qt::Checked" name="yt" showFeatureCount="0">
-      <filegroup open="true" hidden="false">
-        <legendlayerfile isInOverview="0" layerid="yt20160120091700878" visible="1"/>
-      </filegroup>
-    </legendlayer>
-    <legendlayer drawingOrder="16" open="true" checked="Qt::Unchecked" name="uvs_newCD" showFeatureCount="0">
+    <legendlayer drawingOrder="12" open="true" checked="Qt::Unchecked" name="uvs_newCD" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uvs_newCD20160120081726574" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="17" open="true" checked="Qt::Unchecked" name="cd" showFeatureCount="0">
+    <legendlayer drawingOrder="11" open="true" checked="Qt::Unchecked" name="cd" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="cd20160120080916548" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="18" open="true" checked="Qt::Unchecked" name="uv_union_1" showFeatureCount="0">
+    <legendlayer drawingOrder="10" open="true" checked="Qt::Unchecked" name="uv_union_1" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uv_union_120160120080510391" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="19" open="true" checked="Qt::Unchecked" name="temp.shp" showFeatureCount="0">
+    <legendlayer drawingOrder="6" open="true" checked="Qt::Unchecked" name="temp.shp" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="temp_shp20160120070118816" visible="0"/>
       </filegroup>
     </legendlayer>
-    <legendlayer drawingOrder="20" open="true" checked="Qt::Unchecked" name="uv_union" showFeatureCount="0">
+    <legendlayer drawingOrder="9" open="true" checked="Qt::Unchecked" name="uv_union" showFeatureCount="0">
       <filegroup open="true" hidden="false">
         <legendlayerfile isInOverview="0" layerid="uv_union20160120080358728" visible="0"/>
       </filegroup>
     </legendlayer>
+    <legendlayer drawingOrder="7" open="true" checked="Qt::Unchecked" name="DPD_uvmfg_polygon" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="DPD_uvmfg_polygon20160120080258229" visible="0"/>
+      </filegroup>
+    </legendlayer>
+    <legendlayer drawingOrder="8" open="true" checked="Qt::Unchecked" name="DPD_uvmfg_polygon copy" showFeatureCount="0">
+      <filegroup open="true" hidden="false">
+        <legendlayerfile isInOverview="0" layerid="DPD_uvmfg_polygon_copy20160120080311409" visible="0"/>
+      </filegroup>
+    </legendlayer>
   </legend>
-  <projectlayers layercount="21">
+  <projectlayers layercount="25">
     <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Line" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
       <id>Cleaned20160120111454901</id>
       <datasource>../../../../../Downloads/uv_lines_clean.shp</datasource>
@@ -397,10 +432,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -449,6 +484,738 @@
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
         <edittype widgetv2type="TextEdit" name="SHAPE_LEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>Cleaned20160120114709918</id>
+      <datasource>/var/folders/lw/2v4k95l560b093527fqvrnj00000gn/T/processing/0e679e1ebed0407592bb563693cd5ca9/output.shp</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>Cleaned</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs</proj4>
+          <srsid>100002</srsid>
+          <srid>0</srid>
+          <authid>USER:100002</authid>
+          <description> * Generated CRS (+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs)</description>
+          <projectionacronym>lcc</projectionacronym>
+          <ellipsoidacronym>GRS80</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="System">ogr</provider>
+      <previewExpression></previewExpression>
+      <vectorjoins/>
+      <expressionfields/>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="OBJECTID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_TYPE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="POLYID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SUBPOLY">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="WATER">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="TYPE_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="COMMON_ARE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UC_INIT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLINT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="CENVILLNO">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLNUMB">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="ACRES">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_AREA">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_LEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+      <renderer-v2 symbollevels="0" type="singleSymbol">
+        <symbols>
+          <symbol alpha="1" type="fill" name="0">
+            <layer pass="0" class="SimpleFill" locked="0">
+              <prop k="border_width_map_unit_scale" v="0,0"/>
+              <prop k="color" v="108,80,231,255"/>
+              <prop k="joinstyle" v="bevel"/>
+              <prop k="offset" v="0,0"/>
+              <prop k="offset_map_unit_scale" v="0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="outline_color" v="0,0,0,255"/>
+              <prop k="outline_style" v="solid"/>
+              <prop k="outline_width" v="0.26"/>
+              <prop k="outline_width_unit" v="MM"/>
+              <prop k="style" v="solid"/>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale scalemethod="area"/>
+      </renderer-v2>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerTransparency>0</layerTransparency>
+      <displayfield>UV_NAME</displayfield>
+      <label>0</label>
+      <labelattributes>
+        <label fieldname="" text="Label"/>
+        <family fieldname="" name=".SF NS Text"/>
+        <size fieldname="" units="pt" value="12"/>
+        <bold fieldname="" on="0"/>
+        <italic fieldname="" on="0"/>
+        <underline fieldname="" on="0"/>
+        <strikeout fieldname="" on="0"/>
+        <color fieldname="" red="0" blue="0" green="0"/>
+        <x fieldname=""/>
+        <y fieldname=""/>
+        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+        <angle fieldname="" value="0" auto="0"/>
+        <alignment fieldname="" value="center"/>
+        <buffercolor fieldname="" red="255" blue="255" green="255"/>
+        <buffersize fieldname="" units="pt" value="1"/>
+        <bufferenabled fieldname="" on=""/>
+        <multilineenabled fieldname="" on=""/>
+        <selectedonly on=""/>
+      </labelattributes>
+      <editform></editform>
+      <editforminit/>
+      <featformsuppress>0</featformsuppress>
+      <annotationform></annotationform>
+      <editorlayout>generatedlayout</editorlayout>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <attributeactions/>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="OBJECTID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_TYPE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="POLYID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SUBPOLY">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="WATER">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="TYPE_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="COMMON_ARE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UC_INIT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLINT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="CENVILLNO">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLNUMB">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="ACRES">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_AREA">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_LEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>DPD_uvmfg_polygon20160120080258229</id>
+      <datasource>./Urban Villages/StatePlane/DPD_uvmfg_polygon.shp</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>DPD_uvmfg_polygon</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000001 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs</proj4>
+          <srsid>100000</srsid>
+          <srid>0</srid>
+          <authid>USER:100000</authid>
+          <description> * Generated CRS (+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000001 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs)</description>
+          <projectionacronym>lcc</projectionacronym>
+          <ellipsoidacronym>GRS80</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="System">ogr</provider>
+      <previewExpression></previewExpression>
+      <vectorjoins/>
+      <expressionfields/>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="OBJECTID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_TYPE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="POLYID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SUBPOLY">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="WATER">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="TYPE_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="COMMON_ARE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UC_INIT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLINT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="CENVILLNO">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLNUMB">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="ACRES">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_AREA">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_LEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+      <renderer-v2 symbollevels="0" type="singleSymbol">
+        <symbols>
+          <symbol alpha="1" type="fill" name="0">
+            <layer pass="0" class="SimpleFill" locked="0">
+              <prop k="border_width_map_unit_scale" v="0,0"/>
+              <prop k="color" v="26,16,140,255"/>
+              <prop k="joinstyle" v="bevel"/>
+              <prop k="offset" v="0,0"/>
+              <prop k="offset_map_unit_scale" v="0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="outline_color" v="0,0,0,255"/>
+              <prop k="outline_style" v="solid"/>
+              <prop k="outline_width" v="0.26"/>
+              <prop k="outline_width_unit" v="MM"/>
+              <prop k="style" v="solid"/>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale scalemethod="area"/>
+      </renderer-v2>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerTransparency>0</layerTransparency>
+      <displayfield>UV_NAME</displayfield>
+      <label>0</label>
+      <labelattributes>
+        <label fieldname="" text="Label"/>
+        <family fieldname="" name=".SF NS Text"/>
+        <size fieldname="" units="pt" value="12"/>
+        <bold fieldname="" on="0"/>
+        <italic fieldname="" on="0"/>
+        <underline fieldname="" on="0"/>
+        <strikeout fieldname="" on="0"/>
+        <color fieldname="" red="0" blue="0" green="0"/>
+        <x fieldname=""/>
+        <y fieldname=""/>
+        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+        <angle fieldname="" value="0" auto="0"/>
+        <alignment fieldname="" value="center"/>
+        <buffercolor fieldname="" red="255" blue="255" green="255"/>
+        <buffersize fieldname="" units="pt" value="1"/>
+        <bufferenabled fieldname="" on=""/>
+        <multilineenabled fieldname="" on=""/>
+        <selectedonly on=""/>
+      </labelattributes>
+      <editform>../../../../../Downloads</editform>
+      <editforminit/>
+      <featformsuppress>0</featformsuppress>
+      <annotationform>../../../../../Downloads</annotationform>
+      <editorlayout>generatedlayout</editorlayout>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <attributeactions/>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="OBJECTID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_TYPE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="POLYID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SUBPOLY">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="WATER">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="TYPE_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="COMMON_ARE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UC_INIT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLINT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="CENVILLNO">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLNUMB">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="ACRES">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_AREA">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_LEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>DPD_uvmfg_polygon_copy20160120080311409</id>
+      <datasource>./Urban Villages/StatePlane/DPD_uvmfg_polygon.shp</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>DPD_uvmfg_polygon copy</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000001 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs</proj4>
+          <srsid>100000</srsid>
+          <srid>0</srid>
+          <authid>USER:100000</authid>
+          <description> * Generated CRS (+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000001 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs)</description>
+          <projectionacronym>lcc</projectionacronym>
+          <ellipsoidacronym>GRS80</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="System">ogr</provider>
+      <previewExpression></previewExpression>
+      <vectorjoins/>
+      <expressionfields/>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="OBJECTID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_TYPE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="POLYID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SUBPOLY">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="WATER">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="TYPE_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="COMMON_ARE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UC_INIT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLINT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="CENVILLNO">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLNUMB">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="ACRES">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_AREA">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_LEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+      <renderer-v2 symbollevels="0" type="singleSymbol">
+        <symbols>
+          <symbol alpha="1" type="fill" name="0">
+            <layer pass="0" class="SimpleFill" locked="0">
+              <prop k="border_width_map_unit_scale" v="0,0"/>
+              <prop k="color" v="26,16,140,255"/>
+              <prop k="joinstyle" v="bevel"/>
+              <prop k="offset" v="0,0"/>
+              <prop k="offset_map_unit_scale" v="0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="outline_color" v="0,0,0,255"/>
+              <prop k="outline_style" v="solid"/>
+              <prop k="outline_width" v="0.26"/>
+              <prop k="outline_width_unit" v="MM"/>
+              <prop k="style" v="solid"/>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale scalemethod="area"/>
+      </renderer-v2>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerTransparency>0</layerTransparency>
+      <displayfield>UV_NAME</displayfield>
+      <label>0</label>
+      <labelattributes>
+        <label fieldname="" text="Label"/>
+        <family fieldname="" name=".SF NS Text"/>
+        <size fieldname="" units="pt" value="12"/>
+        <bold fieldname="" on="0"/>
+        <italic fieldname="" on="0"/>
+        <underline fieldname="" on="0"/>
+        <strikeout fieldname="" on="0"/>
+        <color fieldname="" red="0" blue="0" green="0"/>
+        <x fieldname=""/>
+        <y fieldname=""/>
+        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+        <angle fieldname="" value="0" auto="0"/>
+        <alignment fieldname="" value="center"/>
+        <buffercolor fieldname="" red="255" blue="255" green="255"/>
+        <buffersize fieldname="" units="pt" value="1"/>
+        <bufferenabled fieldname="" on=""/>
+        <multilineenabled fieldname="" on=""/>
+        <selectedonly on=""/>
+      </labelattributes>
+      <editform>../../../../../Downloads</editform>
+      <editforminit/>
+      <featformsuppress>0</featformsuppress>
+      <annotationform>../../../../../Downloads</annotationform>
+      <editorlayout>generatedlayout</editorlayout>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <attributeactions/>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="OBJECTID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UV_TYPE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="POLYID">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SUBPOLY">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="WATER">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="TYPE_NAME">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="COMMON_ARE">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="UC_INIT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLINT">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="CENVILLNO">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="VILLNUMB">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="ACRES">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_AREA">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+        <edittype widgetv2type="TextEdit" name="SHAPE_LEN">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Point" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>Errors20160120110730134</id>
+      <datasource>/var/folders/lw/2v4k95l560b093527fqvrnj00000gn/T/processing/e643df7f64414bc498a15d1f2a9c2458/error.shp</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>Errors</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs</proj4>
+          <srsid>100002</srsid>
+          <srid>0</srid>
+          <authid>USER:100002</authid>
+          <description> * Generated CRS (+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs)</description>
+          <projectionacronym>lcc</projectionacronym>
+          <ellipsoidacronym>GRS80</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="System">ogr</provider>
+      <previewExpression></previewExpression>
+      <vectorjoins/>
+      <expressionfields/>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="cat">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+      <renderer-v2 symbollevels="0" type="singleSymbol">
+        <symbols>
+          <symbol alpha="1" type="marker" name="0">
+            <layer pass="0" class="SimpleMarker" locked="0">
+              <prop k="angle" v="0"/>
+              <prop k="color" v="62,97,157,255"/>
+              <prop k="horizontal_anchor_point" v="1"/>
+              <prop k="name" v="circle"/>
+              <prop k="offset" v="0,0"/>
+              <prop k="offset_map_unit_scale" v="0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="outline_color" v="0,0,0,255"/>
+              <prop k="outline_style" v="solid"/>
+              <prop k="outline_width" v="0"/>
+              <prop k="outline_width_map_unit_scale" v="0,0"/>
+              <prop k="outline_width_unit" v="MM"/>
+              <prop k="scale_method" v="area"/>
+              <prop k="size" v="2"/>
+              <prop k="size_map_unit_scale" v="0,0"/>
+              <prop k="size_unit" v="MM"/>
+              <prop k="vertical_anchor_point" v="1"/>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale scalemethod="area"/>
+      </renderer-v2>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerTransparency>0</layerTransparency>
+      <displayfield>cat</displayfield>
+      <label>0</label>
+      <labelattributes>
+        <label fieldname="" text="Label"/>
+        <family fieldname="" name=".SF NS Text"/>
+        <size fieldname="" units="pt" value="12"/>
+        <bold fieldname="" on="0"/>
+        <italic fieldname="" on="0"/>
+        <underline fieldname="" on="0"/>
+        <strikeout fieldname="" on="0"/>
+        <color fieldname="" red="0" blue="0" green="0"/>
+        <x fieldname=""/>
+        <y fieldname=""/>
+        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+        <angle fieldname="" value="0" auto="0"/>
+        <alignment fieldname="" value="center"/>
+        <buffercolor fieldname="" red="255" blue="255" green="255"/>
+        <buffersize fieldname="" units="pt" value="1"/>
+        <bufferenabled fieldname="" on=""/>
+        <multilineenabled fieldname="" on=""/>
+        <selectedonly on=""/>
+      </labelattributes>
+      <editform></editform>
+      <editforminit/>
+      <featformsuppress>0</featformsuppress>
+      <annotationform></annotationform>
+      <editorlayout>generatedlayout</editorlayout>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <attributeactions/>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="cat">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+    </maplayer>
+    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Line" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+      <id>Errors20160120111455056</id>
+      <datasource>/var/folders/lw/2v4k95l560b093527fqvrnj00000gn/T/processing/60d1aef580c14342bc2a586a4ec7adca/error.shp</datasource>
+      <title></title>
+      <abstract></abstract>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>Errors</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs</proj4>
+          <srsid>100002</srsid>
+          <srid>0</srid>
+          <authid>USER:100002</authid>
+          <description> * Generated CRS (+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000002 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs)</description>
+          <projectionacronym>lcc</projectionacronym>
+          <ellipsoidacronym>GRS80</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="System">ogr</provider>
+      <previewExpression></previewExpression>
+      <vectorjoins/>
+      <expressionfields/>
+      <map-layer-style-manager current="">
+        <map-layer-style name=""/>
+      </map-layer-style-manager>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="cat">
+          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+        </edittype>
+      </edittypes>
+      <renderer-v2 symbollevels="0" type="singleSymbol">
+        <symbols>
+          <symbol alpha="1" type="line" name="0">
+            <layer pass="0" class="SimpleLine" locked="0">
+              <prop k="capstyle" v="square"/>
+              <prop k="customdash" v="5;2"/>
+              <prop k="customdash_map_unit_scale" v="0,0"/>
+              <prop k="customdash_unit" v="MM"/>
+              <prop k="draw_inside_polygon" v="0"/>
+              <prop k="joinstyle" v="bevel"/>
+              <prop k="line_color" v="208,251,122,255"/>
+              <prop k="line_style" v="solid"/>
+              <prop k="line_width" v="0.26"/>
+              <prop k="line_width_unit" v="MM"/>
+              <prop k="offset" v="0"/>
+              <prop k="offset_map_unit_scale" v="0,0"/>
+              <prop k="offset_unit" v="MM"/>
+              <prop k="use_custom_dash" v="0"/>
+              <prop k="width_map_unit_scale" v="0,0"/>
+            </layer>
+          </symbol>
+        </symbols>
+        <rotation/>
+        <sizescale scalemethod="area"/>
+      </renderer-v2>
+      <customproperties/>
+      <blendMode>0</blendMode>
+      <featureBlendMode>0</featureBlendMode>
+      <layerTransparency>0</layerTransparency>
+      <displayfield>cat</displayfield>
+      <label>0</label>
+      <labelattributes>
+        <label fieldname="" text="Label"/>
+        <family fieldname="" name=".SF NS Text"/>
+        <size fieldname="" units="pt" value="12"/>
+        <bold fieldname="" on="0"/>
+        <italic fieldname="" on="0"/>
+        <underline fieldname="" on="0"/>
+        <strikeout fieldname="" on="0"/>
+        <color fieldname="" red="0" blue="0" green="0"/>
+        <x fieldname=""/>
+        <y fieldname=""/>
+        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
+        <angle fieldname="" value="0" auto="0"/>
+        <alignment fieldname="" value="center"/>
+        <buffercolor fieldname="" red="255" blue="255" green="255"/>
+        <buffersize fieldname="" units="pt" value="1"/>
+        <bufferenabled fieldname="" on=""/>
+        <multilineenabled fieldname="" on=""/>
+        <selectedonly on=""/>
+      </labelattributes>
+      <editform></editform>
+      <editforminit/>
+      <featformsuppress>0</featformsuppress>
+      <annotationform></annotationform>
+      <editorlayout>generatedlayout</editorlayout>
+      <excludeAttributesWMS/>
+      <excludeAttributesWFS/>
+      <attributeactions/>
+      <edittypes>
+        <edittype widgetv2type="TextEdit" name="cat">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
       </edittypes>
@@ -1167,10 +1934,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -1307,10 +2074,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -1392,12 +2159,6 @@
         <map-layer-style name=""/>
       </map-layer-style-manager>
       <edittypes>
-        <edittype widgetv2type="TextEdit" name="NHOOD_FULL">
-          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-        </edittype>
-        <edittype widgetv2type="TextEdit" name="NHOOD_ABBR">
-          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-        </edittype>
         <edittype widgetv2type="TextEdit" name="OBJECTID">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
@@ -1633,21 +2394,15 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
       <attributeactions/>
       <edittypes>
-        <edittype widgetv2type="TextEdit" name="NHOOD_FULL">
-          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-        </edittype>
-        <edittype widgetv2type="TextEdit" name="NHOOD_ABBR">
-          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-        </edittype>
         <edittype widgetv2type="TextEdit" name="OBJECTID">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
@@ -2040,10 +2795,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -2263,10 +3018,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -2583,10 +3338,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -2653,8 +3408,8 @@
           <proj4>+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs</proj4>
           <srsid>100003</srsid>
           <srid>0</srid>
-          <authid>USER:100003</authid>
-          <description> * Generated CRS (+proj=lcc +lat_1=47.5 +lat_2=48.73333333333333 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0000000001 +y_0=0 +ellps=GRS80 +units=us-ft +no_defs)</description>
+          <authid></authid>
+          <description></description>
           <projectionacronym>lcc</projectionacronym>
           <ellipsoidacronym>GRS80</ellipsoidacronym>
           <geographicflag>false</geographicflag>
@@ -2761,10 +3516,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -2943,10 +3698,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -3125,10 +3880,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -3307,10 +4062,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -4154,10 +4909,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -4564,10 +5319,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -4661,100 +5416,6 @@
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
         <edittype widgetv2type="TextEdit" name="SHAPE_LE_2">
-          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-        </edittype>
-      </edittypes>
-    </maplayer>
-    <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
-      <id>yt_choiceBound20160121093612639</id>
-      <datasource>./yt_choiceBound.shp</datasource>
-      <title></title>
-      <abstract></abstract>
-      <keywordList>
-        <value></value>
-      </keywordList>
-      <layername>yt_choiceBound</layername>
-      <srs>
-        <spatialrefsys>
-          <proj4>+proj=lcc +lat_1=48.73333333333333 +lat_2=47.5 +lat_0=47 +lon_0=-120.8333333333333 +x_0=500000.0001016001 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=us-ft +no_defs</proj4>
-          <srsid>1648</srsid>
-          <srid>3690</srid>
-          <authid>EPSG:3690</authid>
-          <description>NAD83(NSRS2007) / Washington North (ftUS)</description>
-          <projectionacronym>lcc</projectionacronym>
-          <ellipsoidacronym>GRS80</ellipsoidacronym>
-          <geographicflag>false</geographicflag>
-        </spatialrefsys>
-      </srs>
-      <provider encoding="System">ogr</provider>
-      <previewExpression></previewExpression>
-      <vectorjoins/>
-      <expressionfields/>
-      <map-layer-style-manager current="">
-        <map-layer-style name=""/>
-      </map-layer-style-manager>
-      <edittypes>
-        <edittype widgetv2type="TextEdit" name="id">
-          <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-        </edittype>
-      </edittypes>
-      <renderer-v2 symbollevels="0" type="singleSymbol">
-        <symbols>
-          <symbol alpha="1" type="fill" name="0">
-            <layer pass="0" class="SimpleFill" locked="0">
-              <prop k="border_width_map_unit_scale" v="0,0"/>
-              <prop k="color" v="112,109,199,255"/>
-              <prop k="joinstyle" v="bevel"/>
-              <prop k="offset" v="0,0"/>
-              <prop k="offset_map_unit_scale" v="0,0"/>
-              <prop k="offset_unit" v="MM"/>
-              <prop k="outline_color" v="0,0,0,255"/>
-              <prop k="outline_style" v="solid"/>
-              <prop k="outline_width" v="0.26"/>
-              <prop k="outline_width_unit" v="MM"/>
-              <prop k="style" v="solid"/>
-            </layer>
-          </symbol>
-        </symbols>
-        <rotation/>
-        <sizescale scalemethod="area"/>
-      </renderer-v2>
-      <customproperties/>
-      <blendMode>0</blendMode>
-      <featureBlendMode>0</featureBlendMode>
-      <layerTransparency>0</layerTransparency>
-      <displayfield>id</displayfield>
-      <label>0</label>
-      <labelattributes>
-        <label fieldname="" text="Label"/>
-        <family fieldname="" name=".SF NS Text"/>
-        <size fieldname="" units="pt" value="12"/>
-        <bold fieldname="" on="0"/>
-        <italic fieldname="" on="0"/>
-        <underline fieldname="" on="0"/>
-        <strikeout fieldname="" on="0"/>
-        <color fieldname="" red="0" blue="0" green="0"/>
-        <x fieldname=""/>
-        <y fieldname=""/>
-        <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
-        <angle fieldname="" value="0" auto="0"/>
-        <alignment fieldname="" value="center"/>
-        <buffercolor fieldname="" red="255" blue="255" green="255"/>
-        <buffersize fieldname="" units="pt" value="1"/>
-        <bufferenabled fieldname="" on=""/>
-        <multilineenabled fieldname="" on=""/>
-        <selectedonly on=""/>
-      </labelattributes>
-      <editform></editform>
-      <editforminit/>
-      <featformsuppress>0</featformsuppress>
-      <annotationform></annotationform>
-      <editorlayout>generatedlayout</editorlayout>
-      <excludeAttributesWMS/>
-      <excludeAttributesWFS/>
-      <attributeactions/>
-      <edittypes>
-        <edittype widgetv2type="TextEdit" name="id">
           <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
         </edittype>
       </edittypes>
@@ -4930,10 +5591,10 @@
         <multilineenabled fieldname="" on=""/>
         <selectedonly on=""/>
       </labelattributes>
-      <editform>.</editform>
+      <editform></editform>
       <editforminit/>
       <featformsuppress>0</featformsuppress>
-      <annotationform>.</annotationform>
+      <annotationform></annotationform>
       <editorlayout>generatedlayout</editorlayout>
       <excludeAttributesWMS/>
       <excludeAttributesWFS/>
@@ -5054,27 +5715,31 @@
     <Digitizing>
       <DefaultSnapToleranceUnit type="int">2</DefaultSnapToleranceUnit>
       <LayerSnappingList type="QStringList">
-        <value>Cleaned20160120111454901</value>
+        <value>DPD_uvmfg_polygon20160120080258229</value>
+        <value>DPD_uvmfg_polygon_copy20160120080311409</value>
         <value>Street_Network_Database20160120082804120</value>
         <value>cd20160120080916548</value>
-        <value>new_nhood20160120113135714</value>
-        <value>nhoods_lines_shp20160120110126963</value>
-        <value>seaUVs_CAC20160120101015860</value>
         <value>temp_shp20160120070118816</value>
-        <value>test20160120095407329</value>
-        <value>test320160120100705525</value>
-        <value>test_slivers20160120114957742</value>
-        <value>uv_generalized20160120111313201</value>
-        <value>uv_lines_gen_shp20160120111346876</value>
-        <value>uv_lines_simple20160120111650111</value>
-        <value>uv_lines_simple_diss20160120112714280</value>
         <value>uv_union20160120080358728</value>
         <value>uv_union_120160120080510391</value>
         <value>uvs_newCD20160120081726574</value>
-        <value>uvs_union20160120112254046</value>
-        <value>yt20160120091700878</value>
         <value>yt_line_shp20160120085628537</value>
-        <value>yt_choiceBound20160121093612639</value>
+        <value>yt20160120091700878</value>
+        <value>test20160120095407329</value>
+        <value>test320160120100705525</value>
+        <value>seaUVs_CAC20160120101015860</value>
+        <value>nhoods_lines_shp20160120110126963</value>
+        <value>Errors20160120110730134</value>
+        <value>uv_generalized20160120111313201</value>
+        <value>uv_lines_gen_shp20160120111346876</value>
+        <value>Cleaned20160120111454901</value>
+        <value>Errors20160120111455056</value>
+        <value>uv_lines_simple20160120111650111</value>
+        <value>uvs_union20160120112254046</value>
+        <value>uv_lines_simple_diss20160120112714280</value>
+        <value>new_nhood20160120113135714</value>
+        <value>Cleaned20160120114709918</value>
+        <value>test_slivers20160120114957742</value>
       </LayerSnappingList>
       <LayerSnappingEnabledList type="QStringList">
         <value>disabled</value>
@@ -5098,11 +5763,19 @@
         <value>disabled</value>
         <value>disabled</value>
         <value>disabled</value>
+        <value>disabled</value>
+        <value>disabled</value>
+        <value>disabled</value>
+        <value>disabled</value>
       </LayerSnappingEnabledList>
-      <SnappingMode type="QString">all_layers</SnappingMode>
+      <SnappingMode type="QString">current_layer</SnappingMode>
       <AvoidIntersectionsList type="QStringList"/>
       <IntersectionSnapping type="bool">true</IntersectionSnapping>
       <LayerSnappingToleranceUnitList type="QStringList">
+        <value>2</value>
+        <value>2</value>
+        <value>2</value>
+        <value>2</value>
         <value>2</value>
         <value>2</value>
         <value>2</value>
@@ -5147,11 +5820,19 @@
         <value>to_vertex_and_segment</value>
         <value>to_vertex_and_segment</value>
         <value>to_vertex_and_segment</value>
+        <value>to_vertex_and_segment</value>
+        <value>to_vertex_and_segment</value>
+        <value>to_vertex_and_segment</value>
+        <value>to_vertex_and_segment</value>
       </LayerSnapToList>
       <DefaultSnapType type="QString">to segment</DefaultSnapType>
       <DefaultSnapTolerance type="double">10</DefaultSnapTolerance>
       <TopologicalEditing type="bool">true</TopologicalEditing>
       <LayerSnappingToleranceList type="QStringList">
+        <value>0.000000</value>
+        <value>0.000000</value>
+        <value>0.000000</value>
+        <value>0.000000</value>
         <value>0.000000</value>
         <value>0.000000</value>
         <value>0.000000</value>

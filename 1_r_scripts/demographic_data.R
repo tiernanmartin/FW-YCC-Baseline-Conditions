@@ -255,25 +255,33 @@ medHhInc_bar <- function(){
         
         blues <- RColorBrewer::brewer.pal(n = 9, name = "Blues")
         
-        pal <- colorNumeric(palette = blues,
-                            domain = c(round(min(medianIncome2014_plus$MEDIAN),-4),round(max(medianIncome2014_plus$MEDIAN),-3)))
-        
         mypal <- medianIncome2014_plus$MEDIAN %>% 
                 sort() %>% 
                 pal()
        
+        bgrnd <- col2hex("grey95")
+        bgrnd_RGB <- col2rgb("grey95")
+        
+        
         g <- ggplot(medianIncome2014_plus, aes(x=reorder(GEO, MEDIAN), y=MEDIAN)) +
                 geom_bar(stat='identity',fill = mypal,alpha = .5) +
                 geom_text(data = medianIncome2014_plus,label = paste0(medianIncome2014_plus$GEO,": $",format(medianIncome2014_plus$MEDIAN,big.mark=",")), hjust = 1.1) +
-                scale_y_continuous(labels = scales::dollar) +
+                # scale_y_continuous(labels = scales::dollar_format(x = scales::unit_format("k",scale = 1e-3))) +
+                scale_y_continuous(breaks = seq(0,plyr::round_any(max(medianIncome2014_plus$MEDIAN),10000, f = ceiling),by = 10000),
+                                   labels = useful::multiple.dollar) +
                 coord_flip() +
                 theme(
                         # plot.margin = unit(c(-10,0,0,0), "points"),
                         plot.margin = unit(c(0,0,0,0), "points"),
-                        panel.background = element_rect(fill = "grey95"),
-                        # panel.grid = element_blank(),
-                        # panel.grid.minor = element_blank(), 
-                        # panel.grid.major = element_blank(),
+                        plot.background = element_rect(fill = bgrnd),
+                        panel.background = element_rect(fill = bgrnd),
+                        # panel.grid = element_line(),
+                        # panel.grid.major = element_line(colour = "grey50",size = .5,linetype = 3),
+                        # panel.grid.minor = element_blank(),
+                        # panel.grid.major.y = element_blank(),
+                        panel.grid = element_blank(),
+                        panel.grid.minor = element_blank(),
+                        panel.grid.major = element_blank(),
                         plot.background = element_blank(),
                         axis.title.y = element_blank(),
                         axis.title.x = element_blank(),
@@ -283,12 +291,33 @@ medHhInc_bar <- function(){
                         strip.background = element_blank()
                         )
         
+        g
         gg <- grid.arrange(g, ncol=1, bottom = textGrob("Source: U.S. Census Bureau; American Community Survey,\n2014 American Community Survey 5-Year Estimates, Table B19001",x = 0.05,
-                                                        hjust = 0, vjust = .5,
+                                                        hjust = 0, vjust = .6,
                                                         gp = gpar(fontface = "italic",
                                                                   fontsize = 10)))
         
+        gg <- grid.arrange(g, ncol=1, bottom = rectGrob(height = unit(80,"points"),
+                                                        gp = gpar(lwd = 8.5,
+                                                                  col = "grey95", 
+                                                                  fill = "grey95")))
         
+        
+        gg <- grid.arrange(g, ncol=1, bottom = list(rectGrob(
+                                                             gp = gpar(col = NA, fill = "grey95")),
+                                                    textGrob("Source: U.S. Census Bureau; American Community Survey,\n2014 American Community Survey 5-Year Estimates, Table B19001",
+                                                             x = 0.05,
+                                                             hjust = 0, vjust = .6,
+                                                             gp = gpar(fontface = "italic",
+                                                                       fontsize = 10)
+                                                             )
+                                                    )
+                           )
+        
+       
+                                   
+        
+        gg
 }
 
 {
