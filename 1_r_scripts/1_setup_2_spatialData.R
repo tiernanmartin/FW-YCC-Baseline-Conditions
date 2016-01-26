@@ -2,7 +2,7 @@
 
 # SETUP: SOURCE R SCRIPTS -------------------------------------------------------------------------
 
-source("./1_r_scripts/1_setup_functions.R") # load the project settings, packages, and user-defined functions
+source("./1_r_scripts/1_setup_1_functions.R") # load the project settings, packages, and user-defined functions
 
 sessionInfo()
 
@@ -328,23 +328,25 @@ blk_CAC <- {
                                 select(RN) %>% 
                                 unlist()
                         
-                        waterbodies_sel.shp <- waterbodies.shp[c(ps),] %>%  # refine the subset of the spatial data
-                                spTransform(CRSobj = crs_proj) %>%  # change the CRS from geographic to projected
-                                gUnaryUnion()
+                        if(!file.exists("./2_inputs/waterbodies_sel.shp")){
+                                waterbodies_sel.shp <- waterbodies.shp[c(ps),] %>%  # refine the subset of the spatial data
+                                        spTransform(CRSobj = crs_proj) 
+                                
+                                waterbodies_sel.shp %>% 
+                                        writeOGR(dsn = "./2_inputs/",layer = "waterbodies_sel",driver = "ESRI Shapefile")
+                        }
                         
-                        writeOGR(obj = waterbodies_sel.shp,dsn = "./2_inputs/",layer = "waterbodies_sel",driver = "ESRI Shapefile")
-                        
-                        blk_CAC_noWtrbds <- gDifference(spgeom1 = blk_CAC, spgeom2 = waterbodies_sel.shp, 
-                                                        byid = TRUE) 
-                        rn <- row.names(blk_CAC_noWtrbds)
-                        
-                        nodata <- rep(NA, times = 1262) %>% as.data.frame()
-                        
-                        rownames(nodata) <- rn
-                        
-                        blk_CAC_noWtrbds %>% 
-                                SpatialPolygonsDataFrame(data = nodata) %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "blk_CAC_noWtrbds",driver = "ESRI Shapefile") # Remove the waterbodies from the tract shapes
+                        # Remove the waterbodies from the census block geographies
+                        readOGR(dsn = "./2_inputs/",layer = "waterbodies_sel") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                gUnaryUnion() %>% 
+                                gDifference(spgeom1 = blk_CAC, spgeom2 = ., 
+                                            byid = TRUE) %>% 
+                                mySptlPolyDF() %>% 
+                                writeOGR(dsn = "./2_inputs/",
+                                         layer = "blk_CAC_noWtrbds",
+                                         driver = "ESRI Shapefile",
+                                         overwrite_layer = TRUE) # Remove the waterbodies from the tract shapes
                         
                         # Must download the block-level data directly from American Commmunity Survery b/c 
                         # the smallest scale of data provided by the Census API is the block-group level.
@@ -383,10 +385,28 @@ blk_CAC <- {
 }
 
 blk_CAC_noWtrbds <- {
-        readOGR(dsn = "./2_inputs/",layer = "blk_CAC_noWtrbds") %>% 
-                spTransform(CRSobj = crs_proj)
+        
+        make_blk_CAC_noWtrbds <- function(){
+                shp <- readOGR(dsn = "./2_inputs/",layer = "blk_CAC_noWtrbds") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+                shp_data <- blk_CAC
+                
+                shp@data <- 
+                        gCentroid(shp,byid = T) %>% 
+                        over(., shp_data) %>% 
+                        as.data.frame()
+                
+                shp
+        }
+        
+        blk_CAC_noWtrbds <- make_blk_CAC_noWtrbds()
+        
+        rm(make_blk_CAC_noWtrbds)
+        
+        blk_CAC_noWtrbds
+        
 }
-
 
 # This function allows me to easily find the GEOID of tracts that I'm considering excluding 
 # (e.g. Tract 93, the majority of which is in SODO)
@@ -562,8 +582,9 @@ blk_rev <- {
                         
                         new_include <- c(tract_pop@data$TRACTCE,CapHill) 
                         
-                        blk_CAC[blk_CAC@data$TRACTCE %in% new_include,] %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "blk_rev",driver = "ESRI Shapefile")
+                        blk_CAC_noWtrbds[blk_CAC_noWtrbds@data$TRACTCE %in% new_include,] %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "blk_rev",driver = "ESRI Shapefile",
+                                         overwrite_layer = TRUE)
                 }
                 
                 readOGR(dsn = "./2_inputs/",layer = "blk_rev") %>% 
@@ -572,9 +593,6 @@ blk_rev <- {
         
         
         blk_rev <- make_blk_rev()
-        
-        blk_CAC_noWtrbds <<- gDifference(spgeom1 = blk_rev, spgeom2 = waterbodies_sel.shp, 
-                                        byid = TRUE)
         
         rm(make_blk_rev)
         
@@ -1023,5 +1041,5 @@ myLflt_uvs <- function(){
         
 }
 
-myLflt_uvs()
+# myLflt_uvs()
       

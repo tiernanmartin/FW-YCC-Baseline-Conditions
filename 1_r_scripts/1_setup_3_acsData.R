@@ -2,7 +2,9 @@
 
 # SETUP: LOAD PACKAGES AND PROJECT SETTINGS --------------------------------------------------------------
 
-source(file = "./1_r_scripts/setup_and_spatial_data.R")
+source("./1_r_scripts/1_setup_1_functions.R") # load the project settings, packages, and user-defined functions
+
+source("./1_r_scripts/1_setup_2_spatialData.R") # load spatial data
 
 # -------------------------------------------------------------------------------------------------        
 

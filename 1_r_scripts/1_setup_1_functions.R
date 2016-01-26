@@ -42,6 +42,34 @@ crs_geog <- CRS("+init=epsg:2285") # Washington State plane CRS
 
 # Yellow-Green-Blue color palette
 
+# Quick conversion of objects from class=SpatialPolygons to class=SpatialPolygonsDataFrame
+# (this is necessary for saving spatial data in the ESRI Shapefile format)
+
+mySptlPolyDF <- function(shp){
+        
+        shp_rn <- row.names(shp)
+        
+        shp_len <- shp@polygons %>% length()
+        
+        if(length(shp_rn) != shp_len){
+                return(message("The `shp` object does not have the same number of row names as the list of polygons"))
+        }
+        
+        else{
+                nodata <- rep(NA, times = shp_len) %>% as.data.frame()
+                
+                rownames(nodata) <- rn
+                
+                shp %<>% 
+                        SpatialPolygonsDataFrame(data = nodata)
+                
+                return(shp)
+        }
+        
+
+}
+
+
 myYlGnBu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,
                                                                name = "YlGnBu"), 
                              space = "Lab",

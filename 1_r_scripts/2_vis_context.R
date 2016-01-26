@@ -6,6 +6,8 @@ source("./1_r_scripts/1_setup_functions.R") # load the project settings, package
 
 source("./1_r_scripts/1_setup_spatialData.R") # load the project's areal data (i.e., boundaries)
 
+source("./1_r_scripts/1_setup_3_acsData.R") # create the ACS geometries
+
 sessionInfo()
 
 # -------------------------------------------------------------------------------------------------        
@@ -58,13 +60,13 @@ mylflt_seaUVs <- function(){
 # mylflt_seaUVs() %>%
 #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs.html")
 
-mylflt_seaUVs() %>% addPolylines(data = seaNhoods_outline,
-                                 group = "Neighborhoods",
-                                 color = col2hex("dodgerblue"), weight = 1, opacity = 1,stroke = T,
-                                 fill = F) %>% 
-        addLayersControl(overlayGroups = c("Neighborhoods")) %>% 
-        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs_nhoods.html")
-        
+# mylflt_seaUVs() %>% addPolylines(data = seaNhoods_outline,
+#                                  group = "Neighborhoods",
+#                                  color = col2hex("dodgerblue"), weight = 1, opacity = 1,stroke = T,
+#                                  fill = F) %>% 
+#         addLayersControl(overlayGroups = c("Neighborhoods")) %>% 
+#         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUVs_nhoods.html")
+#         
 
 mylflt_CAC_bounds <- function(){
         yt <- seaUVs_CAC[seaUVs_CAC$NHOOD_ABBR %in% c("YT"),]
@@ -107,7 +109,7 @@ mylflt_CAC_bounds <- function(){
 # mylflt_CAC_bounds() %>% 
 #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_CAC_bounds.html")
 
-myLflt_uvs() %>% 
-        saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_uvs_vs_census.html")
-
+# myLflt_uvs() %>% 
+#         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_uvs_vs_census.html")
+# 
 
