@@ -31,6 +31,8 @@ require(maptools)       # for combine SpatialPolygonsDataFrames
 require(grid)
 require(gridExtra)
 require(useful)         # for "$150K labeling 
+require(readxl)         # for reading Excel documents
+require(stringr)        # for string extraction
 
 
 options(scipen=999,stringsAsFactors = FALSE)
@@ -40,7 +42,26 @@ crs_geog <- CRS("+init=epsg:2285") # Washington State plane CRS
 
 # SETUP: MY FUNCTIONS --------------------------------------------------------------------
 
-# Yellow-Green-Blue color palette
+# wtr_clip
+# A function for clipping census geometries (or any other areal data) with waterbody polygons
+# Note: the waterbody shapefile should be flattened (`gUnaryUnion`) before being passed to this function
+
+wtr_clip <- function(orig, wtr, path){
+        
+        new <- 
+                gDifference(spgeom1 = orig, spgeom2 = wtr, 
+                            byid = TRUE) %>% 
+                mySptlPolyDF()
+        
+        new@data <- 
+                gCentroid(new,byid = T) %>% 
+                over(., orig) %>% 
+                as.data.frame()
+        
+        new
+        
+}
+
 
 # Quick conversion of objects from class=SpatialPolygons to class=SpatialPolygonsDataFrame
 # (this is necessary for saving spatial data in the ESRI Shapefile format)
@@ -58,7 +79,7 @@ mySptlPolyDF <- function(shp){
         else{
                 nodata <- rep(NA, times = shp_len) %>% as.data.frame()
                 
-                rownames(nodata) <- rn
+                rownames(nodata) <- shp_rn
                 
                 shp %<>% 
                         SpatialPolygonsDataFrame(data = nodata)
@@ -69,6 +90,8 @@ mySptlPolyDF <- function(shp){
 
 }
 
+
+# Yellow-Green-Blue color palette
 
 myYlGnBu <- colorRampPalette(colors = RColorBrewer::brewer.pal(n = 9,
                                                                name = "YlGnBu"), 

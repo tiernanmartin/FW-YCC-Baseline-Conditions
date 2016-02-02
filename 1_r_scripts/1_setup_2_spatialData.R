@@ -8,7 +8,7 @@ sessionInfo()
 
 # -------------------------------------------------------------------------------------------------
 
-# SPATIAL DATA: CAC NEIGHBORHOODS, BAILEY-GATZERT BOUNDARY, MY CAC BOUNDARY -----------------------
+# SPATIAL DATA: CAC NEIGHBORHOODS, BAILEY-GATZERT BOUNDARY, MY CAC BOUNDARY, WATERBODIES, UVS -----
 
 seaNhoods_CAC <- {
         make_seaNhoods_CAC <- function(){
@@ -92,17 +92,19 @@ myCACbound_cntr <- {
                 spTransform(CRSobj = crs_proj)
 }
 
-# SPATIAL DATA: CENSUS TRACTS, BLOCK GROUPS, BLOCKS -----------------------------------------------
-
-# 'tract_CAC' and 'bg_CAC' are TIGER shapefiles that are clipped to remove waterbodies (for visual clarity)
-tract_CAC <- {
+waterbodies <- {
         
-        make_tract_CAC <- function(){
+        make_waterbodies <- function(){
                 
-                if(!file.exists("./2_inputs/tracts.shp")){
-                        tracts_orig <- 
-                                tigris::tracts(state = "WA", county = "King") %>% 
+                if(!file.exists("./2_inputs/waterbodies.shp")){
+                        # Tracts
+                        
+                        tracts_orig <- tigris::tracts(state = "WA", county = "King") %>% 
                                 spTransform(CRSobj = crs_proj)
+                        
+                        tracts_big <- gUnaryUnion(tracts_orig) # simplify the tract polygons by merging them into one polygon
+                        
+                        # Waterbodies
                         
                         if(!file.exists("./2_inputs/NHDMajor.gdb")){  # check if the file already exists, if not then download it
                                 url <- "ftp://www.ecy.wa.gov/gis_a/inlandWaters/NHD/NHDmajor.gdb.zip" # save the URL for the waterbodies data
@@ -123,8 +125,6 @@ tract_CAC <- {
                                         layer = "NHD_MajorWaterbodies") %>%
                                 gBuffer(byid=TRUE, width=0) %>% # clean up self-intersecting polygons
                                 spTransform(CRSobj = crs_proj) # transform the projection to match the project projection
-                        
-                        tracts_big <- gUnaryUnion(tracts_orig) # simplify the tract polygons by merging them into one polygon
                         
                         waterbodies_cntr <- gCentroid(spgeom = waterbodies.shp,byid = TRUE) # create a set of center points for the waterbodies shapes
                         
@@ -141,41 +141,198 @@ tract_CAC <- {
                                 select(RN) %>% 
                                 unlist()
                         
-                        waterbodies_sel.shp <- waterbodies.shp[c(ps,intersect),] %>%  # refine the subset of the spatial data
+                        waterbodies.shp[c(ps,intersect),] %>%  # refine the subset of the spatial data
                                 spTransform(CRSobj = crs_proj) %>%  # change the CRS from geographic to projected
-                                gUnaryUnion()
+                                gUnaryUnion() %>%
+                                mySptlPolyDF() %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "waterbodies",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                }
+                
+                readOGR(dsn = "./2_inputs/",layer = "waterbodies") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+        }
+        
+        waterbodies <- make_waterbodies()
+        
+        rm(make_waterbodies)
+        
+        waterbodies
+}
+
+seaUVs <- {
+        make_seaUVs <- function(){
+                if(!file.exists("./2_inputs/Urban_Villages/StatePlane/DPD_uvmfg_polygon.shp")){
+                        url <- "https://data.seattle.gov/download/ugw3-tp9e/application/zip" # save the URL for the neighborhood boundaries
                         
-                        tracts <- gDifference(spgeom1 = tracts_orig, spgeom2 = waterbodies_sel.shp, 
-                                              byid = TRUE) # Remove the waterbodies from the tract shapes
+                        temp <- tempfile() # create a temporary file to hold the compressed download
                         
-                        PugetSoundTract <- "53033990100" 
+                        download(url, dest = temp, mode="wb") # download the file
                         
-                        df <- tracts_orig@data %>% filter(GEOID %!in% PugetSoundTract)
+                        unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
                         
-                        rn <- rownames(df)
+                }
+                
+                seaUVs <- readOGR(dsn = "2_inputs/Urban_Villages/StatePlane/",layer = "DPD_uvmfg_polygon") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+                
+        }
+        
+        seaUVs <- make_seaUVs()
+        
+        rm(make_seaUVs)
+        
+        seaUVs_outline <<- 
+                seaUVs %>% 
+                as('SpatialLines') 
+        
+        seaUVs_ycc <<- seaUVs[grepl("China*|Pioneer*|First*|12th*|23rd*|Pike|Capitol|Madison",seaUVs@data$UV_NAME),]
+        
+        seaUVs_ycc_outline <<- 
+                seaUVs_ycc %>% 
+                as('SpatialLines')
+        
+        seaUVs
+        
+        
+}
+
+seaAcsUvs <- {
+        readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
+                mutate(TRACT_10 = str_pad(TRACT_10,width = 6, pad = "0"))
+        }
+
+# Note: these boundaries are editted versions of the Seattle Urban Village bounaries,
+# which can be downloaded here: https://data.seattle.gov/download/ugw3-tp9e/application/zip
+
+seaUVs_CAC <- {
+        
+        make_seaUVs_CAC <- function(){
+                if(!file.exists("./2_inputs/seaUVs_CAC.shp")){
+                        shp <- readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                .[order(.@data$UV_NAME),]
                         
-                        tracts <- spChFIDs(obj = tracts,x = rn) %>% # change the row IDs to match those in 'tracts_orig'
-                                SpatialPolygonsDataFrame(Sr = .,data = df) %>% 
-                                spTransform(.,CRSobj = crs_proj) %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "tracts_noWtrbds", driver = "ESRI Shapefile")
+                        shp@data %<>%
+                                cbind(myNhoods_geo[order(myNhoods_geo$NHOOD.FULL),]) %>% 
+                                select(NHOOD.FULL,NHOOD.ABBR,everything())
+                        
+                        writeOGR(obj = shp,dsn = "./2_inputs/",
+                                 layer = "seaUVs_CAC",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                        
+                }
+                
+                readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
+                        spTransform(CRSobj = crs_proj)
+        }
+        
+        seaUVs_CAC <- make_seaUVs_CAC()
+        
+        rm(make_seaUVs_CAC)
+        
+        seaUVs_CAC
+        
+        
+        
+}
+
+seaUVs_CAC_outline <- 
+        seaUVs_CAC %>% 
+        as('SpatialLines') 
+
+
+
+# SPATIAL DATA: CENSUS TRACTS, BLOCK GROUPS, BLOCKS -----------------------------------------------
+
+# all Census geometries are TIGER shapefiles that are clipped to remove waterbodies (for visual clarity)
+
+tract_sea <- {
+        
+        make_tract_sea <- function(){
+                
+                
+                if(!file.exists("./2_inputs/tracts.shp")){
+                        tracts_orig <- 
+                                tigris::tracts(state = "WA", county = "King") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        
+                        wtr_clip(orig = tracts_orig,wtr = waterbodies) %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "tracts",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                }
+
+                if(!file.exists("./2_inputs/tract_sea.shp")){
+                        seaTrts <- 
+                                readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
+                                mutate(TRACT_10 = str_pad(TRACT_10,width = 6, pad = "0")) %>% 
+                                select(TRACT_10) %>% 
+                                unique() %>% 
+                                unlist()
+                        
+                        readOGR(dsn = "./2_inputs/",layer = "tracts") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                .[.[["TRACTCE"]] %in% seaTrts,] %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "tract_sea",driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                }
+                
+                readOGR(dsn = "./2_inputs/",layer = "tract_sea") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+        }
+        
+        tract_sea <- make_tract_sea()
+        
+        rm(make_tract_sea)
+        
+        tract_sea_outline <<- 
+                tract_sea %>% 
+                as('SpatialLines')
+        
+        tract_sea
+}
+
+tract_CAC <- {
+        
+        make_tract_CAC <- function(){
+                
+                if(!file.exists("./2_inputs/tracts.shp")){
+                        tracts_orig <- 
+                                tigris::tracts(state = "WA", county = "King") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        
+                        wtr_clip(orig = tracts_orig,wtr = waterbodies) %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "tracts",driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 }
                 
                 
-                
-                if(!file.exists("./2_inputs/tract_CAC.shp")){
-                        tract_wa <- readOGR(dsn = "./2_inputs/", layer = "tracts_noWtrbds") %>% 
-                                spTransform(CRSobj = crs_proj)
+                if(!file.exists("./2_inputs/tracts_CAC.shp")){
                         
-                        overlap <- gIntersects(spgeom1 = tract_wa,spgeom2 = myCACbound, byid = T) %>%
-                                which(. == T)
+                        seaTrts <- 
+                                readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
+                                mutate(TRACT_10new = str_pad(TRACT_10,width = 6, pad = "0")) %>% 
+                                select(TRACT_10 = TRACT_10new) %>% 
+                                unique() %>% 
+                                unlist()
                         
-                        tract_CAC <- tract_wa[overlap,] %>% 
-                                writeOGR(dsn = "./2_inputs/", layer = "tract_CAC", driver = "ESRI Shapefile",overwrite_layer = TRUE)
                         
+                        tracts <- 
+                                readOGR(dsn = "./2_inputs/",layer = "tracts") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                .[.[["TRACTCE"]] %in% seaTrts,]
+                        
+                                gContains(myCACbound,gCentroid(tracts, byid = TRUE),byid = TRUE) %>%
+                                which(.==1) %>% 
+                                tracts[.,] %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "tract_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 }
                 
                 readOGR(dsn = "./2_inputs/",layer = "tract_CAC") %>% 
                         spTransform(CRSobj = crs_proj)
+                
+                
         }
         
         tract_CAC <- make_tract_CAC()
@@ -184,87 +341,86 @@ tract_CAC <- {
         
         tract_CAC
         
-        
 } 
+
+
+bg_sea <- {
+        
+        make_bg_sea <- function(){
+                
+                
+                if(!file.exists("./2_inputs/bg.shp")){
+                        bg_orig <- 
+                                tigris::block_groups(state = "WA", county = "King") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        
+                        wtr_clip(orig = bg_orig,wtr = waterbodies) %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "bg",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                }
+                
+                if(!file.exists("./2_inputs/bg_sea.shp")){
+                        seaTrts <- 
+                                readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
+                                mutate(TRACT_10 = str_pad(TRACT_10,width = 6, pad = "0")) %>% 
+                                select(TRACT_10) %>% 
+                                unique() %>% 
+                                unlist()
+                        
+                        readOGR(dsn = "./2_inputs/",layer = "bg") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                .[.[["TRACTCE"]] %in% seaTrts,] %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "bg_sea",driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                }
+                
+                bg_sea <- 
+                        readOGR(dsn = "./2_inputs/",layer = "bg_sea") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+                bg_sea
+                
+                
+        }
+        
+        bg_sea <- make_bg_sea()
+        
+        rm(make_bg_sea)
+        
+        bg_sea_outline <<- 
+                bg_sea %>% 
+                as('SpatialLines')
+        
+        bg_sea
+
+}
 
 bg_CAC <- {
         
         make_bg_CAC <- function(){
                 
                 if(!file.exists("./2_inputs/bg.shp")){
-                        bg_orig <- tigris::block_groups(state = "WA", county = "King") %>% 
+                        bg_orig <- 
+                                tigris::block_groups(state = "WA", county = "King") %>% 
                                 spTransform(CRSobj = crs_proj)
                         
-                        if(!file.exists("./2_inputs/NHDMajor.gdb")){  # check if the file already exists, if not then download it
-                                url <- "ftp://www.ecy.wa.gov/gis_a/inlandWaters/NHD/NHDmajor.gdb.zip" # save the URL for the waterbodies data
-                                
-                                temp <- tempfile() # create a temporary file to hold the compressed download
-                                
-                                download(url, dest = temp, mode="wb") # download the file
-                                
-                                unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
-                                
-                                dateDownloaded <- date()
-                        }
-                        
-                        path_gdb <- "./2_inputs/NHDMajor.gdb/" # path to the geodatabase folder
-                        
-                        waterbodies.shp <- 
-                                readOGR(dsn = path_gdb,      # create a waterbodies shape
-                                        layer = "NHD_MajorWaterbodies") %>%
-                                gBuffer(byid=TRUE, width=0) %>% # clean up self-intersecting polygons
-                                spTransform(CRSobj = crs_proj) # transform the projection to match the project projection
-                        
-                        bg_big <- gUnaryUnion(bg_orig) # simplify the tract polygons by merging them into one polygon
-                        
-                        waterbodies_cntr <- gCentroid(spgeom = waterbodies.shp,byid = TRUE) # create a set of center points for the waterbodies shapes
-                        
-                        intersect <- over(x = waterbodies_cntr,y = bg_big,returnList = TRUE) %>%  # find the indices of all waterbodies whose center point overlaps the merged bg shape
-                                .[which(. == 1)] %>% 
-                                names()
-                        
-                        # some of the Puget Sound polygon centroids aren't overlapped by bg, so we'll added them manually
-                        ps <- 
-                                waterbodies.shp@data %>% 
-                                mutate(RN = rownames(.)) %>% 
-                                as.data.frame %>% 
-                                filter(GNIS_Name %in% "Puget Sound" & AreaSqKm > 100) %>% 
-                                select(RN) %>% 
-                                unlist()
-                        
-                        waterbodies_sel.shp <- waterbodies.shp[c(ps,intersect),] %>%  # refine the subset of the spatial data
-                                spTransform(CRSobj = crs_proj) %>%  # change the CRS from geographic to projected
-                                gUnaryUnion()
-                        
-                        bg <- gDifference(spgeom1 = bg_orig, spgeom2 = waterbodies_sel.shp, 
-                                          byid = TRUE) # Remove the waterbodies from the tract shapes
-                        
-                        PugetSoundTract <- "990100" 
-                        
-                        df <- bg_orig@data %>% filter(TRACTCE %!in% PugetSoundTract)
-                        
-                        rn <- rownames(df)
-                        
-                        bg <- spChFIDs(obj = bg,x = rn) %>% # change the row IDs to match those in 'bg_orig'
-                                SpatialPolygonsDataFrame(Sr = .,data = df) %>% 
-                                spTransform(.,CRSobj = crs_proj) %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "bg_noWtrbds", driver = "ESRI Shapefile")
-                        
+                        wtr_clip(orig = bg_orig,wtr = waterbodies) %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "bg",driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 }
                 
+                
                 if(!file.exists("./2_inputs/bg_CAC.shp")){
+                        bg <- 
+                                readOGR(dsn = "./2_inputs/",layer = "bg") %>% 
+                                spTransform(CRSobj = crs_proj)
                         
-                        sel <- tract_CAC@data$TRACTCE
-                        
-                        bg_CAC <- readOGR(dsn = "./2_inputs/", layer = "bg_noWtrbds") %>% 
-                                spTransform(CRSobj = crs_proj) %>% 
-                                .[.@data$TRACTCE %in% sel,] %>% 
-                                writeOGR(dsn = "./2_inputs/", layer = "bg_CAC", driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                        
+                                bg[bg@data$TRACTCE %in% c(tract_CAC@data$TRACTCE),] %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "bg_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 }
                 
                 readOGR(dsn = "./2_inputs/",layer = "bg_CAC") %>% 
                         spTransform(CRSobj = crs_proj)
+                
+                
         }
         
         bg_CAC <- make_bg_CAC()
@@ -273,107 +429,81 @@ bg_CAC <- {
         
         bg_CAC
         
+} 
+
+
+
+blk_sea <- {
+        
+        make_blk_sea <- function(){
+                
+                if(!file.exists("./2_inputs/blk_sea.shp")){
+                       
+                        seaTrts <- 
+                                readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
+                                mutate(TRACT_10 = str_pad(TRACT_10,width = 6, pad = "0")) %>% 
+                                select(TRACT_10) %>% 
+                                unique() %>% 
+                                unlist()
+                        
+                        blk_sea <- 
+                                tigris::blocks(state = "WA", county = "King") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                .[.@data$TRACTCE10 %in% seaTrts,]
+                        
+                        # NOTE: this step takes a long time!
+                        wtr_clip(orig = blk_sea,wtr = waterbodies) %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "blk_sea",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                }
+                
+                bg_sea <- 
+                        readOGR(dsn = "./2_inputs/",layer = "blk_sea") %>% 
+                        spTransform(CRSobj = crs_proj)
+                
+                bg_sea
+                
+                
+        }
+        
+        blk_sea <- make_blk_sea()
+        
+        rm(make_blk_sea)
+        
+        blk_sea
+        
 }
 
 blk_CAC <- {
         
         make_blk_CAC <- function(){
                 
-                if(!file.exists("./2_inputs/blk_CAC.shp")){
+                if(!file.exists("./2_inputs/blk.shp")){
                         
-                        if(!file.exists("./2_inputs/blk.shp")){
+                        
+                        blk_sea <- 
                                 tigris::blocks(state = "WA", county = "King") %>% 
-                                        spTransform(CRSobj = crs_proj) %>% 
-                                        writeOGR(dsn = "./2_inputs/",layer = "blk", driver = "ESRI Shapefile")
-                        }
-                        
-                        sel <- tract_CAC@data$TRACTCE
-                        
-                        blk_CAC <- readOGR(dsn = "./2_inputs/", layer = "blk") %>% 
                                 spTransform(CRSobj = crs_proj) %>% 
-                                .[.@data$TRACTCE %in% sel,] 
+                                .[.@data$TRACTCE10 %in% seaAcsUvs$TRACT_10,]
                         
-                        if(!file.exists("./2_inputs/NHDMajor.gdb")){  # check if the file already exists, if not then download it
-                                url <- "ftp://www.ecy.wa.gov/gis_a/inlandWaters/NHD/NHDmajor.gdb.zip" # save the URL for the waterbodies data
-                                
-                                temp <- tempfile() # create a temporary file to hold the compressed download
-                                
-                                download(url, dest = temp, mode="wb") # download the file
-                                
-                                unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
-                                
-                                dateDownloaded <- date()
-                        }
+                        # NOTE: this step takes a long time!
+                        wtr_clip(orig = blk_sea,wtr = waterbodies) %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "blk_sea",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                }
+                
+                
+                if(!file.exists("./2_inputs/blk_CAC.shp")){
+                        blk <- 
+                                readOGR(dsn = "./2_inputs/",layer = "blk") %>% 
+                                spTransform(CRSobj = crs_proj)
                         
-                        path_gdb <- "./2_inputs/NHDMajor.gdb/" # path to the geodatabase folder
-                        
-                        waterbodies.shp <- 
-                                readOGR(dsn = path_gdb,      # create a waterbodies shape
-                                        layer = "NHD_MajorWaterbodies") %>%
-                                gBuffer(byid=TRUE, width=0) %>% # clean up self-intersecting polygons
-                                spTransform(CRSobj = crs_proj) # transform the projection to match the project projection
-                        
-                        blk_big <- gUnaryUnion(blk_CAC) # simplify the tract polygons by merging them into one polygon
-                        
-                        waterbodies_cntr <- gCentroid(spgeom = waterbodies.shp,byid = TRUE) # create a set of center points for the waterbodies shapes
-                        
-                        intersect <- over(x = waterbodies_cntr,y = blk_big,returnList = TRUE) %>%  # find the indices of all waterbodies whose center point overlaps the merged bg shape
-                                .[which(. == 1)] %>% 
-                                names()
-                        ps <- 
-                                waterbodies.shp@data %>% 
-                                mutate(RN = rownames(.)) %>% 
-                                as.data.frame %>% 
-                                filter(GNIS_Name %in% "Puget Sound") %>% 
-                                select(RN) %>% 
-                                unlist()
-                        
-                        if(!file.exists("./2_inputs/waterbodies_sel.shp")){
-                                waterbodies_sel.shp <- waterbodies.shp[c(ps),] %>%  # refine the subset of the spatial data
-                                        spTransform(CRSobj = crs_proj) 
-                                
-                                waterbodies_sel.shp %>% 
-                                        writeOGR(dsn = "./2_inputs/",layer = "waterbodies_sel",driver = "ESRI Shapefile")
-                        }
-                        
-                        # Remove the waterbodies from the census block geographies
-                        readOGR(dsn = "./2_inputs/",layer = "waterbodies_sel") %>% 
-                                spTransform(CRSobj = crs_proj) %>% 
-                                gUnaryUnion() %>% 
-                                gDifference(spgeom1 = blk_CAC, spgeom2 = ., 
-                                            byid = TRUE) %>% 
-                                mySptlPolyDF() %>% 
-                                writeOGR(dsn = "./2_inputs/",
-                                         layer = "blk_CAC_noWtrbds",
-                                         driver = "ESRI Shapefile",
-                                         overwrite_layer = TRUE) # Remove the waterbodies from the tract shapes
-                        
-                        # Must download the block-level data directly from American Commmunity Survery b/c 
-                        # the smallest scale of data provided by the Census API is the block-group level.
-                        
-                        blk_df <- 
-                                readr::read_csv(file = "./2_inputs/wa_kc_blocks_pop/DEC_10_SF1_P1_with_ann.csv",
-                                                # load population data
-                                                skip = 1,
-                                                col_types = "cccn")
-                        
-                        
-                        
-                        blk_CAC <-
-                                geo_join(
-                                        spatial_data = blk_CAC,
-                                        # join spatial and demographic data
-                                        data_frame = blk_df,
-                                        by_sp = "GEOID10",
-                                        by_df = "Id2"
-                                ) %>%
-                                spTransform(CRSobj = crs_proj) %>% 
-                                writeOGR(dsn = "./2_inputs/", layer = "blk_CAC", driver = "ESRI Shapefile",overwrite_layer = T)
-                        
+                        blk[blk@data$TRACTCE %in% c(tract_CAC@data$TRACTCE),] %>% 
+                                writeOGR(dsn = "./2_inputs/",layer = "blk_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 }
                 
                 readOGR(dsn = "./2_inputs/",layer = "blk_CAC") %>% 
                         spTransform(CRSobj = crs_proj)
+                
+                
         }
         
         blk_CAC <- make_blk_CAC()
@@ -382,49 +512,90 @@ blk_CAC <- {
         
         blk_CAC
         
-}
+} 
 
-blk_CAC_noWtrbds <- {
-        
-        make_blk_CAC_noWtrbds <- function(){
-                shp <- readOGR(dsn = "./2_inputs/",layer = "blk_CAC_noWtrbds") %>% 
-                        spTransform(CRSobj = crs_proj)
-                
-                shp_data <- blk_CAC
-                
-                shp@data <- 
-                        gCentroid(shp,byid = T) %>% 
-                        over(., shp_data) %>% 
-                        as.data.frame()
-                
-                shp
-        }
-        
-        blk_CAC_noWtrbds <- make_blk_CAC_noWtrbds()
-        
-        rm(make_blk_CAC_noWtrbds)
-        
-        blk_CAC_noWtrbds
-        
-}
 
-# This function allows me to easily find the GEOID of tracts that I'm considering excluding 
-# (e.g. Tract 93, the majority of which is in SODO)
-
-myLflt_tractTest <- function(){
-        popup_text <- paste0(tract_CAC@data$NAMELSAD,"<br>","GEOID: ",tract_CAC@data$GEOID)
-        
-        myLeaflet(tract_CAC) %>% 
-                addPolygons(data = tract_CAC,
-                            stroke = F,
-                            fillOpacity = 0,
-                            popup = popup_text)
-        
-}
-
-# myLflt_tractTest()
 
 # SPATIAL DATA: TRACT SELECTION, REVISION OF BLOCK GROUP + BLOCK SELECTION ------------------------
+
+# Attribute Urban Village IDs to all block groups
+# NOTE: this function can be used for either tract or block-group level attribution,
+# and either housing units or population can be used as the determining variable.
+
+UV2Census <- function(tract = TRUE, unit = "hu"){
+        
+        geo <- if(tract == TRUE){tract_sea} else(bg_sea)
+        blk <- blk_sea
+        by_sp <- if(tract == TRUE){"TRACTCE"} else{"GEOID"}
+        pop <- read_csv(file = "./2_inputs/wa_kc_blocks_pop/DEC_10_SF1_P1_with_ann.csv",col_types = "cccn")
+        hu <- read_csv(file = "./2_inputs/wa_kc_blocks_hu/DEC_10_SF1_H1.csv",col_types = "cccn")
+        count <- if(unit == "hu"){hu} else(pop)
+        
+        
+        # Read in the Housing Units data from ACS 2010 (block scale)
+        
+        # Join it with the block spatial polygon df
+        blk %<>% 
+                myGeoJoin(data_frame = count,by_sp = "GEOID10",by_df = "GEO.id2") %>% 
+                .[.@data$D001 > 0 & !is.na(.@data$D001),]
+        
+        blk <- geo_join(spatial_data = blk,
+                        data_frame = seaAcsUvs,
+                        by_sp = "GEOID10", 
+                        by_df = "GEOID10")
+        
+        # Create different `ID` column depending on whether this is a tract-level or block-group-level operation
+        if(tract == TRUE){
+                blk@data %<>%
+                        mutate(ID = substr(GEOID10,6,11)) %>% 
+                        select(ID,D001,UV = URBAN_VILLAGE_NAME)
+        } else {
+                blk@data %<>%
+                        mutate(ID = substr(GEOID10,1,12)) %>% 
+                        select(ID,D001,UV = URBAN_VILLAGE_NAME)
+        }
+        
+        # Remove the blocks whose Urban Village is 'NA'
+        blk <- blk[!is.na(blk@data$UV),]
+        
+        geos <-  sort(unique(blk@data$ID)) %>% 
+                as.data.frame()
+        
+        colnames(geos) <- "ID"
+        
+        tractUV <- 
+                blk@data %>% 
+                group_by(UV,ID) %>%  
+                summarise(HU_COUNT = sum(D001)) %>% 
+                spread(key = UV, value = HU_COUNT) %>% 
+                ungroup() %>% 
+                select(-ID)  %>% 
+                replace(is.na(.),0) %>% 
+                mutate(UV = max.col(m= .,ties.method = "first")) %>% 
+                mutate(UV = colnames(.)[as.numeric(UV)]) %>% 
+                select(UV) %>% 
+                bind_cols(geos) %>% 
+                select(ID,UV)
+        
+        shp <- 
+                geo_join(spatial_data = geo,
+                         data_frame = tractUV,
+                         by_sp = by_sp,
+                         by_df = "ID")
+        
+        # Remove the "Outside Villages"
+        shp %<>%
+                .[shp@data$UV %!in% "Outside Villages" & !is.na(shp@data$UV),]
+        
+        return(shp)
+        
+}
+
+
+
+# For the comparison between using housing units and population, run the R script below
+# source("./1_r_scripts/1_setup_uv2CensusDiff.R",echo = TRUE)
+
 
 # Select tracts where the majority of the population lives within the CAC bound and map the result
 
@@ -680,80 +851,6 @@ myNhoods_geo <- data.frame(
                          "Yesler Terrace", "Little Saigon", 
                          "Central District","First Hill", "12 Ave & Capitol Hill"),
         "NHOOD.ABBR" = c("PS","CID","YT","LS","CD","FH","12AV"))
-
-
-seaUVs <- {
-        make_seaUVs <- function(){
-                if(!file.exists("./2_inputs/Urban_Villages/StatePlane/DPD_uvmfg_polygon.shp")){
-                        url <- "https://data.seattle.gov/download/ugw3-tp9e/application/zip" # save the URL for the neighborhood boundaries
-                        
-                        temp <- tempfile() # create a temporary file to hold the compressed download
-                        
-                        download(url, dest = temp, mode="wb") # download the file
-                        
-                        unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
-                        
-                }
-                
-                seaUVs <- readOGR(dsn = "2_inputs/Urban_Villages/StatePlane/",layer = "DPD_uvmfg_polygon") %>% 
-                        spTransform(CRSobj = crs_proj)
-        
-                
-        }
-       
-        seaUVs <- make_seaUVs()
-        
-        rm(make_seaUVs)
-        
-        seaUVs_outline <<- 
-                seaUVs %>% 
-                as('SpatialLines') 
-        
-        seaUVs
-        
-        
-}
-
-
-# Note: these boundaries are editted versions of the Seattle Urban Village bounaries,
-# which can be downloaded here: https://data.seattle.gov/download/ugw3-tp9e/application/zip
-
-seaUVs_CAC <- {
-        
-        make_seaUVs_CAC <- function(){
-                if(!file.exists("./2_inputs/seaUVs_CAC.shp")){
-                        shp <- readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
-                                spTransform(CRSobj = crs_proj) %>% 
-                                .[order(.@data$UV_NAME),]
-                        
-                        shp@data %<>%
-                                cbind(myNhoods_geo[order(myNhoods_geo$NHOOD.FULL),]) %>% 
-                                select(NHOOD.FULL,NHOOD.ABBR,everything())
-                        
-                        writeOGR(obj = shp,dsn = "./2_inputs/",
-                                 layer = "seaUVs_CAC",
-                                 driver = "ESRI Shapefile",
-                                 overwrite_layer = TRUE)
-                        
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
-                        spTransform(CRSobj = crs_proj)
-        }
-        
-        seaUVs_CAC <- make_seaUVs_CAC()
-        
-        rm(make_seaUVs_CAC)
-        
-        seaUVs_CAC
-        
-        
-        
-}
-
-seaUVs_CAC_outline <- 
-        seaUVs_CAC %>% 
-        as('SpatialLines') 
 
 
 tract_rev <- {
