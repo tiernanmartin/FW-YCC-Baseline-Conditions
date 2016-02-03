@@ -518,6 +518,14 @@ blk_CAC <- {
 
 # SPATIAL DATA: TRACT SELECTION, REVISION OF BLOCK GROUP + BLOCK SELECTION ------------------------
 
+# I decided to connect the urban village identities to cesus geographies using the housing units count
+# from the 2010 Census. The function I wrote to do this also has the ability to do this calculation
+# using tracts (as the census geometry), or using population as the determining variable.
+
+# For the comparison between using housing units and population, run the R script below
+source("./1_r_scripts/1_setup_uv2CensusDiff.R",echo = TRUE)
+
+
 # Attribute Urban Village IDs to all block groups
 # NOTE: this function can be used for either tract or block-group level attribution,
 # and either housing units or population can be used as the determining variable.
@@ -526,7 +534,7 @@ UV2Census <- function(tract = TRUE, unit = "hu"){
         
         geo <- if(tract == TRUE){tract_sea} else(bg_sea)
         blk <- blk_sea
-        by_sp <- if(tract == TRUE){"TRACTCE"} else{"GEOID"}
+        by_sp <- if(tract == TRUE){"TRACTCE"} else("GEOID")
         pop <- read_csv(file = "./2_inputs/wa_kc_blocks_pop/DEC_10_SF1_P1_with_ann.csv",col_types = "cccn")
         hu <- read_csv(file = "./2_inputs/wa_kc_blocks_hu/DEC_10_SF1_H1.csv",col_types = "cccn")
         count <- if(unit == "hu"){hu} else(pop)
@@ -590,11 +598,6 @@ UV2Census <- function(tract = TRUE, unit = "hu"){
         return(shp)
         
 }
-
-
-
-# For the comparison between using housing units and population, run the R script below
-# source("./1_r_scripts/1_setup_uv2CensusDiff.R",echo = TRUE)
 
 
 # Select tracts where the majority of the population lives within the CAC bound and map the result

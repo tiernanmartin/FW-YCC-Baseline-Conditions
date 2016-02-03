@@ -2,7 +2,7 @@ fun <- function(tract = TRUE, unit = "hu"){
         
         geo <- if(tract == TRUE){tract_sea} else(bg_sea)
         blk <- blk_sea
-        by_sp <- if(tract == TRUE){"TRACTCE"} else{"GEOID"}
+        by_sp <- if(tract == TRUE){"TRACTCE"} else("GEOID")
         pop <- read_csv(file = "./2_inputs/wa_kc_blocks_pop/DEC_10_SF1_P1_with_ann.csv",col_types = "cccn")
         hu <- read_csv(file = "./2_inputs/wa_kc_blocks_hu/DEC_10_SF1_H1.csv",col_types = "cccn")
         count <- if(unit == "hu"){hu} else(pop)
@@ -74,6 +74,9 @@ test <- fun(tract = FALSE, unit = "hu")
 
 test2 <- fun(tract = FALSE, unit = "pop")
 
+outline <- fun(tract = FALSE, unit = "hu") %>% 
+        as('SpatialLines')
+
 x <- as.data.frame(test@data)
 y <- as.data.frame(test2@data)
 
@@ -107,8 +110,8 @@ differs <-
                             smoothFactor = 0,
                             stroke = F,
                             fillColor = ~pal2(test2@data$UV), fillOpacity = .75) %>% 
-                addPolylines(data = bg_sea_outline,
-                             color = col2hex("white"),opacity = .5, weight = 2) %>% 
+                addPolylines(data = outline,
+                             color = col2hex("white"),opacity = .5, weight = 2) %>%
                 addCircles(group = "Difference",
                            data = differs) %>% 
                 addLegend(position = "topright",pal = pal, values = unique(test@data$UV)) %>% 

@@ -8,6 +8,7 @@ require(grDevices)      # for color palettes
 require(rgdal)          # for readOGR and others
 require(sp)             # for spatial objects
 require(leaflet)        # for interactive maps (NOT leafletR here)
+require(plyr)           # for rounding (the `round_any` function)
 require(dplyr)          # for working with data frames
 require(ggplot2)        # for plotting
 require(tigris)
@@ -35,12 +36,28 @@ require(readxl)         # for reading Excel documents
 require(stringr)        # for string extraction
 
 
+
 options(scipen=999,stringsAsFactors = FALSE)
 
 crs_proj <- CRS("+init=epsg:4326") # This project will use WGS 84 projected coordinate system
 crs_geog <- CRS("+init=epsg:2285") # Washington State plane CRS
 
 # SETUP: MY FUNCTIONS --------------------------------------------------------------------
+
+# myMini
+# A quick function to add a (well-formatted) mini map to a leaflet map
+
+myMini <- function(map){
+        addMiniMap(map = map,
+                   position = "topleft",
+                   width = 150, height = 450,zoomLevelFixed = 10)
+}
+        
+# norm0to1
+# A function to convert numeric values to a 0 to 1 scale (rounds up to the nearest 100th)
+
+norm0to1 <- function(x) {plyr::round_any(x = (x - min(x, na.rm=TRUE))/(max(x,na.rm=TRUE) - 
+                                                                               min(x, na.rm=TRUE)),accuracy = .01, f = ceiling)} 
 
 # wtr_clip
 # A function for clipping census geometries (or any other areal data) with waterbody polygons
