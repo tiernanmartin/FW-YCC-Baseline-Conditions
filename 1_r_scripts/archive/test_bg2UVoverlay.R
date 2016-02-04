@@ -1,8 +1,8 @@
 fun <- function(tract = TRUE, unit = "hu"){
         
-        tract = FALSE
-        unit = "hu"
         
+        # tract = FALSE
+        # unit = "hu"
         geo <- if(tract == TRUE){tract_sea} else(bg_sea)
         blk <- blk_sea
         by_sp <- if(tract == TRUE){"TRACTCE"} else("GEOID")
@@ -45,13 +45,6 @@ fun <- function(tract = TRUE, unit = "hu"){
                 as.data.frame()
         
         colnames(geos) <- "ID"
-
-        
-        test <- 
-                blk@data %>% 
-                group_by(ID,UV) %>%  
-                summarise(HU_COUNT = sum(D001)) %>% 
-                spread(key = UV, value = HU_COUNT) 
         
         
         tractUV <- 
@@ -116,16 +109,14 @@ pal <- colorFactor(palette = "Set2",domain = test@data$UV)
 pal2 <- colorFactor(palette = "Set2",domain = blk_uvs@data$URBAN_VILLAGE_NAME)
         
         
-       
-        
 leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
+                addProviderTiles("Esri.WorldGrayCanvas") %>% 
                 addPolygons(group = "blocks",
                             data = blk_uvs,
                             smoothFactor = 0,
-                            color = ~pal2(blk_uvs@data$URBAN_VILLAGE_NAME),opacity = .25, weight = 1,
+                            color = ~pal2(blk_uvs@data$URBAN_VILLAGE_NAME),opacity = .5, weight = 1.5,
                             fillColor = ~pal2(blk_uvs@data$URBAN_VILLAGE_NAME), fillOpacity = ~RANGE) %>%
-                
+                myMini() %>% 
                 addPolylines(group = "block group geos",
                             data = bg_sea_outline,
                             color = col2hex("grey25"),opacity = .8, weight = 2) %>% 

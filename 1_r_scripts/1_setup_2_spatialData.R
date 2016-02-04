@@ -160,8 +160,8 @@ waterbodies <- {
         waterbodies
 }
 
-seaUVs <- {
-        make_seaUVs <- function(){
+seaUvs <- {
+        make_seaUvs <- function(){
                 if(!file.exists("./2_inputs/Urban_Villages/StatePlane/DPD_uvmfg_polygon.shp")){
                         url <- "https://data.seattle.gov/download/ugw3-tp9e/application/zip" # save the URL for the neighborhood boundaries
                         
@@ -173,27 +173,33 @@ seaUVs <- {
                         
                 }
                 
-                seaUVs <- readOGR(dsn = "2_inputs/Urban_Villages/StatePlane/",layer = "DPD_uvmfg_polygon") %>% 
-                        spTransform(CRSobj = crs_proj)
+                
+                readOGR(dsn = "2_inputs/Urban_Villages/StatePlane/",layer = "DPD_uvmfg_polygon") %>% 
+                        spTransform(CRSobj = crs_proj) %>% 
+                        wtr_clip(wtr = waterbodies) %>% 
+                        writeOGR(dsn = "./2_inputs/",layer = "seaUvs",driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 
                 
         }
         
-        seaUVs <- make_seaUVs()
+        make_seaUvs()
+
+        rm(make_seaUvs)
         
-        rm(make_seaUVs)
+        seaUvs <- readOGR(dsn = "./2_inputs/",layer = "seaUvs") %>% 
+                spTransform(CRSobj = crs_proj)
         
-        seaUVs_outline <<- 
-                seaUVs %>% 
+        seaUvs_outline <<- 
+                seaUvs %>% 
                 as('SpatialLines') 
         
-        seaUVs_ycc <<- seaUVs[grepl("China*|Pioneer*|First*|12th*|23rd*|Pike|Capitol|Madison",seaUVs@data$UV_NAME),]
+        seaUvs_ycc <<- seaUvs[grepl("China*|Pioneer*|First*|12th*|23rd*|Pike|Capitol|Madison",seaUvs@data$UV_NAME),]
         
-        seaUVs_ycc_outline <<- 
-                seaUVs_ycc %>% 
+        seaUvs_ycc_outline <<- 
+                seaUvs_ycc %>% 
                 as('SpatialLines')
         
-        seaUVs
+        seaUvs
         
         
 }
@@ -456,11 +462,11 @@ blk_sea <- {
                                 writeOGR(dsn = "./2_inputs/",layer = "blk_sea",driver = "ESRI Shapefile",overwrite_layer = TRUE)
                 }
                 
-                bg_sea <- 
+                blk_sea <- 
                         readOGR(dsn = "./2_inputs/",layer = "blk_sea") %>% 
                         spTransform(CRSobj = crs_proj)
                 
-                bg_sea
+                blk_sea
                 
                 
         }
@@ -514,7 +520,7 @@ blk_CAC <- {
         
 } 
 
-
+# -------------------------------------------------------------------------------------------------
 
 # SPATIAL DATA: TRACT SELECTION, REVISION OF BLOCK GROUP + BLOCK SELECTION ------------------------
 
@@ -525,80 +531,83 @@ blk_CAC <- {
 # For the comparison between using housing units and population, run the R script below
 source("./1_r_scripts/1_setup_uv2CensusDiff.R",echo = TRUE)
 
-
 # Attribute Urban Village IDs to all block groups
 # NOTE: this function can be used for either tract or block-group level attribution,
 # and either housing units or population can be used as the determining variable.
+# see '1_setup_1_functions.R' for the details of this function. 
 
-UV2Census <- function(tract = TRUE, unit = "hu"){
+bg_uvs <- {
         
-        geo <- if(tract == TRUE){tract_sea} else(bg_sea)
-        blk <- blk_sea
-        by_sp <- if(tract == TRUE){"TRACTCE"} else("GEOID")
-        pop <- read_csv(file = "./2_inputs/wa_kc_blocks_pop/DEC_10_SF1_P1_with_ann.csv",col_types = "cccn")
-        hu <- read_csv(file = "./2_inputs/wa_kc_blocks_hu/DEC_10_SF1_H1.csv",col_types = "cccn")
-        count <- if(unit == "hu"){hu} else(pop)
-        
-        
-        # Read in the Housing Units data from ACS 2010 (block scale)
-        
-        # Join it with the block spatial polygon df
-        blk %<>% 
-                myGeoJoin(data_frame = count,by_sp = "GEOID10",by_df = "GEO.id2") %>% 
-                .[.@data$D001 > 0 & !is.na(.@data$D001),]
-        
-        blk <- geo_join(spatial_data = blk,
-                        data_frame = seaAcsUvs,
-                        by_sp = "GEOID10", 
-                        by_df = "GEOID10")
-        
-        # Create different `ID` column depending on whether this is a tract-level or block-group-level operation
-        if(tract == TRUE){
-                blk@data %<>%
-                        mutate(ID = substr(GEOID10,6,11)) %>% 
-                        select(ID,D001,UV = URBAN_VILLAGE_NAME)
-        } else {
-                blk@data %<>%
-                        mutate(ID = substr(GEOID10,1,12)) %>% 
-                        select(ID,D001,UV = URBAN_VILLAGE_NAME)
+        if(!file.exists("./2_inputs/bg_uvs.shp")){
+                make_bg_uvs <- function(){
+                        bg_uvs <- UV2Census(tract = FALSE)
+                        writeOGR(obj = bg_uvs,
+                                 dsn = "./2_inputs/",
+                                 layer = "bg_uvs",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                }
+                
+                make_bg_uvs()
+                
+                rm(make_bg_uvs)
+                        
         }
         
-        # Remove the blocks whose Urban Village is 'NA'
-        blk <- blk[!is.na(blk@data$UV),]
+        bg_uvs <- readOGR(dsn = "./2_inputs/",layer = "bg_uvs") %>% 
+                spTransform(CRSobj = crs_proj)
+}
+
+# Join the Urban Village data with the census block polygons
+
+blk_uvs <- {
         
-        geos <-  sort(unique(blk@data$ID)) %>% 
-                as.data.frame()
+        if(!file.exists("./2_inputs/blk_uvs.shp")){
+                make_blk_uvs <- function(){
+                        blk_uvs <-
+                                blk_sea %>% 
+                                geo_join(data_frame = seaAcsUvs,
+                                         by_sp = "GEOID10",
+                                         by_df = "GEOID10") %>% 
+                                geo_join(data_frame = hu,
+                                         by_sp = "GEOID10",
+                                         by_df = "GEO.id2") %>% 
+                                .[!is.na(.@data$D001),] %>% 
+                                .[.@data$D001 > 0,] %>% 
+                                .[!is.na(.@data$URBAN_VILLAGE_NAME),] %>% 
+                                .[.@data$URBAN_VILLAGE_TYPE %!in% c("Manufacturing Industrial","Outside Villages"),]
+                        
+                        # Normalize the Housing Units count (0 to 1 scale)
+                        blk_uvs@data %<>% 
+                                mutate(RANGE = D001) %>% 
+                                mutate_each_(funs(norm0to1), vars = "RANGE")
+                        
+                        writeOGR(obj = blk_uvs,dsn = "./2_inputs/",layer = "blk_uvs",
+                                 driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                        
+                }
+                
+                make_blk_uvs()
+                
+                rm(make_blk_uvs)
+        }
         
-        colnames(geos) <- "ID"
+        blk_uvs <- 
+                readOGR(dsn = "./2_inputs/",layer = "blk_uvs") %>% 
+                spTransform(CRSobj = crs_proj)
         
-        tractUV <- 
-                blk@data %>% 
-                group_by(UV,ID) %>%  
-                summarise(HU_COUNT = sum(D001)) %>% 
-                spread(key = UV, value = HU_COUNT) %>% 
-                ungroup() %>% 
-                select(-ID)  %>% 
-                replace(is.na(.),0) %>% 
-                mutate(UV = max.col(m= .,ties.method = "first")) %>% 
-                mutate(UV = colnames(.)[as.numeric(UV)]) %>% 
-                select(UV) %>% 
-                bind_cols(geos) %>% 
-                select(ID,UV)
         
-        shp <- 
-                geo_join(spatial_data = geo,
-                         data_frame = tractUV,
-                         by_sp = by_sp,
-                         by_df = "ID")
         
-        # Remove the "Outside Villages"
-        shp %<>%
-                .[shp@data$UV %!in% "Outside Villages" & !is.na(shp@data$UV),]
         
-        return(shp)
+        
         
 }
 
+
+
+# -------------------------------------------------------------------------------------------------
+
+# ARCHIVE -----------------------------------------------------------------------------------------
 
 # Select tracts where the majority of the population lives within the CAC bound and map the result
 
@@ -833,7 +842,7 @@ myLflt_blockPop <- function(){
 
 # myLflt_blockPop()
 
-# SPATIAL DATA: SCALES OF ANALYSIS ----------------------------------------------------------------
+# SPATIAL DATA: SCALES OF ANALYSIS 
 
 # Neighborhood names at the different Census geographies
 
