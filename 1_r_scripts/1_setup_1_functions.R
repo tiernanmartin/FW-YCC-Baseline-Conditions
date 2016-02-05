@@ -44,6 +44,7 @@ crs_geog <- CRS("+init=epsg:2285") # Washington State plane CRS
 
 # SETUP: MY FUNCTIONS --------------------------------------------------------------------
 
+
 # UV2Census
 # A function that attributes Urban Village identities to Census geometries (e.g., block groups, tracts)
 

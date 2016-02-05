@@ -213,12 +213,22 @@ server <- function(input, output){
 
                 mySet2 <- RColorBrewer::brewer.pal(n = 7, "Set2")
                 pal <- colorFactor(palette = mySet2,domain = bg_uvs@data$UV)
+                
+                outline <- bg_uvs %>% 
+                        as('SpatialLines')
 
                 myLfltShiny() %>%
-                        addPolygons(data = bg_uvs,
+                        addPolygons(group = "Block Groups",
+                                    data = bg_uvs,
+                                    smoothFactor = 0,
+                                    popup = ~UV,
                                     stroke = FALSE,
                                     fillColor = ~pal(bg_uvs@data$UV), fillOpacity = .75) %>%
-                        addLegend(title = "Block Groups by Urban Village",position = "topright",pal = pal, values = unique(bg_uvs@data$UV))
+                        addPolylines(group = "Block Group Boundaries",
+                                    data = bg_uvs,
+                                    color = col2hex("white"), weight = 2.5, opacity = .75) %>% 
+                        addLegend(title = "Block Groups by Urban Village",position = "topright",pal = pal, values = unique(bg_uvs@data$UV)) %>% 
+                        addLayersControl(overlayGroups = c("Block Groups","Block Group Boundaries"),options = layersControlOptions(collapsed = FALSE))
         }
 
         # map6 <- {

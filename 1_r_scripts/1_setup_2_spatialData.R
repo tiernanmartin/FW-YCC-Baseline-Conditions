@@ -193,13 +193,62 @@ seaUvs <- {
                 seaUvs %>% 
                 as('SpatialLines') 
         
-        seaUvs_ycc <<- seaUvs[grepl("China*|Pioneer*|First*|12th*|23rd*|Pike|Capitol|Madison",seaUvs@data$UV_NAME),]
-        
-        seaUvs_ycc_outline <<- 
-                seaUvs_ycc %>% 
-                as('SpatialLines')
-        
         seaUvs
+        
+        
+}
+
+seaUvs_ycc <- {
+        
+        
+        make_seaUvs_ycc <- function(){
+                
+                seaUvs_ycc <- 
+                        seaUvs[grepl("China*|Pioneer*|First*|12th*|23rd*|Pike|Capitol|Madison",seaUvs@data$UV_NAME),]
+                
+                if(file.exists("./2_inputs/seaUvs_ycc.shp")){
+                        writeOGR(obj = seaUvs_ycc,
+                                 dsn = "./2_inputs/",
+                                 layer = "seaUvs_ycc",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                }  
+                
+                return(seaUvs_ycc)
+                
+        }
+        
+        seaUvs_ycc <- make_seaUvs_ycc()
+        
+        rm(make_seaUvs_ycc)
+        
+        seaUvs_ycc
+        
+        
+}
+
+seaUvs_ycc_rev <- {
+        
+        make_seaUvs_ycc_rev <- function(){
+                
+                
+                seaUvs_ycc_rev <-
+                        readOGR(dsn = "./2_inputs/",layer = "seaUvs_ycc_rev") %>% 
+                        spTransform(CRSobj = crs_proj) %>% 
+                        .[,1:13]
+                
+                if(!file.exists("./2_inputs/seaUvs_ycc_rev.shp")){
+                        writeOGR(obj = seaUvs_ycc_rev,dsn = "./2_inputs/",layer = "seaUvs_ycc_rev",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                }
+                
+                return(seaUvs_ycc_rev)
+        }
+        
+        seaUvs_ycc_rev <- make_seaUvs_ycc_rev()
+        
+        rm(make_seaUvs_ycc_rev)
+        
+        seaUvs_ycc_rev
         
         
 }
@@ -601,6 +650,109 @@ blk_uvs <- {
         
         
         
+}
+
+tract_ycc <- {
+        make_tract_ycc <- function(){
+
+                if(!file.exists("./2_inputs/tract_ycc.shp")){
+                        
+                        TRACTCE_ycc <- 
+                                c("007900", "008600", "007401", "007500", "008300", "008400", 
+                                  "008500", "008700", "008800", "009000", "009100", "007600", 
+                                  "007402", "009200")
+                        
+                        tract_ycc <- 
+                                tract_sea[tract_sea@data$TRACTCE %in% TRACTCE_ycc,]
+                        
+                        writeOGR(obj = tract_ycc,
+                                 dsn = "./2_inputs/",
+                                 layer = "tract_ycc",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                }
+                
+                readOGR(dsn = "./2_inputs/",layer = "tract_ycc") %>% 
+                        spTransform(CRSobj = crs_proj)
+        }
+        
+        tract_ycc <- make_tract_ycc()
+        
+        rm(make_tract_ycc)
+        
+        tract_ycc
+        
+}
+        
+bg_ycc <- {
+        
+        make_bg_ycc <- function(){
+                
+                bg_ids <- 
+                        c("530330079005","530330074014","530330084001","530330084003",
+                          "530330079001","530330079004","530330074021","530330088001",
+                          "530330075001","530330074012","530330065003","530330065002",
+                          "530330088003","530330085002","530330085003","530330086003",
+                          "530330087003","530330088002","530330085001","530330089003",
+                          "530330090001","530330091001","530330091002","530330092001",
+                          "530330092002","530330082002","530330082003","530330083001",
+                          "530330083002","530330074011","530330074013","530330075002",
+                          "530330075003","530330075004","530330075005","530330076001",
+                          "530330076002","530330076003","530330077003","530330077004",
+                          "530330086001","530330090002","530330086002","530330074023",
+                          "530330074022","530330084002","530330079002","530330087002",
+                          "530330087001","530330079003")
+                
+                df <- 
+                        bg_uvs@data[bg_uvs@data$GEOID %in% bg_ids,c("GEOID","UV")]
+                
+                bg_ycc <- 
+                        bg_sea[bg_sea@data$GEOID %in% bg_ids,]
+                
+                bg_ycc <- 
+                        geo_join(spatial_data = bg_ycc,
+                                 data_frame = df,
+                                 by_sp = "GEOID",
+                                 by_df = "GEOID")
+                
+                # Change the UV for the block groups who housing unit count UV was "unintuitive"
+                
+                bg_ycc@data[bg_ycc@data$GEOID %in% c("530330079003",
+                                                     "530330079002",
+                                                     "530330079001"),"UV"] <- "23rd & Union-Jackson"
+                
+               
+                
+                bg_ycc
+          
+        }
+        
+        bg_ycc <- make_bg_ycc()
+        
+        rm(make_bg_ycc)
+        
+        view_bg_ycc <- function(){
+                
+                popup <- paste0("GEOID: ",bg_ycc@data$GEOID, "<br>",
+                                "Urban Village: ", bg_ycc@data$UV)
+                pal <- colorFactor(palette = "Set2",domain = bg_ycc@data$UV)
+                
+                myLfltShiny() %>% 
+                        addPolygons(data = bg_ycc,
+                                    popup = popup,
+                                    color = "white", opacity = 1, weight = 1.5,
+                                    fillColor = ~pal(bg_ycc@data$UV), fillOpacity = .75) %>% 
+                        addLegend(title = "Block Groups (by Urban Village)",
+                                  position = c("topright"),pal = pal, values = unique(bg_ycc@data$UV))
+        }
+        
+        
+        view_bg_ycc() %>% 
+        htmlwidgets::saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_bg_ycc.html")
+        
+        
+        bg_ycc
+
 }
 
 
