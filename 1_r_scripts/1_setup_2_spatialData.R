@@ -585,51 +585,6 @@ source("./1_r_scripts/1_setup_uv2CensusDiff.R",echo = TRUE)
 # and either housing units or population can be used as the determining variable.
 # see '1_setup_1_functions.R' for the details of this function. 
 
-tract_uvs <- {
-        
-        if(!file.exists("./2_inputs/tract_uvs.shp")){
-                make_tract_uvs <- function(){
-                        tract_uvs <- UV2Census()
-                        writeOGR(obj = tract_uvs,
-                                 dsn = "./2_inputs/",
-                                 layer = "tract_uvs",
-                                 driver = "ESRI Shapefile",
-                                 overwrite_layer = TRUE)
-                }
-                
-                make_tract_uvs()
-                
-                rm(make_tract_uvs)
-                
-        }
-        
-        tract_uvs <- readOGR(dsn = "./2_inputs/",layer = "tract_uvs") %>% 
-                spTransform(CRSobj = crs_proj)
-        
-}
-
-bg_uvs <- {
-        
-        if(!file.exists("./2_inputs/bg_uvs.shp")){
-                make_bg_uvs <- function(){
-                        bg_uvs <- UV2Census(tract = FALSE)
-                        writeOGR(obj = bg_uvs,
-                                 dsn = "./2_inputs/",
-                                 layer = "bg_uvs",
-                                 driver = "ESRI Shapefile",
-                                 overwrite_layer = TRUE)
-                }
-                
-                make_bg_uvs()
-                
-                rm(make_bg_uvs)
-                        
-        }
-        
-        bg_uvs <- readOGR(dsn = "./2_inputs/",layer = "bg_uvs") %>% 
-                spTransform(CRSobj = crs_proj)
-}
-
 # Join the Urban Village data with the census block polygons
 
 blk_uvs <- {
@@ -675,7 +630,210 @@ blk_uvs <- {
         
 }
 
-# (Somewhat) arbitrary census-UV attribution
+# Determine Urban Villages for Census Tracts and Block Groups (based on housing unit count)
+
+tract_uvs <- {
+        
+        if(!file.exists("./2_inputs/tract_uvs.shp")){
+                make_tract_uvs <- function(){
+                        tract_uvs <- UV2Census()
+                        writeOGR(obj = tract_uvs,
+                                 dsn = "./2_inputs/",
+                                 layer = "tract_uvs",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                }
+                
+                make_tract_uvs()
+                
+                rm(make_tract_uvs)
+                
+        }
+        
+        tract_uvs <- readOGR(dsn = "./2_inputs/",layer = "tract_uvs") %>% 
+                spTransform(CRSobj = crs_proj)
+        
+        view_tract_uvs <- function(){
+                popup <- paste0("TRACT: ",tract_uvs@data$TRACTCE,"<br>",
+                                "Urban Village: ", tract_uvs@data$UV)
+                
+                pal <- colorFactor(palette = "Set2",domain = tract_uvs@data$UV)
+                
+                myLfltShiny() %>% 
+                        addPolygons(data = tract_uvs,
+                                    popup = popup,
+                                    color = "white", opacity = 1, weight = 1.5,
+                                    fillColor = ~pal(tract_uvs@data$UV), fillOpacity = .75) %>% 
+                        addLegend(title = "Tracts (by Urban Village)",
+                                  position = c("topright"),pal = pal, values = unique(tract_uvs@data$UV))
+                
+        }
+        
+        tract_uvs
+        
+        
+        
+}
+
+bg_uvs <- {
+        
+        if(!file.exists("./2_inputs/bg_uvs.shp")){
+                make_bg_uvs <- function(){
+                        bg_uvs <- UV2Census(tract = FALSE)
+                        writeOGR(obj = bg_uvs,
+                                 dsn = "./2_inputs/",
+                                 layer = "bg_uvs",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                }
+                
+                make_bg_uvs()
+                
+                rm(make_bg_uvs)
+                        
+        }
+        
+        bg_uvs <- readOGR(dsn = "./2_inputs/",layer = "bg_uvs") %>% 
+                spTransform(CRSobj = crs_proj)
+}
+
+# YCC: Tracts and Block Groups with UV by HU count
+
+
+tract_ycc_hu <- {
+        make_tract_ycc_hu <- function(){
+                
+                if(!file.exists("./2_inputs/tract_ycc_hu.shp")){
+                        
+                        tract_ids <- 
+                                c("007900", "008600", "007401", "007500", "008300", "008400", 
+                                  "008500", "008700", "008800", "009000", "009100", "007600", 
+                                  "007402", "009200")
+                        
+                        df <- 
+                                tract_uvs@data[tract_uvs@data$TRACTCE %in% tract_ids,c("TRACTCE","UV")]
+                        
+                        tract_ycc_hu <- 
+                                tract_sea[tract_sea@data$TRACTCE %in% tract_ids,] %>% 
+                                geo_join(data_frame = df,
+                                         by_sp = "TRACTCE",
+                                         by_df = "TRACTCE")
+                        
+                        writeOGR(obj = tract_ycc_hu,
+                                 dsn = "./2_inputs/",
+                                 layer = "tract_ycc_hu",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                }
+                
+                readOGR(dsn = "./2_inputs/",layer = "tract_ycc_hu") %>% 
+                        spTransform(CRSobj = crs_proj)
+        }
+        
+        tract_ycc_hu <- make_tract_ycc_hu()
+        
+        rm(make_tract_ycc_hu)
+        
+        view_tract_ycc_hu <- function(){
+                
+                popup <- paste0("TRACT: ",tract_ycc_hu@data$TRACTCE, "<br>",
+                                "Urban Village: ", tract_ycc_hu@data$UV)
+                pal <- colorFactor(palette = "Set2",domain = tract_ycc_hu@data$UV)
+                
+                myLfltShiny() %>% 
+                        addPolygons(data = tract_ycc_hu,
+                                    popup = popup,
+                                    color = "white", opacity = 1, weight = 1.5,
+                                    fillColor = ~pal(tract_ycc_hu@data$UV), fillOpacity = .75) %>% 
+                        addLegend(title = "OPTION A: HOUSING UNIT COUNT<br>YCC Tracts (by Urban Village)",
+                                  position = c("topright"),pal = pal, values = unique(tract_ycc_hu@data$UV))
+        }
+        
+        
+        # view_tract_ycc_hu() %>%
+        #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_tract_ycc_hu.html")
+        
+        
+        tract_ycc_hu
+        
+}
+
+bg_ycc_hu <- {
+        
+        make_bg_ycc_hu <- function(){
+                
+                bg_ids <- 
+                        c("530330079005","530330074014","530330084001","530330084003",
+                          "530330079001","530330079004","530330074021","530330088001",
+                          "530330075001","530330074012","530330065003","530330065002",
+                          "530330088003","530330085002","530330085003","530330086003",
+                          "530330087003","530330088002","530330085001","530330089003",
+                          "530330090001","530330091001","530330091002","530330092001",
+                          "530330092002","530330082002","530330082003","530330083001",
+                          "530330083002","530330074011","530330074013","530330075002",
+                          "530330075003","530330075004","530330075005","530330076001",
+                          "530330076002","530330076003","530330077003","530330077004",
+                          "530330086001","530330090002","530330086002","530330074023",
+                          "530330074022","530330084002","530330079002","530330087002",
+                          "530330087001","530330079003")
+                
+                df <- 
+                        bg_uvs@data[bg_uvs@data$GEOID %in% bg_ids,c("GEOID","UV")]
+                
+                bg_ycc_hu <- 
+                        bg_sea[bg_sea@data$GEOID %in% bg_ids,]
+                
+                bg_ycc_hu <- 
+                        geo_join(spatial_data = bg_ycc_hu,
+                                 data_frame = df,
+                                 by_sp = "GEOID",
+                                 by_df = "GEOID")
+                
+                # Change the UV for the block groups who housing unit count UV was "unintuitive"
+                
+                bg_ycc_hu@data[bg_ycc_hu@data$GEOID %in% c("530330079003",
+                                                     "530330079002",
+                                                     "530330079001"),"UV"] <- "23rd & Union-Jackson"
+                
+                
+                
+                bg_ycc_hu
+                
+        }
+        
+        bg_ycc_hu <- make_bg_ycc_hu()
+        
+        rm(make_bg_ycc_hu)
+        
+        view_bg_ycc_hu <- function(){
+                
+                popup <- paste0("GEOID: ",bg_ycc_hu@data$GEOID, "<br>",
+                                "Urban Village: ", bg_ycc_hu@data$UV)
+                pal <- colorFactor(palette = "Set2",domain = bg_ycc_hu@data$UV)
+                
+                myLfltShiny() %>% 
+                        addPolygons(data = bg_ycc_hu,
+                                    popup = popup,
+                                    color = "white", opacity = 1, weight = 1.5,
+                                    fillColor = ~pal(bg_ycc_hu@data$UV), fillOpacity = .75) %>% 
+                        addLegend(title = "OPTION A: HOUSING UNIT COUNT<br>YCC Block Groups (by Urban Village)",
+                                  position = c("topright"),pal = pal, values = unique(bg_ycc_hu@data$UV))
+        }
+        
+        # view_bg_ycc_hu %>% 
+        #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_bg_ycc_hu.html")
+        
+        bg_ycc_hu
+        
+}
+
+
+
+# YCC: Tracts and Block Groups by (somewhat) arbitrary attribution
+
+
+
+
 
 tract_ycc <- {
         make_tract_ycc <- function(){
@@ -695,6 +853,9 @@ tract_ycc <- {
                                 geo_join(data_frame = df,
                                          by_sp = "TRACTCE",
                                          by_df = "TRACTCE")
+                        
+                        
+                        tract_ycc@data[tract_ycc@data$TRACTCE %in% c("007900"),"UV"] <- "23rd & Union-Jackson"
                         
                         
                         writeOGR(obj = tract_ycc,
@@ -723,14 +884,14 @@ tract_ycc <- {
                                     popup = popup,
                                     color = "white", opacity = 1, weight = 1.5,
                                     fillColor = ~pal(tract_ycc@data$UV), fillOpacity = .75) %>% 
-                        addLegend(title = "Tracts (by Urban Village)",
+                        addLegend(title = "OPTION B: ARBITRARY<br>Tracts (by Urban Village)",
                                   position = c("topright"),pal = pal, values = unique(tract_ycc@data$UV))
         }
         
         
-        # view_tract_ycc() %>% 
-        #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_tract_ycc.html")
-        # 
+        view_tract_ycc() %>%
+                saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_tract_ycc.html")
+
         
         tract_ycc
         
@@ -794,7 +955,7 @@ bg_ycc <- {
                                     popup = popup,
                                     color = "white", opacity = 1, weight = 1.5,
                                     fillColor = ~pal(bg_ycc@data$UV), fillOpacity = .75) %>% 
-                        addLegend(title = "Block Groups (by Urban Village)",
+                        addLegend(title = "OPTION B: ARBITRARY<br>Block Groups (by Urban Village)",
                                   position = c("topright"),pal = pal, values = unique(bg_ycc@data$UV))
         }
         
