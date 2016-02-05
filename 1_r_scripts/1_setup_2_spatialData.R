@@ -585,6 +585,29 @@ source("./1_r_scripts/1_setup_uv2CensusDiff.R",echo = TRUE)
 # and either housing units or population can be used as the determining variable.
 # see '1_setup_1_functions.R' for the details of this function. 
 
+tract_uvs <- {
+        
+        if(!file.exists("./2_inputs/tract_uvs.shp")){
+                make_tract_uvs <- function(){
+                        tract_uvs <- UV2Census()
+                        writeOGR(obj = tract_uvs,
+                                 dsn = "./2_inputs/",
+                                 layer = "tract_uvs",
+                                 driver = "ESRI Shapefile",
+                                 overwrite_layer = TRUE)
+                }
+                
+                make_tract_uvs()
+                
+                rm(make_tract_uvs)
+                
+        }
+        
+        tract_uvs <- readOGR(dsn = "./2_inputs/",layer = "tract_uvs") %>% 
+                spTransform(CRSobj = crs_proj)
+        
+}
+
 bg_uvs <- {
         
         if(!file.exists("./2_inputs/bg_uvs.shp")){
@@ -652,18 +675,27 @@ blk_uvs <- {
         
 }
 
+# (Somewhat) arbitrary census-UV attribution
+
 tract_ycc <- {
         make_tract_ycc <- function(){
 
                 if(!file.exists("./2_inputs/tract_ycc.shp")){
                         
-                        TRACTCE_ycc <- 
+                        tract_ids <- 
                                 c("007900", "008600", "007401", "007500", "008300", "008400", 
                                   "008500", "008700", "008800", "009000", "009100", "007600", 
                                   "007402", "009200")
                         
+                        df <- 
+                                tract_uvs@data[tract_uvs@data$TRACTCE %in% tract_ids,c("TRACTCE","UV")]
+                        
                         tract_ycc <- 
-                                tract_sea[tract_sea@data$TRACTCE %in% TRACTCE_ycc,]
+                                tract_sea[tract_sea@data$TRACTCE %in% tract_ids,] %>% 
+                                geo_join(data_frame = df,
+                                         by_sp = "TRACTCE",
+                                         by_df = "TRACTCE")
+                        
                         
                         writeOGR(obj = tract_ycc,
                                  dsn = "./2_inputs/",
@@ -679,6 +711,26 @@ tract_ycc <- {
         tract_ycc <- make_tract_ycc()
         
         rm(make_tract_ycc)
+        
+        view_tract_ycc <- function(){
+                
+                popup <- paste0("TRACT: ",tract_ycc@data$TRACTCE, "<br>",
+                                "Urban Village: ", tract_ycc@data$UV)
+                pal <- colorFactor(palette = "Set2",domain = tract_ycc@data$UV)
+                
+                myLfltShiny() %>% 
+                        addPolygons(data = tract_ycc,
+                                    popup = popup,
+                                    color = "white", opacity = 1, weight = 1.5,
+                                    fillColor = ~pal(tract_ycc@data$UV), fillOpacity = .75) %>% 
+                        addLegend(title = "Tracts (by Urban Village)",
+                                  position = c("topright"),pal = pal, values = unique(tract_ycc@data$UV))
+        }
+        
+        
+        # view_tract_ycc() %>% 
+        #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_tract_ycc.html")
+        # 
         
         tract_ycc
         
@@ -746,10 +798,8 @@ bg_ycc <- {
                                   position = c("topright"),pal = pal, values = unique(bg_ycc@data$UV))
         }
         
-        
-        view_bg_ycc() %>% 
-        htmlwidgets::saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_bg_ycc.html")
-        
+        # view_bg_ycc %>% 
+        #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_bg_ycc.html")
         
         bg_ycc
 
