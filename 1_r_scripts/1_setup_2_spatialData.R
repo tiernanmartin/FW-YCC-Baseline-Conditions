@@ -248,6 +248,23 @@ seaUvs_ycc_rev <- {
         
         rm(make_seaUvs_ycc_rev)
         
+        view_seaUvs_ycc_rev <- function(){
+                
+                popup <- paste0("Urban Village: ", seaUvs_ycc_rev@data$UV_NAME)
+                pal <- colorFactor(palette = "Set2",domain = seaUvs_ycc_rev@data$UV_NAME)
+                
+                myLfltShiny() %>% 
+                        addPolygons(data = seaUvs_ycc_rev,
+                                    popup = popup,
+                                    color = "white", opacity = 1, weight = 1.5,
+                                    fillColor = ~pal(seaUvs_ycc_rev@data$UV_NAME), fillOpacity = .75) %>% 
+                        addLegend(title = "Urban Village Boundaries<br>(slightly modified)",
+                                  position = c("topright"),pal = pal, values = unique(seaUvs_ycc_rev@data$UV_NAME))
+        }
+        
+        # view_seaUvs_ycc_rev() %>%
+        #         saveWidget(file = "~/Documents/FW/YCC/FW-YCC-Baseline-Conditions/4_webcontent/html/lflt_seaUvs_ycc_rev.html")
+
         seaUvs_ycc_rev
         
         
@@ -257,48 +274,6 @@ seaAcsUvs <- {
         readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
                 mutate(TRACT_10 = str_pad(TRACT_10,width = 6, pad = "0"))
         }
-
-# Note: these boundaries are editted versions of the Seattle Urban Village bounaries,
-# which can be downloaded here: https://data.seattle.gov/download/ugw3-tp9e/application/zip
-
-seaUVs_CAC <- {
-        
-        make_seaUVs_CAC <- function(){
-                if(!file.exists("./2_inputs/seaUVs_CAC.shp")){
-                        shp <- readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
-                                spTransform(CRSobj = crs_proj) %>% 
-                                .[order(.@data$UV_NAME),]
-                        
-                        shp@data %<>%
-                                cbind(myNhoods_geo[order(myNhoods_geo$NHOOD.FULL),]) %>% 
-                                select(NHOOD.FULL,NHOOD.ABBR,everything())
-                        
-                        writeOGR(obj = shp,dsn = "./2_inputs/",
-                                 layer = "seaUVs_CAC",
-                                 driver = "ESRI Shapefile",
-                                 overwrite_layer = TRUE)
-                        
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>% 
-                        spTransform(CRSobj = crs_proj)
-        }
-        
-        seaUVs_CAC <- make_seaUVs_CAC()
-        
-        rm(make_seaUVs_CAC)
-        
-        seaUVs_CAC
-        
-        
-        
-}
-
-seaUVs_CAC_outline <- 
-        seaUVs_CAC %>% 
-        as('SpatialLines') 
-
-
 
 # SPATIAL DATA: CENSUS TRACTS, BLOCK GROUPS, BLOCKS -----------------------------------------------
 
@@ -348,56 +323,6 @@ tract_sea <- {
         
         tract_sea
 }
-
-tract_CAC <- {
-        
-        make_tract_CAC <- function(){
-                
-                if(!file.exists("./2_inputs/tracts.shp")){
-                        tracts_orig <- 
-                                tigris::tracts(state = "WA", county = "King") %>% 
-                                spTransform(CRSobj = crs_proj)
-                        
-                        wtr_clip(orig = tracts_orig,wtr = waterbodies) %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "tracts",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                
-                if(!file.exists("./2_inputs/tracts_CAC.shp")){
-                        
-                        seaTrts <- 
-                                readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
-                                mutate(TRACT_10new = str_pad(TRACT_10,width = 6, pad = "0")) %>% 
-                                select(TRACT_10 = TRACT_10new) %>% 
-                                unique() %>% 
-                                unlist()
-                        
-                        
-                        tracts <- 
-                                readOGR(dsn = "./2_inputs/",layer = "tracts") %>% 
-                                spTransform(CRSobj = crs_proj) %>% 
-                                .[.[["TRACTCE"]] %in% seaTrts,]
-                        
-                                gContains(myCACbound,gCentroid(tracts, byid = TRUE),byid = TRUE) %>%
-                                which(.==1) %>% 
-                                tracts[.,] %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "tract_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "tract_CAC") %>% 
-                        spTransform(CRSobj = crs_proj)
-                
-                
-        }
-        
-        tract_CAC <- make_tract_CAC()
-        
-        rm(make_tract_CAC)
-        
-        tract_CAC
-        
-} 
-
 
 bg_sea <- {
         
@@ -449,45 +374,6 @@ bg_sea <- {
 
 }
 
-bg_CAC <- {
-        
-        make_bg_CAC <- function(){
-                
-                if(!file.exists("./2_inputs/bg.shp")){
-                        bg_orig <- 
-                                tigris::block_groups(state = "WA", county = "King") %>% 
-                                spTransform(CRSobj = crs_proj)
-                        
-                        wtr_clip(orig = bg_orig,wtr = waterbodies) %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "bg",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                
-                if(!file.exists("./2_inputs/bg_CAC.shp")){
-                        bg <- 
-                                readOGR(dsn = "./2_inputs/",layer = "bg") %>% 
-                                spTransform(CRSobj = crs_proj)
-                        
-                                bg[bg@data$TRACTCE %in% c(tract_CAC@data$TRACTCE),] %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "bg_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "bg_CAC") %>% 
-                        spTransform(CRSobj = crs_proj)
-                
-                
-        }
-        
-        bg_CAC <- make_bg_CAC()
-        
-        rm(make_bg_CAC)
-        
-        bg_CAC
-        
-} 
-
-
-
 blk_sea <- {
         
         make_blk_sea <- function(){
@@ -527,47 +413,6 @@ blk_sea <- {
         blk_sea
         
 }
-
-blk_CAC <- {
-        
-        make_blk_CAC <- function(){
-                
-                if(!file.exists("./2_inputs/blk.shp")){
-                        
-                        
-                        blk_sea <- 
-                                tigris::blocks(state = "WA", county = "King") %>% 
-                                spTransform(CRSobj = crs_proj) %>% 
-                                .[.@data$TRACTCE10 %in% seaAcsUvs$TRACT_10,]
-                        
-                        # NOTE: this step takes a long time!
-                        wtr_clip(orig = blk_sea,wtr = waterbodies) %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "blk_sea",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                
-                if(!file.exists("./2_inputs/blk_CAC.shp")){
-                        blk <- 
-                                readOGR(dsn = "./2_inputs/",layer = "blk") %>% 
-                                spTransform(CRSobj = crs_proj)
-                        
-                        blk[blk@data$TRACTCE %in% c(tract_CAC@data$TRACTCE),] %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "blk_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "blk_CAC") %>% 
-                        spTransform(CRSobj = crs_proj)
-                
-                
-        }
-        
-        blk_CAC <- make_blk_CAC()
-        
-        rm(make_blk_CAC)
-        
-        blk_CAC
-        
-} 
 
 # -------------------------------------------------------------------------------------------------
 
@@ -695,6 +540,23 @@ bg_uvs <- {
         
         bg_uvs <- readOGR(dsn = "./2_inputs/",layer = "bg_uvs") %>% 
                 spTransform(CRSobj = crs_proj)
+        
+        view_bg_uvs <- function(){
+                popup <- paste0("GEOID: ",bg_uvs@data$GEOID,"<br>",
+                                "Urban Village: ", bg_uvs@data$UV)
+                
+                pal <- colorFactor(palette = "Set2",domain = bg_uvs@data$UV)
+                
+                myLfltShiny() %>% 
+                        addPolygons(data = bg_uvs,
+                                    popup = popup,
+                                    color = "white", opacity = 1, weight = 1.5,
+                                    fillColor = ~pal(bg_uvs@data$UV), fillOpacity = .75) %>% 
+                        addLegend(title = "Tracts (by Urban Village)",
+                                  position = c("topright"),pal = pal, values = unique(bg_uvs@data$UV))
+                
+        }
+        
 }
 
 # YCC: Tracts and Block Groups with UV by HU count
@@ -937,547 +799,713 @@ bg_ycc_arb <- {
 # -------------------------------------------------------------------------------------------------
 
 # ARCHIVE -----------------------------------------------------------------------------------------
-
-# Select tracts where the majority of the population lives within the CAC bound and map the result
-
-tract_pop <- {
-        
-        make_tract_pop <- function(){
-                
-                if(!file.exists("./2_inputs/tract_pop.shp")){
-                        overlap <- gCentroid(spgeom = blk_CAC, byid = TRUE) %>%
-                                .[myCACbound,] %>%
-                                blk_CAC[.,]
-                        
-                        overlap <- overlap@data$GEOID10
-                        
-                        blk_CAC@data %<>% select(TRACTCE10, GEOID10, Geography, Total) %>% # drop irrelevant variables
-                                mutate(Location = as.factor(ifelse(
-                                        GEOID10 %in% overlap,
-                                        "inside",
-                                        "outside"
-                                )))
-                        
-                        include <-
-                                blk_CAC@data %>%
-                                group_by(TRACTCE10, Location) %>%
-                                summarise(Count = sum(Total)) %>%
-                                spread(Location, Count) %>%
-                                replace(is.na(.), 0) %>%
-                                filter(inside > outside) %>%
-                                select(TRACTCE10) %>%
-                                unlist()
-                        
-                        tract_pop <- tract_CAC[tract_CAC@data$TRACTCE %in% include, ] %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "tract_pop",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "tract_pop") %>% 
-                        spTransform(CRSobj = crs_proj)
-        }
-        
-        tract_pop <- make_tract_pop()
-        
-        rm(make_tract_pop)
-        
-        tract_pop
-        
-}
-
-myLflt_TractPopTest <- function(){
-        
-        legend_layers <- factor(c("CAC boundary","blocks","tracts"),
-                                levels = c("CAC boundary","blocks","tracts"), ordered = T)
-        
-        pal_r <- colorNumeric(palette = "Reds",
-                              domain = 0:sd(blk_CAC$Total))
-        
-        pal_b <- colorNumeric(palette = "Blues",
-                              domain = 0:sd(blk_CAC$Total))
-        
-        popup_text <- paste0(tract_CAC@data$NAMELSAD,"<br>","GEOID: ",tract_CAC@data$GEOID)
-        
-        tract_blk_in <- blk_CAC[blk_CAC@data$TRACTCE %in% tract_pop@data$TRACTCE,]
-        
-        tract_blk_out <- blk_CAC[blk_CAC@data$TRACTCE %!in% tract_pop@data$TRACTCE,]
-        
-        leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(data = tract_blk_in,
-                            fillColor = ~pal_r(Total), fillOpacity = .75,
-                            stroke = FALSE,
-                            group = legend_layers[2]) %>% 
-                addPolygons(data = tract_blk_out,
-                            fillColor = ~pal_b(Total), fillOpacity = .75,
-                            stroke = FALSE,
-                            group = legend_layers[2]) %>% 
-                addPolygons(data = myCACbound,
-                            fillOpacity = 0,
-                            weight = 3,
-                            color = "#ff9900",
-                            dashArray = "5, 5",
-                            opacity = 1,
-                            group = legend_layers[1]) %>% 
-                addPolygons(data = tract_CAC,
-                            fillOpacity = 0,
-                            weight = 1, color = "black", opacity = 1,
-                            popup = popup_text,
-                            group = legend_layers[3]) %>% 
-                addLayersControl(overlayGroups = c("CAC boundary","blocks","tracts"),
-                                 options = layersControlOptions(collapsed = FALSE))
-        
-}
-
-# myLflt_TractPopTest()
-
-# Revise the tract selection to include Tract 79 (Capitol Hill)
-
-tract_rev <- {
-        
-        make_tract_rev <- function(){
-                if(!file.exists("./2_inputs/tract_rev.shp")){
-                        
-                        CapHill <- "007900" # save the Tract ID for Tract 79
-                        
-                        new_include <- c(tract_pop@data$TRACTCE,CapHill) 
-                        
-                        tract_CAC[tract_CAC@data$TRACTCE %in% new_include,] %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "tract_rev",driver = "ESRI Shapefile")
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "tract_rev") %>% 
-                        spTransform(CRSobj = crs_proj)
-        }
-        
-        tract_rev <- make_tract_rev()
-        
-        rm(make_tract_rev)
-        
-        tract_rev
-        
-        
-}
-
-bg_rev <- {
-        
-        make_bg_rev <- function(){
-                
-                if(!file.exists("./2_inputs/bg_rev.shp")){
-                        
-                        CapHill <- "007900" # save the Tract ID for Tract 79
-                        
-                        new_include <- c(tract_pop@data$TRACTCE,CapHill) 
-                        
-                        bg_rev <- bg_CAC[bg_CAC@data$TRACTCE %in% new_include,] 
-                        
-                        writeOGR(obj = bg_rev,dsn = "./2_inputs/",layer = "bg_rev",driver = "ESRI Shapefile",overwrite_layer = TRUE)
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "bg_rev") %>% 
-                        spTransform(CRSobj = crs_proj)
-        }
-        
-        bg_rev <- make_bg_rev()
-        
-        rm(make_bg_rev)
-        
-        bg_rev
-        
-}
-
-blk_rev <- {
-        
-        make_blk_rev <- function(){
-                if(!file.exists("./2_inputs/blk_rev.shp")){
-                        
-                        CapHill <- "007900" # save the Tract ID for Tract 79
-                        
-                        new_include <- c(tract_pop@data$TRACTCE,CapHill) 
-                        
-                        blk_CAC_noWtrbds[blk_CAC_noWtrbds@data$TRACTCE %in% new_include,] %>% 
-                                writeOGR(dsn = "./2_inputs/",layer = "blk_rev",driver = "ESRI Shapefile",
-                                         overwrite_layer = TRUE)
-                }
-                
-                readOGR(dsn = "./2_inputs/",layer = "blk_rev") %>% 
-                        spTransform(CRSobj = crs_proj)
-        }
-        
-        
-        blk_rev <- make_blk_rev()
-        
-        rm(make_blk_rev)
-        
-        blk_rev
-        
-        
-}
-
-# Shows the census spatial boundaries for the CAC study area
-
-myLflt_censusSel <- function(){
-        
-        
-        leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(data = blk_rev,
-                            fillColor = col2hex("darkblue"),fillOpacity = .33,
-                            color = col2hex("white"), weight = 1, opacity = .5,
-                            group = "1. Blocks") %>% 
-                addPolygons(data = bg_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 3, opacity = .75,dashArray = "5, 10",
-                            group = "2. Block Groups") %>% 
-                addPolygons(data = tract_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 5, opacity = .9,
-                            group = "3. Tracts") %>% 
-                addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
-                                 options = layersControlOptions(collapsed = FALSE))
-}
-
-# myLflt_censusSel()
-
-# Shows the population density by block in the CAC study area
-
-myLflt_blockPop <- function(){
-        
-        pal <- colorNumeric(palette = "Blues",domain = 0:sd(blk_rev@data$Total))
-        
-        leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(data = blk_rev,
-                            fillColor = ~pal(Total),fillOpacity = .5,
-                            color = col2hex("white"), weight = 1, opacity = .5,
-                            group = "1. Blocks") %>% 
-                addPolygons(data = bg_rev,
-                            fill = FALSE,
-                            color = col2hex("gray50"), weight = 3, opacity = .75,dashArray = "3, 6",
-                            group = "2. Block Groups") %>% 
-                addPolygons(data = tract_rev,
-                            fill = FALSE,
-                            color = col2hex("gray25"), weight = 5, opacity = .9,
-                            group = "3. Tracts") %>% 
-                addPolygons(data = myCACbound,
-                            fillOpacity = 0,
-                            weight = 3,
-                            color = "#ff9900",
-                            dashArray = "5, 5",
-                            opacity = 1,
-                            group = "4. CAC Boundary") %>% 
-                addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts", "4. CAC Boundary"),
-                                 options = layersControlOptions(collapsed = FALSE))
-}
-
-# myLflt_blockPop()
-
-# SPATIAL DATA: SCALES OF ANALYSIS 
-
-# Neighborhood names at the different Census geographies
-
-myNhoods_tract <- data.frame(
-        "NHOOD.FULL" = c("Pioneer Square", 
-                    "Chinatown-International District, Yesler Terrace & Little Saigon",
-                    "Central District", "First Hill", "12 Ave & Capitol Hill"),
-        "NHOOD.ABBR" = c("PS","CIDYTLS","CD","FH","12AV"))
-
-myNhoods_bg <- data.frame(
-        "NHOOD.FULL" = c("Pioneer Square", 
-                        "Chinatown-International District","Yesler Terrace & Little Saigon",
-                        "Central District", "First Hill", "12 Ave & Capitol Hill"),
-        "NHOOD.ABBR" = c("PS","CID","YTLS","CD","FH","12AV"))
-
-myNhoods_geo <- data.frame(
-        "NHOOD.FULL" = c("Pioneer Square", "Chinatown-International District",
-                         "Yesler Terrace", "Little Saigon", 
-                         "Central District","First Hill", "12 Ave & Capitol Hill"),
-        "NHOOD.ABBR" = c("PS","CID","YT","LS","CD","FH","12AV"))
-
-
-tract_rev <- {
-        
-        make_tract_rev <- function(){
-                
-                tract_rev <-  
-                        tract_rev@data %>% 
-                        as.data.frame() %>%
-                        mutate(NHOOD.FULL = ifelse(
-                                NAME %in% "92",
-                                myNhoods_tract[1, 1],
-                                ifelse(
-                                        NAME %in% "91",
-                                        myNhoods_tract[2, 1],
-                                        ifelse(
-                                                NAME %in% c("90", "87", "79"),
-                                                myNhoods_tract[3, 1],
-                                                ifelse(
-                                                        NAME %in% "85",
-                                                        myNhoods_tract[4, 1],
-                                                        ifelse(NAME %in% "86",
-                                                               myNhoods_tract[5, 1],
-                                                               NA)
-                                                )
-                                        )
-                                )
-                        )) %>% 
-                        left_join(y = myNhoods_tract) %>% 
-                        select(GEOID,NHOOD.FULL,NHOOD.ABBR) %>% 
-                        myGeoJoin(spatial_data = tract_rev,data_frame = .,by_sp = "GEOID", by_df = "GEOID")
-        }
-        
-        tract_rev <- make_tract_rev()
-        
-        rm(make_tract_rev)
-        
-        tract_rev
-        
-}
-
-myLflt_tractRevTest <- function(){
-        
-        popup_text <- paste0(tract_rev@data$NHOOD.FULL)
-        
-        myLflt_blockPop() %>% 
-                addPolygons(data = tract_rev,
-                            fillOpacity = 0,
-                            stroke = FALSE,
-                            popup = popup_text)
-                
-} # Map with block pop. density, nhood boundaries, and popups 
-
-# myLflt_tractRevTest()
-
-myLflt_nhoodTract <- function(){
-        
-        pal <- colorFactor(palette = "Set3",
-                           domain = tract_rev@data$NHOOD.FULL)
-        
-        leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(data = tract_rev,
-                            fillColor = ~pal(NHOOD.FULL), fillOpacity = .8,
-                            color = col2hex("white"), weight = 5, opacity = .9,
-                            group = "3. Tracts") %>% 
-                addPolygons(data = blk_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 1, opacity = .5,
-                            group = "1. Blocks") %>% 
-                addPolygons(data = bg_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 3, opacity = .75,dashArray = "5, 10",
-                            group = "2. Block Groups") %>% 
-                addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
-                                 options = layersControlOptions(collapsed = FALSE)) %>% 
-                addLegend(pal = pal, 
-                          values = tract_rev@data$NHOOD.FULL, 
-                          position = "topright", 
-                          title = "Study Area Neighborhoods: Census Tracts",
-                          opacity = 1)
-} # Map with tracts colored by neighborhood
-
-# myLflt_nhoodTract()
-
-bg_rev <- {
-        
-        make_bg_rev <- function(){
-                
-                bg_rev <-
-                        bg_rev@data %>%
-                        as.data.frame() %>%
-                        mutate(NHOOD.FULL = ifelse(
-                                TRACTCE %in% "009200",
-                                myNhoods_bg[1, 1],
-                                ifelse(
-                                        GEOID %in% "530330091002",
-                                        myNhoods_bg[2, 1],
-                                        ifelse(
-                                                GEOID %in% "530330091001",
-                                                myNhoods_bg[3, 1],
-                                                ifelse(
-                                                        TRACTCE %in% c("007900", "009000", "008700"),
-                                                        myNhoods_bg[4, 1],
-                                                        ifelse(
-                                                                TRACTCE %in% "008500",
-                                                                myNhoods_bg[5, 1],
-                                                                ifelse(TRACTCE %in% "008600",
-                                                                       myNhoods_bg[6, 1],
-                                                                       NA)
-                                                        )
-                                                )
-                                        )
-                                )
-                        )) %>%
-                        left_join(y = myNhoods_bg) %>%
-                        select(GEOID, NHOOD.FULL, NHOOD.ABBR) %>%
-                        myGeoJoin(
-                                spatial_data = bg_rev,
-                                data_frame = .,
-                                by_sp = "GEOID",
-                                by_df = "GEOID"
-                        )
-        } # Eliminate interpolygonal slivers
-        
-        bg_rev <- make_bg_rev()
-        
-        rm(make_bg_rev)
-        
-        bg_rev
-        
-        
-}
-
-myLflt_bgRevTest <- function(){
-        
-        popup_text <- paste0("GEOID: ",bg_rev@data$GEOID,
-                             "<br>",bg_rev@data$NHOOD.FULL)
-        
-        myLflt_censusSel() %>% 
-                addPolygons(data = bg_rev,
-                            fillOpacity = 0,
-                            stroke = F,
-                            popup = popup_text)
-        
-}
-
-# myLflt_bgRevTest()
-
-
-bg_hood_cntrs <- {
-        
-        make_bg_hood_cntrs <- function(){
-                
-                cntr <- bg_rev %>% 
-                        raster::aggregate(by = "NHOOD.ABBR") %>% 
-                        gCentroid(byid = TRUE)
-                
-                rn <- row.names(cntr)
-                
-                df <- bg_rev@data %>% 
-                        mutate(NHOOD.ABBR = as.factor(NHOOD.ABBR)) %>% 
-                        group_by(NHOOD.ABBR) %>% 
-                        summarise(NHOOD = first(NHOOD.ABBR)) %>% 
-                        dplyr::select(NHOOD) %>% 
-                        as.data.frame()
-                
-                rownames(df) <- rn
-                
-                bg_hood_cntrs <-
-                        SpatialPointsDataFrame(coords = cntr,data = df) %>% 
-                        spTransform(CRSobj = crs_proj)
-                
-        }
-        
-        bg_hood_cntrs <- make_bg_hood_cntrs()
-        
-        rm(make_bg_hood_cntrs)
-        
-        bg_hood_cntrs
-    
-} # For labeling the neighborhoods
-
-
-myLflt_nhoodBg <- function(){
-        
-        pal <- colorFactor(palette = "Set2",
-                           domain = bg_rev@data$NHOOD.FULL)
-        
-        leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(data = bg_rev,
-                            fillColor = ~pal(NHOOD.FULL), fillOpacity = .5,
-                            color = col2hex("white"), weight = 3, opacity = .75,dashArray = "5, 10",
-                            group = "2. Block Groups") %>% 
-                addPolygons(data = tract_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 5, opacity = .9,
-                            group = "3. Tracts") %>% 
-                addPolygons(data = blk_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 1, opacity = .5,
-                            group = "1. Blocks") %>% 
-                
-                addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
-                                 options = layersControlOptions(collapsed = FALSE)) %>% 
-                addLegend(pal = pal, 
-                          values = bg_rev@data$NHOOD.FULL, 
-                          position = "topright", 
-                          title = "Study Area Neighborhoods:<br> Census Block Groups",
-                          opacity = 1)
-} # Map with block groups colored by neighborhood
-
-# myLflt_nhoodBg()
-
-# An outline of the study area neighborhoods 
-# (as defined by the census tracts associated with them in this project)
-
-nhoods_census_outline <- 
-        bg_rev %>% 
-        gUnaryUnion(id = as.factor(.@data$NHOOD.ABBR)) %>% 
-        as('SpatialLines') 
-        
-
-myLflt_nhoods <- function(){
-        pal <- colorFactor(palette = "Set2",
-                           domain = seaNhoods_CAC@data$S_HOOD)
-        
-        leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(data = seaNhoods_CAC, 
-                            fillColor = ~pal(seaNhoods_CAC@data$S_HOOD), fillOpacity = .5,
-                            stroke = F,
-                            popup = paste0(seaNhoods_CAC@data$S_HOOD)) %>% 
-                addPolygons(data = blk_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 1, opacity = .5,
-                            group = "1. Blocks") %>% 
-                addPolygons(data = bg_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 3, opacity = .75,dashArray = "3, 6",
-                            group = "2. Block Groups") %>% 
-                addPolygons(data = tract_rev,
-                            fill = FALSE,
-                            color = col2hex("white"), weight = 5, opacity = .9,
-                            group = "3. Tracts") %>% 
-                addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
-                                 options = layersControlOptions(collapsed = FALSE))
-        
-        
-}
-
-# myLflt_nhoods()
-
-
-myLflt_uvs <- function(){
-        pal <- colorFactor(palette = "Set2",
-                           domain = seaUVs_CAC@data$NHOOD_ABBR)
-        
-        leaflet() %>% 
-                addProviderTiles("CartoDB.Positron") %>% 
-                addPolygons(group = "Neighborhoods",
-                            data = seaUVs_CAC, 
-                            fillColor = ~pal(seaUVs_CAC@data$NHOOD_ABBR), fillOpacity = .5,
-                            stroke = F,
-                            popup = paste0(seaUVs_CAC@data$NHOOD_ABBR)) %>% 
-                addPolylines(group = "Neighborhoods",
-                             data = seaUVs_CAC_outline,
-                             color = "white", weight = 1, opacity = .75) %>% 
-                addPolygons(group = "Census Geometry",
-                            data = blk_rev,
-                            fill = FALSE,
-                            color = col2hex("dodgerblue"), weight = 1, opacity = .5) %>% 
-                addPolygons(group = "Census Geometry",
-                            data = bg_rev,
-                            fill = FALSE,
-                            color = col2hex("dodgerblue"), weight = 3, opacity = .75) %>% 
-                addPolygons(group = "Census Geometry",
-                            data = tract_rev,
-                            fill = FALSE,
-                            color = col2hex("dodgerblue"), weight = 5, opacity = .9) %>% 
-                addLayersControl(overlayGroups = c("Neighborhoods","Census Geometry"),
-                                 options = layersControlOptions(collapsed = FALSE))
-        
-        
-}
-
-# myLflt_uvs()
-      
+# 
+# # Select tracts where the majority of the population lives within the CAC bound and map the result
+# 
+# seaUVs_CAC <- {
+#         
+#         make_seaUVs_CAC <- function(){
+#                 if(!file.exists("./2_inputs/seaUVs_CAC.shp")){
+#                         shp <- readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>%
+#                                 spTransform(CRSobj = crs_proj) %>%
+#                                 .[order(.@data$UV_NAME),]
+#                         
+#                         shp@data %<>%
+#                                 cbind(myNhoods_geo[order(myNhoods_geo$NHOOD.FULL),]) %>%
+#                                 select(NHOOD.FULL,NHOOD.ABBR,everything())
+#                         
+#                         writeOGR(obj = shp,dsn = "./2_inputs/",
+#                                  layer = "seaUVs_CAC",
+#                                  driver = "ESRI Shapefile",
+#                                  overwrite_layer = TRUE)
+#                         
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "seaUVs_CAC") %>%
+#                         spTransform(CRSobj = crs_proj)
+#         }
+#         
+#         seaUVs_CAC <- make_seaUVs_CAC()
+#         
+#         rm(make_seaUVs_CAC)
+#         
+#         seaUVs_CAC
+#         
+#         
+#         
+# }
+# 
+# seaUVs_CAC_outline <-
+#         seaUVs_CAC %>%
+#         as('SpatialLines')
+# 
+# 
+# 
+# tract_pop <- {
+#         
+#         make_tract_pop <- function(){
+#                 
+#                 if(!file.exists("./2_inputs/tract_pop.shp")){
+#                         overlap <- gCentroid(spgeom = blk_CAC, byid = TRUE) %>%
+#                                 .[myCACbound,] %>%
+#                                 blk_CAC[.,]
+#                         
+#                         overlap <- overlap@data$GEOID10
+#                         
+#                         blk_CAC@data %<>% select(TRACTCE10, GEOID10, Geography, Total) %>% # drop irrelevant variables
+#                                 mutate(Location = as.factor(ifelse(
+#                                         GEOID10 %in% overlap,
+#                                         "inside",
+#                                         "outside"
+#                                 )))
+#                         
+#                         include <-
+#                                 blk_CAC@data %>%
+#                                 group_by(TRACTCE10, Location) %>%
+#                                 summarise(Count = sum(Total)) %>%
+#                                 spread(Location, Count) %>%
+#                                 replace(is.na(.), 0) %>%
+#                                 filter(inside > outside) %>%
+#                                 select(TRACTCE10) %>%
+#                                 unlist()
+#                         
+#                         tract_pop <- tract_CAC[tract_CAC@data$TRACTCE %in% include, ] %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "tract_pop",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "tract_pop") %>% 
+#                         spTransform(CRSobj = crs_proj)
+#         }
+#         
+#         tract_pop <- make_tract_pop()
+#         
+#         rm(make_tract_pop)
+#         
+#         tract_pop
+#         
+# }
+# 
+# myLflt_TractPopTest <- function(){
+#         
+#         legend_layers <- factor(c("CAC boundary","blocks","tracts"),
+#                                 levels = c("CAC boundary","blocks","tracts"), ordered = T)
+#         
+#         pal_r <- colorNumeric(palette = "Reds",
+#                               domain = 0:sd(blk_CAC$Total))
+#         
+#         pal_b <- colorNumeric(palette = "Blues",
+#                               domain = 0:sd(blk_CAC$Total))
+#         
+#         popup_text <- paste0(tract_CAC@data$NAMELSAD,"<br>","GEOID: ",tract_CAC@data$GEOID)
+#         
+#         tract_blk_in <- blk_CAC[blk_CAC@data$TRACTCE %in% tract_pop@data$TRACTCE,]
+#         
+#         tract_blk_out <- blk_CAC[blk_CAC@data$TRACTCE %!in% tract_pop@data$TRACTCE,]
+#         
+#         leaflet() %>% 
+#                 addProviderTiles("CartoDB.Positron") %>% 
+#                 addPolygons(data = tract_blk_in,
+#                             fillColor = ~pal_r(Total), fillOpacity = .75,
+#                             stroke = FALSE,
+#                             group = legend_layers[2]) %>% 
+#                 addPolygons(data = tract_blk_out,
+#                             fillColor = ~pal_b(Total), fillOpacity = .75,
+#                             stroke = FALSE,
+#                             group = legend_layers[2]) %>% 
+#                 addPolygons(data = myCACbound,
+#                             fillOpacity = 0,
+#                             weight = 3,
+#                             color = "#ff9900",
+#                             dashArray = "5, 5",
+#                             opacity = 1,
+#                             group = legend_layers[1]) %>% 
+#                 addPolygons(data = tract_CAC,
+#                             fillOpacity = 0,
+#                             weight = 1, color = "black", opacity = 1,
+#                             popup = popup_text,
+#                             group = legend_layers[3]) %>% 
+#                 addLayersControl(overlayGroups = c("CAC boundary","blocks","tracts"),
+#                                  options = layersControlOptions(collapsed = FALSE))
+#         
+# }
+# 
+# # myLflt_TractPopTest()
+# 
+# # Revise the tract selection to include Tract 79 (Capitol Hill)
+# 
+# tract_rev <- {
+#         
+#         make_tract_rev <- function(){
+#                 if(!file.exists("./2_inputs/tract_rev.shp")){
+#                         
+#                         CapHill <- "007900" # save the Tract ID for Tract 79
+#                         
+#                         new_include <- c(tract_pop@data$TRACTCE,CapHill) 
+#                         
+#                         tract_CAC[tract_CAC@data$TRACTCE %in% new_include,] %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "tract_rev",driver = "ESRI Shapefile")
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "tract_rev") %>% 
+#                         spTransform(CRSobj = crs_proj)
+#         }
+#         
+#         tract_rev <- make_tract_rev()
+#         
+#         rm(make_tract_rev)
+#         
+#         tract_rev
+#         
+#         
+# }
+# 
+# bg_rev <- {
+#         
+#         make_bg_rev <- function(){
+#                 
+#                 if(!file.exists("./2_inputs/bg_rev.shp")){
+#                         
+#                         CapHill <- "007900" # save the Tract ID for Tract 79
+#                         
+#                         new_include <- c(tract_pop@data$TRACTCE,CapHill) 
+#                         
+#                         bg_rev <- bg_CAC[bg_CAC@data$TRACTCE %in% new_include,] 
+#                         
+#                         writeOGR(obj = bg_rev,dsn = "./2_inputs/",layer = "bg_rev",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "bg_rev") %>% 
+#                         spTransform(CRSobj = crs_proj)
+#         }
+#         
+#         bg_rev <- make_bg_rev()
+#         
+#         rm(make_bg_rev)
+#         
+#         bg_rev
+#         
+# }
+# 
+# blk_rev <- {
+#         
+#         make_blk_rev <- function(){
+#                 if(!file.exists("./2_inputs/blk_rev.shp")){
+#                         
+#                         CapHill <- "007900" # save the Tract ID for Tract 79
+#                         
+#                         new_include <- c(tract_pop@data$TRACTCE,CapHill) 
+#                         
+#                         blk_CAC_noWtrbds[blk_CAC_noWtrbds@data$TRACTCE %in% new_include,] %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "blk_rev",driver = "ESRI Shapefile",
+#                                          overwrite_layer = TRUE)
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "blk_rev") %>% 
+#                         spTransform(CRSobj = crs_proj)
+#         }
+#         
+#         
+#         blk_rev <- make_blk_rev()
+#         
+#         rm(make_blk_rev)
+#         
+#         blk_rev
+#         
+#         
+# }
+# 
+# # Shows the census spatial boundaries for the CAC study area
+# 
+# myLflt_censusSel <- function(){
+#         
+#         
+#         leaflet() %>% 
+#                 addProviderTiles("CartoDB.Positron") %>% 
+#                 addPolygons(data = blk_rev,
+#                             fillColor = col2hex("darkblue"),fillOpacity = .33,
+#                             color = col2hex("white"), weight = 1, opacity = .5,
+#                             group = "1. Blocks") %>% 
+#                 addPolygons(data = bg_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 3, opacity = .75,dashArray = "5, 10",
+#                             group = "2. Block Groups") %>% 
+#                 addPolygons(data = tract_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 5, opacity = .9,
+#                             group = "3. Tracts") %>% 
+#                 addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
+#                                  options = layersControlOptions(collapsed = FALSE))
+# }
+# 
+# # myLflt_censusSel()
+# 
+# # Shows the population density by block in the CAC study area
+# 
+# myLflt_blockPop <- function(){
+#         
+#         pal <- colorNumeric(palette = "Blues",domain = 0:sd(blk_rev@data$Total))
+#         
+#         leaflet() %>% 
+#                 addProviderTiles("CartoDB.Positron") %>% 
+#                 addPolygons(data = blk_rev,
+#                             fillColor = ~pal(Total),fillOpacity = .5,
+#                             color = col2hex("white"), weight = 1, opacity = .5,
+#                             group = "1. Blocks") %>% 
+#                 addPolygons(data = bg_rev,
+#                             fill = FALSE,
+#                             color = col2hex("gray50"), weight = 3, opacity = .75,dashArray = "3, 6",
+#                             group = "2. Block Groups") %>% 
+#                 addPolygons(data = tract_rev,
+#                             fill = FALSE,
+#                             color = col2hex("gray25"), weight = 5, opacity = .9,
+#                             group = "3. Tracts") %>% 
+#                 addPolygons(data = myCACbound,
+#                             fillOpacity = 0,
+#                             weight = 3,
+#                             color = "#ff9900",
+#                             dashArray = "5, 5",
+#                             opacity = 1,
+#                             group = "4. CAC Boundary") %>% 
+#                 addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts", "4. CAC Boundary"),
+#                                  options = layersControlOptions(collapsed = FALSE))
+# }
+# 
+# # myLflt_blockPop()
+# 
+# # SPATIAL DATA: SCALES OF ANALYSIS 
+# 
+# # Neighborhood names at the different Census geographies
+# 
+# myNhoods_tract <- data.frame(
+#         "NHOOD.FULL" = c("Pioneer Square", 
+#                     "Chinatown-International District, Yesler Terrace & Little Saigon",
+#                     "Central District", "First Hill", "12 Ave & Capitol Hill"),
+#         "NHOOD.ABBR" = c("PS","CIDYTLS","CD","FH","12AV"))
+# 
+# myNhoods_bg <- data.frame(
+#         "NHOOD.FULL" = c("Pioneer Square", 
+#                         "Chinatown-International District","Yesler Terrace & Little Saigon",
+#                         "Central District", "First Hill", "12 Ave & Capitol Hill"),
+#         "NHOOD.ABBR" = c("PS","CID","YTLS","CD","FH","12AV"))
+# 
+# myNhoods_geo <- data.frame(
+#         "NHOOD.FULL" = c("Pioneer Square", "Chinatown-International District",
+#                          "Yesler Terrace", "Little Saigon", 
+#                          "Central District","First Hill", "12 Ave & Capitol Hill"),
+#         "NHOOD.ABBR" = c("PS","CID","YT","LS","CD","FH","12AV"))
+# 
+# 
+# tract_rev <- {
+#         
+#         make_tract_rev <- function(){
+#                 
+#                 tract_rev <-  
+#                         tract_rev@data %>% 
+#                         as.data.frame() %>%
+#                         mutate(NHOOD.FULL = ifelse(
+#                                 NAME %in% "92",
+#                                 myNhoods_tract[1, 1],
+#                                 ifelse(
+#                                         NAME %in% "91",
+#                                         myNhoods_tract[2, 1],
+#                                         ifelse(
+#                                                 NAME %in% c("90", "87", "79"),
+#                                                 myNhoods_tract[3, 1],
+#                                                 ifelse(
+#                                                         NAME %in% "85",
+#                                                         myNhoods_tract[4, 1],
+#                                                         ifelse(NAME %in% "86",
+#                                                                myNhoods_tract[5, 1],
+#                                                                NA)
+#                                                 )
+#                                         )
+#                                 )
+#                         )) %>% 
+#                         left_join(y = myNhoods_tract) %>% 
+#                         select(GEOID,NHOOD.FULL,NHOOD.ABBR) %>% 
+#                         myGeoJoin(spatial_data = tract_rev,data_frame = .,by_sp = "GEOID", by_df = "GEOID")
+#         }
+#         
+#         tract_rev <- make_tract_rev()
+#         
+#         rm(make_tract_rev)
+#         
+#         tract_rev
+#         
+# }
+# 
+# myLflt_tractRevTest <- function(){
+#         
+#         popup_text <- paste0(tract_rev@data$NHOOD.FULL)
+#         
+#         myLflt_blockPop() %>% 
+#                 addPolygons(data = tract_rev,
+#                             fillOpacity = 0,
+#                             stroke = FALSE,
+#                             popup = popup_text)
+#                 
+# } # Map with block pop. density, nhood boundaries, and popups 
+# 
+# # myLflt_tractRevTest()
+# 
+# myLflt_nhoodTract <- function(){
+#         
+#         pal <- colorFactor(palette = "Set3",
+#                            domain = tract_rev@data$NHOOD.FULL)
+#         
+#         leaflet() %>% 
+#                 addProviderTiles("CartoDB.Positron") %>% 
+#                 addPolygons(data = tract_rev,
+#                             fillColor = ~pal(NHOOD.FULL), fillOpacity = .8,
+#                             color = col2hex("white"), weight = 5, opacity = .9,
+#                             group = "3. Tracts") %>% 
+#                 addPolygons(data = blk_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 1, opacity = .5,
+#                             group = "1. Blocks") %>% 
+#                 addPolygons(data = bg_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 3, opacity = .75,dashArray = "5, 10",
+#                             group = "2. Block Groups") %>% 
+#                 addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
+#                                  options = layersControlOptions(collapsed = FALSE)) %>% 
+#                 addLegend(pal = pal, 
+#                           values = tract_rev@data$NHOOD.FULL, 
+#                           position = "topright", 
+#                           title = "Study Area Neighborhoods: Census Tracts",
+#                           opacity = 1)
+# } # Map with tracts colored by neighborhood
+# 
+# # myLflt_nhoodTract()
+# 
+# bg_rev <- {
+#         
+#         make_bg_rev <- function(){
+#                 
+#                 bg_rev <-
+#                         bg_rev@data %>%
+#                         as.data.frame() %>%
+#                         mutate(NHOOD.FULL = ifelse(
+#                                 TRACTCE %in% "009200",
+#                                 myNhoods_bg[1, 1],
+#                                 ifelse(
+#                                         GEOID %in% "530330091002",
+#                                         myNhoods_bg[2, 1],
+#                                         ifelse(
+#                                                 GEOID %in% "530330091001",
+#                                                 myNhoods_bg[3, 1],
+#                                                 ifelse(
+#                                                         TRACTCE %in% c("007900", "009000", "008700"),
+#                                                         myNhoods_bg[4, 1],
+#                                                         ifelse(
+#                                                                 TRACTCE %in% "008500",
+#                                                                 myNhoods_bg[5, 1],
+#                                                                 ifelse(TRACTCE %in% "008600",
+#                                                                        myNhoods_bg[6, 1],
+#                                                                        NA)
+#                                                         )
+#                                                 )
+#                                         )
+#                                 )
+#                         )) %>%
+#                         left_join(y = myNhoods_bg) %>%
+#                         select(GEOID, NHOOD.FULL, NHOOD.ABBR) %>%
+#                         myGeoJoin(
+#                                 spatial_data = bg_rev,
+#                                 data_frame = .,
+#                                 by_sp = "GEOID",
+#                                 by_df = "GEOID"
+#                         )
+#         } # Eliminate interpolygonal slivers
+#         
+#         bg_rev <- make_bg_rev()
+#         
+#         rm(make_bg_rev)
+#         
+#         bg_rev
+#         
+#         
+# }
+# 
+# myLflt_bgRevTest <- function(){
+#         
+#         popup_text <- paste0("GEOID: ",bg_rev@data$GEOID,
+#                              "<br>",bg_rev@data$NHOOD.FULL)
+#         
+#         myLflt_censusSel() %>% 
+#                 addPolygons(data = bg_rev,
+#                             fillOpacity = 0,
+#                             stroke = F,
+#                             popup = popup_text)
+#         
+# }
+# 
+# # myLflt_bgRevTest()
+# 
+# 
+# bg_hood_cntrs <- {
+#         
+#         make_bg_hood_cntrs <- function(){
+#                 
+#                 cntr <- bg_rev %>% 
+#                         raster::aggregate(by = "NHOOD.ABBR") %>% 
+#                         gCentroid(byid = TRUE)
+#                 
+#                 rn <- row.names(cntr)
+#                 
+#                 df <- bg_rev@data %>% 
+#                         mutate(NHOOD.ABBR = as.factor(NHOOD.ABBR)) %>% 
+#                         group_by(NHOOD.ABBR) %>% 
+#                         summarise(NHOOD = first(NHOOD.ABBR)) %>% 
+#                         dplyr::select(NHOOD) %>% 
+#                         as.data.frame()
+#                 
+#                 rownames(df) <- rn
+#                 
+#                 bg_hood_cntrs <-
+#                         SpatialPointsDataFrame(coords = cntr,data = df) %>% 
+#                         spTransform(CRSobj = crs_proj)
+#                 
+#         }
+#         
+#         bg_hood_cntrs <- make_bg_hood_cntrs()
+#         
+#         rm(make_bg_hood_cntrs)
+#         
+#         bg_hood_cntrs
+#     
+# } # For labeling the neighborhoods
+# 
+# 
+# myLflt_nhoodBg <- function(){
+#         
+#         pal <- colorFactor(palette = "Set2",
+#                            domain = bg_rev@data$NHOOD.FULL)
+#         
+#         leaflet() %>% 
+#                 addProviderTiles("CartoDB.Positron") %>% 
+#                 addPolygons(data = bg_rev,
+#                             fillColor = ~pal(NHOOD.FULL), fillOpacity = .5,
+#                             color = col2hex("white"), weight = 3, opacity = .75,dashArray = "5, 10",
+#                             group = "2. Block Groups") %>% 
+#                 addPolygons(data = tract_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 5, opacity = .9,
+#                             group = "3. Tracts") %>% 
+#                 addPolygons(data = blk_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 1, opacity = .5,
+#                             group = "1. Blocks") %>% 
+#                 
+#                 addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
+#                                  options = layersControlOptions(collapsed = FALSE)) %>% 
+#                 addLegend(pal = pal, 
+#                           values = bg_rev@data$NHOOD.FULL, 
+#                           position = "topright", 
+#                           title = "Study Area Neighborhoods:<br> Census Block Groups",
+#                           opacity = 1)
+# } # Map with block groups colored by neighborhood
+# 
+# # myLflt_nhoodBg()
+# 
+# # An outline of the study area neighborhoods 
+# # (as defined by the census tracts associated with them in this project)
+# 
+# nhoods_census_outline <- 
+#         bg_rev %>% 
+#         gUnaryUnion(id = as.factor(.@data$NHOOD.ABBR)) %>% 
+#         as('SpatialLines') 
+#         
+# 
+# myLflt_nhoods <- function(){
+#         pal <- colorFactor(palette = "Set2",
+#                            domain = seaNhoods_CAC@data$S_HOOD)
+#         
+#         leaflet() %>% 
+#                 addProviderTiles("CartoDB.Positron") %>% 
+#                 addPolygons(data = seaNhoods_CAC, 
+#                             fillColor = ~pal(seaNhoods_CAC@data$S_HOOD), fillOpacity = .5,
+#                             stroke = F,
+#                             popup = paste0(seaNhoods_CAC@data$S_HOOD)) %>% 
+#                 addPolygons(data = blk_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 1, opacity = .5,
+#                             group = "1. Blocks") %>% 
+#                 addPolygons(data = bg_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 3, opacity = .75,dashArray = "3, 6",
+#                             group = "2. Block Groups") %>% 
+#                 addPolygons(data = tract_rev,
+#                             fill = FALSE,
+#                             color = col2hex("white"), weight = 5, opacity = .9,
+#                             group = "3. Tracts") %>% 
+#                 addLayersControl(overlayGroups = c("1. Blocks","2. Block Groups","3. Tracts"),
+#                                  options = layersControlOptions(collapsed = FALSE))
+#         
+#         
+# }
+# 
+# # myLflt_nhoods()
+# 
+# 
+# myLflt_uvs <- function(){
+#         pal <- colorFactor(palette = "Set2",
+#                            domain = seaUVs_CAC@data$NHOOD_ABBR)
+#         
+#         leaflet() %>% 
+#                 addProviderTiles("CartoDB.Positron") %>% 
+#                 addPolygons(group = "Neighborhoods",
+#                             data = seaUVs_CAC, 
+#                             fillColor = ~pal(seaUVs_CAC@data$NHOOD_ABBR), fillOpacity = .5,
+#                             stroke = F,
+#                             popup = paste0(seaUVs_CAC@data$NHOOD_ABBR)) %>% 
+#                 addPolylines(group = "Neighborhoods",
+#                              data = seaUVs_CAC_outline,
+#                              color = "white", weight = 1, opacity = .75) %>% 
+#                 addPolygons(group = "Census Geometry",
+#                             data = blk_rev,
+#                             fill = FALSE,
+#                             color = col2hex("dodgerblue"), weight = 1, opacity = .5) %>% 
+#                 addPolygons(group = "Census Geometry",
+#                             data = bg_rev,
+#                             fill = FALSE,
+#                             color = col2hex("dodgerblue"), weight = 3, opacity = .75) %>% 
+#                 addPolygons(group = "Census Geometry",
+#                             data = tract_rev,
+#                             fill = FALSE,
+#                             color = col2hex("dodgerblue"), weight = 5, opacity = .9) %>% 
+#                 addLayersControl(overlayGroups = c("Neighborhoods","Census Geometry"),
+#                                  options = layersControlOptions(collapsed = FALSE))
+#         
+#         
+# }
+# 
+# # myLflt_uvs()
+#       
+# 
+# tract_CAC <- {
+#         
+#         make_tract_CAC <- function(){
+#                 
+#                 if(!file.exists("./2_inputs/tracts.shp")){
+#                         tracts_orig <- 
+#                                 tigris::tracts(state = "WA", county = "King") %>% 
+#                                 spTransform(CRSobj = crs_proj)
+#                         
+#                         wtr_clip(orig = tracts_orig,wtr = waterbodies) %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "tracts",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 
+#                 if(!file.exists("./2_inputs/tracts_CAC.shp")){
+#                         
+#                         seaTrts <- 
+#                                 readxl::read_excel(path = "./2_inputs/dpdd017073.xlsx") %>% 
+#                                 mutate(TRACT_10new = str_pad(TRACT_10,width = 6, pad = "0")) %>% 
+#                                 select(TRACT_10 = TRACT_10new) %>% 
+#                                 unique() %>% 
+#                                 unlist()
+#                         
+#                         
+#                         tracts <- 
+#                                 readOGR(dsn = "./2_inputs/",layer = "tracts") %>% 
+#                                 spTransform(CRSobj = crs_proj) %>% 
+#                                 .[.[["TRACTCE"]] %in% seaTrts,]
+#                         
+#                         gContains(myCACbound,gCentroid(tracts, byid = TRUE),byid = TRUE) %>%
+#                                 which(.==1) %>% 
+#                                 tracts[.,] %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "tract_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "tract_CAC") %>% 
+#                         spTransform(CRSobj = crs_proj)
+#                 
+#                 
+#         }
+#         
+#         tract_CAC <- make_tract_CAC()
+#         
+#         rm(make_tract_CAC)
+#         
+#         tract_CAC
+#         
+# } 
+# 
+# bg_CAC <- {
+#         
+#         make_bg_CAC <- function(){
+#                 
+#                 if(!file.exists("./2_inputs/bg.shp")){
+#                         bg_orig <- 
+#                                 tigris::block_groups(state = "WA", county = "King") %>% 
+#                                 spTransform(CRSobj = crs_proj)
+#                         
+#                         wtr_clip(orig = bg_orig,wtr = waterbodies) %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "bg",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 
+#                 if(!file.exists("./2_inputs/bg_CAC.shp")){
+#                         bg <- 
+#                                 readOGR(dsn = "./2_inputs/",layer = "bg") %>% 
+#                                 spTransform(CRSobj = crs_proj)
+#                         
+#                         bg[bg@data$TRACTCE %in% c(tract_CAC@data$TRACTCE),] %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "bg_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "bg_CAC") %>% 
+#                         spTransform(CRSobj = crs_proj)
+#                 
+#                 
+#         }
+#         
+#         bg_CAC <- make_bg_CAC()
+#         
+#         rm(make_bg_CAC)
+#         
+#         bg_CAC
+#         
+# } 
+# 
+# blk_CAC <- {
+#         
+#         make_blk_CAC <- function(){
+#                 
+#                 if(!file.exists("./2_inputs/blk.shp")){
+#                         
+#                         
+#                         blk_sea <- 
+#                                 tigris::blocks(state = "WA", county = "King") %>% 
+#                                 spTransform(CRSobj = crs_proj) %>% 
+#                                 .[.@data$TRACTCE10 %in% seaAcsUvs$TRACT_10,]
+#                         
+#                         # NOTE: this step takes a long time!
+#                         wtr_clip(orig = blk_sea,wtr = waterbodies) %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "blk_sea",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 
+#                 if(!file.exists("./2_inputs/blk_CAC.shp")){
+#                         blk <- 
+#                                 readOGR(dsn = "./2_inputs/",layer = "blk") %>% 
+#                                 spTransform(CRSobj = crs_proj)
+#                         
+#                         blk[blk@data$TRACTCE %in% c(tract_CAC@data$TRACTCE),] %>% 
+#                                 writeOGR(dsn = "./2_inputs/",layer = "blk_CAC",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+#                 }
+#                 
+#                 readOGR(dsn = "./2_inputs/",layer = "blk_CAC") %>% 
+#                         spTransform(CRSobj = crs_proj)
+#                 
+#                 
+#         }
+#         
+#         blk_CAC <- make_blk_CAC()
+#         
+#         rm(make_blk_CAC)
+#         
+#         blk_CAC
+#         
+# } 

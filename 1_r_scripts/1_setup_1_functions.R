@@ -50,6 +50,8 @@ crs_geog <- CRS("+init=epsg:2285") # Washington State plane CRS
 
 UV2Census <- function(tract = TRUE, unit = "hu"){
         
+        # tract = TRUE
+        # unit = "hu"
         geo <- if(tract == TRUE){tract_sea} else(bg_sea)
         blk <- blk_sea
         by_sp <- if(tract == TRUE){"TRACTCE"} else("GEOID")
@@ -72,10 +74,10 @@ UV2Census <- function(tract = TRUE, unit = "hu"){
                 geo_join(data_frame = hu,
                          by_sp = "GEOID10",
                          by_df = "GEO.id2") %>% 
-                .[!is.na(.@data$D001),] %>% 
-                .[.@data$D001 > 0,] %>% 
-                .[!is.na(.@data$URBAN_VILLAGE_NAME),] %>% 
-                .[.@data$URBAN_VILLAGE_TYPE %!in% c("Manufacturing Industrial","Outside Villages"),]
+                .[!is.na(.@data$D001),] %>%  
+                .[!is.na(.@data$URBAN_VILLAGE_NAME),]
+        
+        
         
         # Create different `ID` column depending on whether this is a tract-level or block-group-level operation
         if(tract == TRUE){
@@ -91,9 +93,15 @@ UV2Census <- function(tract = TRUE, unit = "hu"){
         geos <-  sort(unique(blk@data$ID)) %>% 
                 as.data.frame()
         
+        
+        geos <- blk@data$ID %>%
+                sort() %>% 
+                unique() %>% 
+                as.data.frame()
+        
         colnames(geos) <- "ID"
         
-        tractUV <- 
+        tractUV <-
                 blk@data %>% 
                 group_by(ID,UV) %>%  
                 summarise(HU_COUNT = sum(D001)) %>% 
@@ -103,25 +111,107 @@ UV2Census <- function(tract = TRUE, unit = "hu"){
                 replace(is.na(.),0) %>% 
                 mutate(UV = max.col(m= .,ties.method = "first")) %>% 
                 mutate(UV = colnames(.)[as.numeric(UV)]) %>% 
+                mutate(UV = ifelse(rowSums(x = .[,colnames(.) %!in% "UV"]) == 0,
+                                   "Not an Urban Village",
+                                   UV)) %>% 
+                mutate(ID = row_number())
+        
+        df1 <-
+                tractUV %>% 
+                filter(UV %in% "Outside Villages")
+        
+        df2 <- 
+                df1 %>% 
+                select(-starts_with("Outside")) %>%
+                select(-UV) %>% 
+                select(-ID) %>%
+                mutate(SUM = rowSums(x = .)) %>% 
+                cbind(df1$ID) %>%
+                filter(SUM > 0) 
+        
+        colnames(df2)[grep(pattern = "ID",x = colnames(df2))] <- "ID"
+        
+        
+        IDSUM <- 
+                df2 %>% 
+                select(ID, SUM)
+        
+        df3 <- 
+                df2 %>% 
+                select(-ID) %>% select(-SUM) %>% 
+                mutate(UV2 = max.col(m= .,ties.method = "first")) %>% 
+                mutate(UV2 = colnames(.)[UV2]) %>% 
+                cbind(IDSUM)
+        
+        df4 <- 
+                df3 %>% 
+                group_by(UV2) %>% 
+                tidyr::nest() %>% 
+                mutate(HU = purrr::map(.x = data, .f = function(x){
+                        
+                        
+                        
+                        x <- x %>% as.data.frame()
+                        
+                        IDSUM <- 
+                                x %>% 
+                                select(ID,SUM)
+                        
+                        x %<>% select(-ID) %>% select(-SUM)
+                        
+                        high <- 
+                                x %>% colSums() %>% which.max() %>% names()
+                        
+                        ID <- "ID"
+                        row <- which.max(x[,high])
+                        
+                        x %<>%
+                                cbind(IDSUM)
+                        
+                        new <- 
+                                x[row,c(high,ID)] %>% 
+                                as.data.frame() %>% 
+                                mutate(UV = colnames(.)[1])
+                        
+                        
+                        colnames(new)[1] <- "HU"
+                        
+                        return(new)
+                        
+                })) %>% 
+                .["HU"] %>% 
+                unnest() %>% 
+                rename(UV2 = UV) %>% 
+                filter(UV2 %!in% tractUV$UV)
+        
+        
+        df5 <- 
+                tractUV %>% 
                 select(UV) %>% 
                 bind_cols(geos) %>% 
-                select(ID,UV)
+                select(GEOID = ID,UV) %>% 
+                mutate(ID = row_number()) %>% 
+                left_join(df4, by = "ID") %>% 
+                mutate(UV3 = ifelse(is.na(UV2),
+                                    UV,
+                                    UV2)) %>% 
+                select(-ID)
+        
         
         shp <- 
                 geo_join(spatial_data = geo,
-                         data_frame = tractUV,
+                         data_frame = df5,
                          by_sp = by_sp,
-                         by_df = "ID")
+                         by_df = "GEOID")
         
         # Remove the "Outside Villages"
         shp %<>%
-                .[shp@data$UV %!in% "Outside Villages" & !is.na(shp@data$UV),]
+                .[shp@data$UV3 %!in% c("Outside Villages",
+                                       "Not an Urban Village") & !is.na(shp@data$UV3),]
         
         return(shp)
         
 }
-
-
 
 # myLfltShiny
 # The presets for Leaflet maps created for the Shiny website
