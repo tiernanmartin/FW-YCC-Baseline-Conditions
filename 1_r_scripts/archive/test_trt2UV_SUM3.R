@@ -1,7 +1,8 @@
-testFUN <- function(tract = TRUE, unit = "hu"){
+
+UV2Census <- function(tract = TRUE, unit = "hu"){
         
-        # tract = TRUE
-        # unit = "hu"
+        tract = TRUE
+        unit = "hu"
         geo <- if(tract == TRUE){tract_sea} else(bg_sea)
         blk <- blk_sea
         by_sp <- if(tract == TRUE){"TRACTCE"} else("GEOID")
@@ -63,94 +64,72 @@ testFUN <- function(tract = TRUE, unit = "hu"){
                 mutate(UV = colnames(.)[as.numeric(UV)]) %>% 
                 mutate(UV = ifelse(rowSums(x = .[,colnames(.) %!in% "UV"]) == 0,
                                    "Not an Urban Village",
-                                   UV)) %>% 
-                mutate(ID = row_number())
+                                   UV)) %>%
+                mutate(SUM = rowSums(.[,sapply(.,is.numeric)])) %>% 
+                mutate(ID = as.character(row_number()))
         
         df1 <-
                 tractUV %>% 
-                filter(UV %in% "Outside Villages")
-                
-        df2 <- 
-                df1 %>% 
-                select(-starts_with("Outside")) %>%
-                select(-UV) %>% 
-                select(-ID) %>%
-                mutate(SUM = rowSums(x = .)) %>% 
-                cbind(df1$ID) %>%
-                filter(SUM > 0) 
-        
-        colnames(df2)[grep(pattern = "ID",x = colnames(df2))] <- "ID"
-        
-        
-        IDSUM <- 
-                df2 %>% 
-                select(ID, SUM)
-        
-        df3 <- 
-                df2 %>% 
-                select(-ID) %>% select(-SUM) %>% 
-                mutate(UV2 = max.col(m= .,ties.method = "first")) %>% 
-                mutate(UV2 = colnames(.)[UV2]) %>% 
-                cbind(IDSUM)
-        
-        df4 <- 
-                df3 %>% 
+                filter(UV %in% "Outside Villages") %>% 
+                select(-starts_with("Outside")) %>% 
+                select(-starts_with("SUM")) %>% 
+                mutate(SUM2 = rowSums(.[,sapply(.,is.numeric)])) %>% 
+                filter(SUM2 > 0) %>% 
+                mutate(SUM2 = as.character(SUM2)) %>% 
+                mutate(UV2 = max.col(m= .[,sapply(.,is.numeric)],ties.method = "first")) %>% 
+                mutate(UV2 = colnames(.)[UV2]) %>%  
                 group_by(UV2) %>% 
                 tidyr::nest() %>% 
                 mutate(HU = purrr::map(.x = data, .f = function(x){
-                       
                         
+                        # x <- df4$data[[1]] %>% as.data.frame()
                         
-                        x <- x %>% as.data.frame()
-                        
-                        IDSUM <- 
-                                x %>% 
-                                select(ID,SUM)
-                        
-                        x %<>% select(-ID) %>% select(-SUM)
-                        
+                        x <- as.data.frame(x)
+                
                         high <- 
-                                x %>% colSums() %>% which.max() %>% names()
+                                colSums(x[,sapply(x,is.numeric)]) %>% which.max() %>% names()
                         
                         ID <- "ID"
+                        SUM2 <- "SUM2"
+                        
                         row <- which.max(x[,high])
                         
-                        x %<>%
-                                cbind(IDSUM)
-                        
                         new <- 
-                                x[row,c(high,ID)] %>% 
+                                x[row,c(high,ID,SUM2)] %>% 
                                 as.data.frame() %>% 
-                                mutate(UV = colnames(.)[1])
+                                mutate(UV = colnames(.)[1]) %>% 
+                                .[,2:4]
                         
+                        return(new)
                         
-                        colnames(new)[1] <- "HU"
-                        
-                       return(new)
-                                
                 })) %>% 
-                .["HU"] %>% 
+                .["HU"] %>%
                 unnest() %>% 
                 rename(UV2 = UV) %>% 
-                filter(UV2 %!in% tractUV$UV)
+                filter(UV2 %!in% tractUV$UV) %>% 
+                mutate(ID = as.numeric(ID),
+                       SUM2 = as.numeric(SUM2))
         
         
-        df5 <- 
+        df2 <- 
                 tractUV %>% 
-                select(UV) %>% 
+                select(UV,SUM) %>% 
                 bind_cols(geos) %>% 
-                select(GEOID = ID,UV) %>% 
+                select(GEOID = ID,UV,SUM) %>% 
                 mutate(ID = row_number()) %>% 
-                left_join(df4, by = "ID") %>% 
+                left_join(df1, by = "ID") %>% 
                 mutate(UV3 = ifelse(is.na(UV2),
                                     UV,
                                     UV2)) %>% 
-                select(-ID)
+                mutate(SUM3 = ifelse(is.na(SUM2),
+                                     SUM,
+                                     SUM2)) %>% 
+                select(-ID) %>% select(GEOID,UV,SUM,UV2,SUM2,UV3,SUM3)
         
         
         shp <- 
                 geo_join(spatial_data = geo,
-                         data_frame = df5,
+                         data_frame = df2,
                          by_sp = by_sp,
                          by_df = "GEOID")
         
@@ -162,30 +141,3 @@ testFUN <- function(tract = TRUE, unit = "hu"){
         return(shp)
         
 }
-
-test <- testFUN(tract = T,unit = "pop")
-
-test2 <-
-        test %>% 
-        .[.@data$UV %!in% "Outside Villages",]
-
-
-pal <- colorFactor(palette = "Set1",domain = test@data$UV3)
-pal2 <- colorFactor(palette = "Set1",domain = test2@data$UV)
-
-myLfltShiny() %>% 
-        addPolygons(group = "Some",
-                    data = test2,
-                    popup = ~UV,
-                    smoothFactor = 0,
-                    color = "white", weight = 2, opacity = .5,
-                    fillColor = ~pal2(test2@data$UV), fillOpacity = .75) %>% 
-        addPolygons(group = "All",
-                    data = test,
-                    popup = ~UV3,
-                    smoothFactor = 0,
-                    color = "white", weight = 2, opacity = .5,
-                    fillColor = ~pal(test@data$UV3), fillOpacity = .75) %>% 
-        addLayersControl(overlayGroups = c("Some", "All"),options = layersControlOptions(collapsed = F))
-
-        

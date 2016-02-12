@@ -22,6 +22,12 @@ readOGR(dsn = "./2_inputs/",layer = "tract_sea") %>%
         mySptlLinesDF() %>% 
         writeOGR(dsn = "./4_webcontent/shiny/UV_CensusGeo_Overlay",layer = "tract_sea_out",driver = "ESRI Shapefile",overwrite_layer = TRUE)
 
+# tract_uvs
+
+readOGR(dsn = "./2_inputs/",layer = "tract_uvs") %>% 
+        spTransform(CRSobj = crs_proj) %>% 
+        writeOGR(dsn = "./4_webcontent/shiny/UV_CensusGeo_Overlay",layer = "tract_uvs",driver = "ESRI Shapefile",overwrite_layer = TRUE)
+
 # bg_sea
 
 readOGR(dsn = "./2_inputs/",layer = "bg_sea") %>% 
@@ -75,3 +81,6 @@ readOGR(dsn = "./2_inputs/",layer = "seaUvs") %>%
 
 read_csv(file = "./2_inputs/wa_kc_blocks_hu/DEC_10_SF1_H1.csv",col_types = "cccn") %>% 
         write_csv(path = "./4_webcontent/shiny/UV_CensusGeo_Overlay/hu.csv")
+
+read_csv(file = "./2_inputs/wa_kc_blocks_pop/DEC_10_SF1_P1_with_ann.csv",col_types = "cccn") %>% 
+        write_csv(path = "./4_webcontent/shiny/UV_CensusGeo_Overlay/pop.csv")

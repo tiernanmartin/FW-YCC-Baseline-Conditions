@@ -324,6 +324,10 @@ tract_sea <- {
         tract_sea
 }
 
+bounds_sea <- {
+        tract_sea %>% gUnaryUnion() %>% .@bbox
+        }
+
 bg_sea <- {
         
         make_bg_sea <- function(){
@@ -500,17 +504,17 @@ tract_uvs <- {
         
         view_tract_uvs <- function(){
                 popup <- paste0("TRACT: ",tract_uvs@data$TRACTCE,"<br>",
-                                "Urban Village: ", tract_uvs@data$UV)
+                                "Urban Village: ", tract_uvs@data$UV3)
                 
-                pal <- colorFactor(palette = "Set2",domain = tract_uvs@data$UV)
+                pal <- colorFactor(palette = "Set2",domain = tract_uvs@data$UV3)
                 
                 myLfltShiny() %>% 
                         addPolygons(data = tract_uvs,
                                     popup = popup,
                                     color = "white", opacity = 1, weight = 1.5,
-                                    fillColor = ~pal(tract_uvs@data$UV), fillOpacity = .75) %>% 
+                                    fillColor = ~pal(tract_uvs@data$UV3), fillOpacity = .75) %>% 
                         addLegend(title = "Tracts (by Urban Village)",
-                                  position = c("topright"),pal = pal, values = unique(tract_uvs@data$UV))
+                                  position = c("topright"),pal = pal, values = unique(tract_uvs@data$UV3))
                 
         }
         
@@ -543,17 +547,17 @@ bg_uvs <- {
         
         view_bg_uvs <- function(){
                 popup <- paste0("GEOID: ",bg_uvs@data$GEOID,"<br>",
-                                "Urban Village: ", bg_uvs@data$UV)
+                                "Urban Village: ", bg_uvs@data$UV3)
                 
-                pal <- colorFactor(palette = "Set2",domain = bg_uvs@data$UV)
+                pal <- colorFactor(palette = "Set2",domain = bg_uvs@data$UV3)
                 
                 myLfltShiny() %>% 
                         addPolygons(data = bg_uvs,
                                     popup = popup,
                                     color = "white", opacity = 1, weight = 1.5,
-                                    fillColor = ~pal(bg_uvs@data$UV), fillOpacity = .75) %>% 
+                                    fillColor = ~pal(bg_uvs@data$UV3), fillOpacity = .75) %>% 
                         addLegend(title = "Tracts (by Urban Village)",
-                                  position = c("topright"),pal = pal, values = unique(bg_uvs@data$UV))
+                                  position = c("topright"),pal = pal, values = unique(bg_uvs@data$UV3))
                 
         }
         
