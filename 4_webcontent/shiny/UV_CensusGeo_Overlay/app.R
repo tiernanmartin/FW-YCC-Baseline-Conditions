@@ -5,9 +5,9 @@
 source("./1_setup_1_functions.R")
 source("./1_setup_1_data.R")
 library(shiny)
-bounds_sea <- {
-        tract_sea %>% gUnaryUnion() %>% .@bbox
-}
+library(markdown)
+library(rmarkdown)
+
 
 # UI ----------------------------------------------------------------------------------------------
 ui <-
@@ -15,7 +15,7 @@ ui <-
                            tabPanel(title = "Map + Data",
                                     fluidRow(column(width = 8,
                                                     
-                                                    # Map -----------------------------------------
+# +-- Map -----------------------------------------
                                                     div(class="outer",
                                                         tags$head(includeCSS("style.css")),
                                                         leafletOutput("map1",height = "100%",width = "66%"),
@@ -24,7 +24,7 @@ ui <-
                                                     )),
                                              column(width = 4,
                                                     
-                                                    # Controls ------------------------------------
+# +-- Controls ------------------------------------
                                                     fluidRow(
                                                             column(width = 6,
                                                                    h4("Map Controls"),
@@ -45,7 +45,7 @@ ui <-
                                                     
                                                     
                                                     
-                                                    # Data Table ----------------------------------
+# +-- Data Table ----------------------------------
                                                     h4("Data"),
                                                     dataTableOutput("table")
                                                     # textOutput(outputId = "print")
@@ -57,7 +57,13 @@ ui <-
                                                     
                                     
                                     )
-                               ))
+                               ),
+# +-- Notes + Sources ----------------------------------
+                           tabPanel(title = "Notes + Sources",
+                                    fluidRow(column(width = 3),
+                                             column(width = 6,
+                                                    htmlOutput("notes")),
+                                             column(width = 3))))
         )
                            
                            
@@ -65,7 +71,7 @@ ui <-
 
 # SERVER ------------------------------------------------------------------------------------------
 server <- function(input, output){
-        # Function arguments ----------------------------------------------------------------------
+# +-- Function arguments ----------------------------------------------------------------------
         geo <- reactive({
                 geo = ifelse(input$geo == "Tract",
                              TRUE,
@@ -77,7 +83,7 @@ server <- function(input, output){
                              "hu")
         })
         
-        # Reactive values for labeling saved files
+# +-- Reactive values for labeling saved files ----------------------------------------------------------------------
         geo_label <- reactive({
                 geo = ifelse(input$geo == "Tract",
                              "trt",
@@ -91,10 +97,10 @@ server <- function(input, output){
         
         
         
-        # Reactive expression: shapefile and dataframe
+# +-- Reactive expression: shapefile and dataframe ----
         rv <- reactiveValues(shp = UV2Census_shiny(), df = UV2Census_shiny() %>% .@data)
         
-        # Invalidators
+# +-- Invalidators -------
         observeEvent(input$geo, {
                 rv$shp <- UV2Census_shiny(tract = geo(),unit = var())
                 rv$df <- UV2Census_shiny(tract = geo(),unit = var()) %>% .@data
@@ -111,7 +117,7 @@ server <- function(input, output){
         
         
         
-        # Map
+# +-- Map --------
         output$map1 <- renderLeaflet({
                 myLfltShiny() %>%
                         fitBounds(lng1 = bounds_sea["x","min"],lat1 = bounds_sea["y","min"],
@@ -138,7 +144,7 @@ server <- function(input, output){
                         
         })
        
-        # Data Table
+# +-- Data Table --------
         output$table <- renderDataTable({
                 
                 countName <- function(){input$var %>% as.character() %>% toupper()}
@@ -149,7 +155,7 @@ server <- function(input, output){
                 DT
         })
         
-        # Download Buttons
+# +-- Download Button ------- 
         output$CSV <- 
                 downloadHandler(filename = function(){
                         make_csv_filename <- function(){
@@ -208,6 +214,12 @@ server <- function(input, output){
                         
                 }
         )
+        
+# +-- Notes + Sources -------
+        getPage<-function() {
+                return(includeHTML("notes.html"))
+        }
+        output$notes <- renderUI({getPage()})
 }
 
 # RUN ---------------------------------------------------------------------------------------------

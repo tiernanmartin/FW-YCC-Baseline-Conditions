@@ -1,0 +1,22 @@
+---
+output: 
+  html_document:
+    theme: "spacelab"
+---
+# Welcome
+
+Welcome to the Yesler Community Collaborative ([YCC](http://yescollab.org/)) ParcelSearch tool.
+
+The purpose of this tool is to empower YCC partners to identify sites where affordable housing could be developed. 
+
+While using this tool, please be aware of the following points:
+
+  - this tool is **very slow** -- allow 20-30 seconds to pass before seeing "refreshed" map results
+  - this is an unfinished, draft product and therefore may contain "bugs"
+  - the City of Seattle requests that all applications making use of their data provide a disclaimer (see the 'Notes' tab on the navigation bar above)
+
+~ The Futurewise Team, <http://www.futurewise.org> 
+
+***
+
+<span style="color:grey">Please direct any questions to </span><tiernan@futurewise.org>

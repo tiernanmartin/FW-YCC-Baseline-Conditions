@@ -1,0 +1,25 @@
+---
+output: html_document
+---
+
+#### Map
+
+**Item One:** `The definition goes here.`
+
+**Item Two:** `Here's another definition. This one has not one but two sentences.`
+
+**Item Three:** `You guessed it -- another definition.`
+
+#### Map + Filters
+
+* Item One: The definition goes here.
+* Item Two: Here's another definition. This one has not one but two sentences.
+* Item Three: You guessed it -- another definition.
+
+#### Map + Filters
+
+Item          | Definition
+------------- | -------------
+Content Cell  | Content Cell
+Content Cell  | Content Cell
+

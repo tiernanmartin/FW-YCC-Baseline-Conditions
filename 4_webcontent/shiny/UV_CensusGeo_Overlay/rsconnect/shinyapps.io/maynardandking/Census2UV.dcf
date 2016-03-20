@@ -1,0 +1,10 @@
+name: Census2UV
+account: maynardandking
+server: shinyapps.io
+appId: 83852
+bundleId: 375816
+url: https://maynardandking.shinyapps.io/Census2UV/
+when: 1455839640.17441
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: ARCHIVE/app_orig.R
