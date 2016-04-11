@@ -2,8 +2,8 @@ name: ParcelSearch
 account: maynardandking
 server: shinyapps.io
 appId: 86550
-bundleId: 399021
+bundleId: 413950
 url: https://maynardandking.shinyapps.io/ParcelSearch/
-when: 1458425530.75389
+when: 1460138634.73609
 asMultiple: FALSE
 asStatic: FALSE

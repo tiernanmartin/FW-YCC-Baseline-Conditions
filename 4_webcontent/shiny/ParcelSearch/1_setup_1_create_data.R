@@ -14,7 +14,6 @@ make_bounds_ycc()
 bounds_ycc_cntr <- c((bounds_ycc[1,1]-bounds_ycc[2,1] )/2 + bounds_ycc[2,1],
                                   (bounds_ycc[2,2]-bounds_ycc[1,2] )/2 + bounds_ycc[1,2])
 
-
 # parcel_ycc_reduc --------
 
 make_parcel_ycc_reduc <- function(){
@@ -25,6 +24,11 @@ make_parcel_ycc_reduc <- function(){
         cn <- read_csv(file = "./4_webcontent/shiny/ParcelSearch/parcel_ycc_cn.csv") %>% unlist(use.names = F)
         
         colnames(parcel_ycc_reduc@data) <- cn
+        
+        parcel_ycc_reduc@data %>% sample_n(50) %>% 
+                select(PROP_NAME:ADJRCAP_FL_AREA_MAX) %>% 
+                write_csv(path = "./4_webcontent/shiny/ParcelSearch/orig_data_glimpse.csv")
+        
         
         parcel_ycc_reduc@data %<>%
                 mutate(URL = paste0("http://blue.kingcounty.com/Assessor/eRealProperty/Dashboard.aspx?ParcelNbr=",PIN)) %>%
@@ -78,3 +82,16 @@ make_parcel_ycc_reduc <- function(){
 }
                
 make_parcel_ycc_reduc()
+
+# north_pole
+
+coords <- cbind(82.3,-113.4)
+data <- rep(NA,26) %>% t() %>% as.data.frame()
+cn <- read_csv(file = "./4_webcontent/shiny/ParcelSearch/parcel_ycc_reduc_cn.csv") %>% unlist(use.names = FALSE)
+colnames(data) <- cn
+
+SpatialPointsDataFrame(coords,data,proj4string = crs_proj,match.ID = FALSE) %>% 
+        writeOGR(dsn = "./4_webcontent/shiny/ParcelSearch/",
+                 layer = "np",
+                 driver = "ESRI Shapefile",
+                 overwrite_layer = TRUE)

@@ -20,15 +20,7 @@ header <- dashboardHeader(
 sidebar <- dashboardSidebar(width = "550px",
 # ---- +--- Custom CSS ---------
                             tags$style(HTML("
-                                            table, th, td {
-                                            vertical-align: top !important;
-                                            }
-                                            .li {
-                                            list-style-type: disc;
-                                            list-style-position: inside;
-                                            text-indent: -1em;
-                                            padding-left: 1em;
-                                            }
+
                                             .button {
                                             -webkit-appearance: none; opacity: .5; color: #FFFFFF !important; background-color: Transparent !important; background-repeat:no-repeat; padding: 0px 0px 0px !important;border: none !important; cursor: pointer; cursor: hand; hover: pointer; overflow: hidden; outline:none;
                                             }
@@ -159,66 +151,26 @@ sidebar <- dashboardSidebar(width = "550px",
                                             border: 0px;
                                             }
                                             .tab-content>.active {
-                                            max-height: 60vh; overflow-y: auto; overflow-x: initial;
+                                            max-height: 60vh; overflow-y: scroll; overflow-x: hidden;
                                             }
                                             .dataTables_scrollBody {
-                                            height: 450px !important; overflow-y: scroll; overflow-x: initial;
+                                            max-height: 135vh;
                                             }
                                             .checkbox{
                                             margin-top: 2.5px;
                                             }
-                                            .form-control {
-                                            color: #FFFFFF !important; opacity: 1 !important;
-                                            background-color: #1e282c !important;
-                                            border-color: Transparent !important;
-                                            }
-                                            .selectize-input, .selectize-control.single .selectize-input.input-active {
-                                            background-color: Transparent !important;
-                                            border-color: Transparent !important;
-                                            }
-                                            .selectize-control.multi .selectize-input > div{
-                                            color: #FFFFFF !important; opacity: 1 !important;
-                                            background-color: #1e282c !important;
-                                            border-color: Transparent !important;
-                                            }
-                                            .selectize-input.focus {
-                                            box-shadow: none;
-                                            }
-                                            #fw_logo  {
-                                            color: #FFFFFF !important; opacity: 1 !important;
-                                            font-size: 80%;
-                                            vertical-align: top;
-                                            position: fixed;
-                                            bottom: 25px;
-                                            right: 6px;
-                                            display: inline-block;
-                                            }
-                                            #fw_logo_txt, #fw_logo_png {
-                                            vertical-align: bottom;
-                                            opacity: 1 !important;
-                                            display: inline-block;
-                                            padding: 0;
-                                            }
-                                            #fw_logo_txt{
-                                            height: 13px !important;
-                                            }
-                                            #fw_logo_png{
-                                            margin-right: 5px
-                                            }
-                                            #dt {
-                                            max-width: 450px;
-                                            }
+
+
                                             ")),
 # ---- +--- Sidebar Panel Content ---------
                             # h6(br()),
                             fluidRow(
                                     column(11,
                                            sidebarMenu(id = "menu",
-                                                       menuItem("About", tabName = "about", icon = icon("question-circle")),
-                                                       menuItem("Data Table", tabName = "table", icon = icon("table")),
-                                                       menuItem("Parcel Categories & Neighborhoods", tabName = "categories", icon = icon("list")),
-                                                       menuItem("Development Conditions", tabName = "dev", icon = icon("sliders"))
-                                                   
+                                                   menuItem("Data Table", tabName = "table", icon = icon("table")),
+                                                   menuItem("Parcel Categories & Neighborhoods", tabName = "categories", icon = icon("list")),
+                                                   menuItem("Development Conditions", tabName = "dev", icon = icon("sliders")),
+                                                   menuItem("About", tabName = "about", icon = icon("question-circle"))
                                                    
                                                    
                                            )),
@@ -355,33 +307,17 @@ conditionalPanel(condition = "input.menu == 'about'",
                                             p("The purpose of this tool is to empower YCC partners to identify sites where affordable housing could be developed."),
                                             p("While using this tool, please be aware of the following points:",
                                               br(),
-                                              tags$li(HTML(paste("this tool is very slow -- allow 10-20 seconds to pass after clicking the ",
-                                                            icon("refresh"),
-                                                            "button before seeing refreshed map results"))),
+                                              tags$li("this tool is very slow -- allow 20-30 seconds to pass before seeing refreshed map results"),
                                               tags$li("this is an unfinished, draft product and therefore may contain bugs"),
-                                              tags$li("the City of Seattle requests that all applications making use of their data provide a disclaimer (see the 'Disclaimer' tab on the navigation bar above)")),
+                                              tags$li("the City of Seattle requests that all applications making use of their data provide a disclaimer (see the 'Notes' tab on the navigation bar above)")),
                                             br(),
                                             p("~ The Futurewise Team,",HTML(paste0("<a href=\"", "http://www.futurewise.org","\"", "\ target=\"_blank", "\">", "www.futurewise.org", "</a>"))),
-                                            # h3(br()),
+                                            h3(br()),
                                             p(
                                                     div(HTML(
                                                             paste("Please direct any questions to",tags$a(href="mailto:tiernan@futurewise.org","tiernan@futurewise.org"))
                                                     ),
                                                     style = "opacity: .5")
-                                            ),
-                                            br(),
-                                            p(
-                                                    div(HTML(
-                                                            paste0("YCC ParcelSearch, Copyright (C) 2016 Futurewise",
-                                                                   "<br>",
-                                                                   "YCC ParcelSearch comes with ABSOLUTELY NO WARRANTY;",
-                                                                   "<br>",
-                                                                   "This is free software, and you are welcome to redistribute it under certain conditions;",
-                                                                   "<br>",
-                                                                   "click the following link for details: ",
-                                                                   tags$a(href="http://tiernanmartin.github.io/FW-YCC-Baseline-Conditions/LICENSE","GNU GENERAL PUBLIC LICENSE"))
-                                                    ),
-                                                    style = "opacity: .5; text-align: center; font-size: 75%")
                                             )
                                             ),
                                    tabPanel(title = "Source",
@@ -399,48 +335,7 @@ conditionalPanel(condition = "input.menu == 'about'",
                                                      verbatimTextOutput(outputId = "orig_data_glimpse"))),
                                    tabPanel(title = "Glossary",
                                                 h2("Glossary"),
-                                            # h4("Parcel Categories"),
-                                            tags$table(
-                                                    tags$th( h4("Parcel Categories")),
-                                                    tags$col(tags$th("Item"),
-                                                             width = "25%"),
-                                                    tags$th("Description"),
-                                                    tags$tr(
-                                                            tags$td("ALL"),
-                                                            tags$td("All parcels.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("PUBLIC"),
-                                                            tags$td("Parcels owned by public bodies (including the City of Seattle).")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("TAX_EXEMPT"),
-                                                            tags$td("Privately-owned parcels that are not subject to taxation.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("REDEV"),
-                                                            tags$td("Parcels with excess capacity for redevelopment.",br(),
-                                                                    "Capacity is calculated by a formula developed by the Seattle Office of Planning and Community Development",
-                                                                    "For details, see", HTML(paste0("<a href=\"", "http://www.seattle.gov/dpd/cs/groups/pan/@pan/documents/web_informational/p2182731.pdf","\"", "\ target=\"_blank", "\">", "this document", "</a>")), ".")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("PARKING"),
-                                                            tags$td("Parcels whose primary use is parking.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("CHURCH"),
-                                                            tags$td("Parcels whose primary use is as a center for faith-based activities.",
-                                                                    br(),
-                                                                    "Note: despite the title, this is not limited to any particular religion.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("HIST_LNDMRK"),
-                                                            tags$td("Parcels whose development is constrained by their locations within recognized historic zones or by their designation as landmark sites.")
-                                                    ),
-                                                    tags$tr(
-                                                            h2(br())
-                                                    )),
-                                                h4("Neighborhoods"),
+                                                h4("Filters (Map I)"),
                                                 tags$table(
                                                         tags$col(tags$th("Item"),
                                                                  width = "25%"),
@@ -448,34 +343,54 @@ conditionalPanel(condition = "input.menu == 'about'",
                                                         tags$tr(
                                                                 tags$td("Outside YCC"),
                                                                 tags$td("Here's some text that is longer and may need to be wrapped.")
-                                                        ))
+                                                        ),
+                                                        style="vertical-align: top;"),
+                                                h4("Filters (Map II)"),
+                                                tags$table(
+                                                        tags$col(tags$th("Item"),
+                                                                 width = "25%"),
+                                                        tags$th("Description"),
+                                                        tags$tr(
+                                                                tags$td("ALL"),
+                                                                tags$td("All parcels.")
+                                                        ),
+                                                        tags$tr(
+                                                                tags$td("PUBLIC"),
+                                                                tags$td("Parcels owned by public bodies (including the City of Seattle).")
+                                                        ),
+                                                        tags$tr(
+                                                                tags$td("TAX_EXEMPT"),
+                                                                tags$td("Privately-owned parcels that are not subject to taxation.")
+                                                        ),
+                                                        tags$tr(
+                                                                tags$td("REDEV"),
+                                                                tags$td("Parcels with excess capacity for redevelopment.",br(),
+                                                                        "Capacity is calculated by a formula developed by the Seattle Office of Planning and Community Development",
+                                                                        "For details, see", HTML(paste0("<a href=\"", "http://www.seattle.gov/dpd/cs/groups/pan/@pan/documents/web_informational/p2182731.pdf","\"", "\ target=\"_blank", "\">", "this document", "</a>")), ".")
+                                                        ),
+                                                        tags$tr(
+                                                                tags$td("PARKING"),
+                                                                tags$td("Parcels whose primary use is parking.")
+                                                        ),
+                                                        tags$tr(
+                                                                tags$td("CHURCH"),
+                                                                tags$td("Parcels whose primary use is as a center for faith-based activities.",
+                                                                        br(),
+                                                                        "Note: despite the title, this is not limited to any particular religion.")
+                                                        ),
+                                                        tags$tr(
+                                                                tags$td("HIST_LNDMRK"),
+                                                                tags$td("Parcels whose development is constrained by their locations within recognized historic zones or by their designation as landmark sites.")
+                                                        ),
+                                                        tags$tr(
+                                                                h2(br())
+                                                        ),
+                                                        style="vertical-align: top;")
+                                            
                                             ),
-                                   tabPanel(title = "License",
-                                            h2("License"),
-                                            tags$blockquote(
-                                                    HTML(
-                                                            paste0("YCC ParcelSearch",
-                                                                   "<br>",
-                                                                   "Copyright (C) 2016 Futurewise",
-                                                                   "<br>",
-                                                                   "This program is free software; you can redistribute it and/or modify
-                                                                   it under the terms of the GNU General Public License as published by
-                                                                   the Free Software Foundation; either version 2 of the License, or
-                                                                   (at your option) any later version.
-                                                                   
-                                                                   This program is distributed in the hope that it will be useful,
-                                                                   but WITHOUT ANY WARRANTY; without even the implied warranty of
-                                                                   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-                                                                   GNU General Public License for more details.
-                                                                   
-                                                                   You should have received a copy of the GNU General Public License along
-                                                                   with this program; if not, write to the Free Software Foundation, Inc.,
-                                                                   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.")
-                                                    ),style = "font-size: 12px"
-                                                    
-                                            ),
+                                   tabPanel(title = "Disclaimer",
                                             h2("Disclaimer"),
-                                            p("The City of Seattle would like all users of their data products to know the following information:"),
+                                            p("The City of Seattle would like all users of their data products to know the following:"),
                                             tags$blockquote("The data made available here has been modified for use from its original source, which is the City of Seattle. Neither the City of Seattle nor the Office of the Chief Technology Officer (OCTO) makes any claims as to the completeness, timeliness, accuracy or content of any data contained in this application; makes any representation of any kind, including, but not limited to, warranty of the accuracy or fitness for a particular use; nor are any such warranties to be implied or inferred with respect to the information or data furnished herein. The data is subject to change as modifications and updates are complete. It is understood that the information contained in the web feed is being used at one's own risk.",style = "font-size: 12px")
                                             )
                                    )
@@ -520,16 +435,7 @@ body <- dashboardBody(
                 # uiOutput("body_dev"),
                 # tags$div(class = 'outer', leafletOutput("map",height = "100%", width = '100%')),
                 # uiOutput("body_about")
-                tags$div(class = 'outer', leafletOutput("map",height = "100%", width = '100%')),
-                tags$div(id = "fw_logo",  
-                         div(id = "fw_logo_txt",
-                             strong("Created by  ")),
-                         div(id = "fw_logo_png",
-                             tags$a(href = "http://www.futurewise.org/",
-                                    target = "_blank",
-                                    img(src = "Futurewise_Logo_Reversed_2.png"))
-                             )
-                         )
+                tags$div(class = 'outer', leafletOutput("map",height = "100%", width = '100%'))
                 )
                 )
 # +--- Create UI ---------
@@ -940,17 +846,9 @@ server <- function(input, output) {
                 
                 rv$df <- rv$shp %>% .@data %>% as.data.frame()
                 
-                if(length(rv$shp@polygons) == 0){
-                        rv$cnts <- np
-                        
-                        
-                }
-                else {
-                        rv$cnts <- rv$shp %>% 
-                                mySptlPntsDF()
-                }
+                rv$cnts <- rv$shp %>% 
+                        mySptlPntsDF()
                 
-        
                 
         })
         
@@ -993,13 +891,6 @@ server <- function(input, output) {
                 # popup <- paste0(strong("Property Name: "),rv$cnts@data$PROP_NAME,br(),
                 #                 strong("PIN: "), rv$cnts@data$PIN,br(),
                 #                 paste0("<a href=\"", rv$cnts@data$URL,"\"", "\ target=\"_blank", "\">", paste0("KC Asessor Property Report ",icon("external-link")), "</a>"))
-                
-                shp_test <- try(filter_shp(),
-                                silent = TRUE)
-                
-                validate(
-                        need(class(shp_test) != "try-error","")
-                )
                 
                 popup <- paste0(strong("Property Name: "),rv$cnts@data$PROP_NAME,br(),
                                 strong("PIN: "), rv$cnts@data$PIN,br(),
@@ -1152,7 +1043,7 @@ server <- function(input, output) {
                 
                 rv$df %>%
                         as.data.frame() %>%
-                        select('Property\nName' = PROP_NAME,'Current\nZoning' = ZONING,'Potential\nAdditional\nUnits' = POT_UNITS,'Max. Floor Area' = ADJRCAP_FL_AREA_MAX,'Appr. Land Value' = LAND_AV) %>%
+                        select('Property\nName' = PROP_NAME,'Current\nZoning' = ZONING,'Potential\nAdditional\nUnits' = POT_UNITS,'Max. Floor Area' = ADJRCAP_FL_AREA_MAX,'Appr. Land Value' = LAND_AV, 'Appr. Bldg. Value' = BLDG_AV) %>%
                         DT::datatable(selection = 'single',
                                       rownames = FALSE,
                                       extensions = 'Scroller',
@@ -1168,10 +1059,10 @@ server <- function(input, output) {
                 
         })
 #  +--- Data Table Glimpse --------
-        
+
         output$orig_data_glimpse <- renderPrint(width = 50,{
                 glimpse(orig_data_glimpse)
-
+                
         })
 #  +--- Download Button ----
         observeEvent(input$refresh,{
@@ -1180,7 +1071,7 @@ server <- function(input, output) {
                                 silent = TRUE)
                 
                 validate(
-                        need(class(shp_test) != "try-error","The current combination of filters excludes all parcels - please revise filter choices.")
+                        need(class(shp_test) != "try-error","")
                 )
                 
                 output$download <-

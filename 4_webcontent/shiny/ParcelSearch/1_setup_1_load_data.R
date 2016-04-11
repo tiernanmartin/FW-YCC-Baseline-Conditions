@@ -2,7 +2,8 @@ bounds_ycc <- read_csv(file = "./bounds_ycc.csv") %>% t()
 colnames(bounds_ycc) <- c("x","y")
 bounds_ycc_cntr <- c((bounds_ycc[1,1]-bounds_ycc[2,1] )/2 + bounds_ycc[2,1],
                      (bounds_ycc[2,2]-bounds_ycc[1,2] )/2 + bounds_ycc[1,2])
-orig_df <- read_csv(file = "./Capacity_For_All_Parcel_2015.csv")
+# orig_df <- read_csv(file = "./Capacity_For_All_Parcel_2015.csv")
+orig_data_glimpse <- read_csv("./orig_data_glimpse.csv")
 
 if(!exists("parcel_ycc_reduc")){
         parcel_ycc_reduc <- 
@@ -26,7 +27,51 @@ if(!exists("parcel_ycc_reduc")){
         
 }
 
-
+np <- {
+  if (!file.exists("./np.shp")) {
+    make_np <- function() {
+      ...
+      np <- CHANGE_THIS
+      writeOGR(obj = np, dsn = "./2_inputs/", layer = "np", 
+        driver = "ESRI Shapefile")
+      
+      colnames(np@data) %>% data_frame() %>% write_csv(path = "./2_inputs/np_cn.csv")
+      
+      view_np <<- function() {
+        
+        myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+        
+        pal <- colorNumeric(palette = myYlOrRd, domain = range(CHANGE_THIS))
+        
+        myLflt() %>% addPolygons(data = CHANGE_THIS, 
+          smoothFactor = 0, color = col2hex("white"), 
+          weight = 1.5, opacity = 0.5, fillColor = pal(CHANGE_THIS), 
+          fillOpacity = 0.75) %>% addLegend(position = "topright", 
+          title = "CHANGE_THIS", pal = pal, values = range(CHANGE_THIS), 
+          opacity = 0.75, labFormat = labelFormat())
+      }
+      np
+      
+    }
+    
+    np <- make_np()
+    rm(make_np)
+    np
+  } else {
+    make_np <- function() {
+      np <- readOGR(dsn = ".", layer = "np") %>% 
+        spTransform(CRSobj = crs_proj)
+      cn <- read_csv(file = "./parcel_ycc_reduc_cn.csv") %>% unlist(use.names = F)
+      
+      colnames(np@data) <- cn
+      
+      np
+    }
+    np <- make_np()
+    rm(make_np)
+    np
+  }
+}
 
 # if(!exists("tract_sea")){
 #         tract_sea <- 

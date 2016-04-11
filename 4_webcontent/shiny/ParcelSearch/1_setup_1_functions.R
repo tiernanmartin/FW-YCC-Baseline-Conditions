@@ -66,6 +66,10 @@ myMini <- function(map){
 
 mySptlPntsDF <- function(shp){
         
+        if(is.null(shp)){
+                return(message("The `shp` object is null"))
+        }
+        
         data <- shp@data %>% as.data.frame()
         
         shp_cnts <- gCentroid(shp, byid = TRUE)

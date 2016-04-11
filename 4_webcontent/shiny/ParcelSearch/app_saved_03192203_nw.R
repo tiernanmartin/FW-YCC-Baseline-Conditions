@@ -661,7 +661,7 @@ server <- function(input, output) {
                 popup <- paste0(strong("Property Name: "),cnts@data$PROP_NAME,br(),
                                 strong("PIN: "), cnts@data$PIN,br(),
                                 strong("Zoning: "),cnts@data$ZONING,br(),
-                                strong("Parcel Area: "),paste0(rv$cnts@data$LAND_SQFT," ft",tags$sup(2)),br(),
+                                strong("Parcel Area: "),paste0(cnts@data$LAND_SQFT," ft",tags$sup(2)),br(),
                                 strong("Existing Units: "),cnts@data$EXIST_UNITS,br(),
                                 strong("Developable Footprint: "),paste0(cnts@data$PARCEL_DEV_SQFT," ft",tags$sup(2)),br(),
                                 strong("Additional Developable Floor Area: "),paste0(cnts@data$ADJRCAP_FL_AREA_MAX," ft",tags$sup(2)),br(),
