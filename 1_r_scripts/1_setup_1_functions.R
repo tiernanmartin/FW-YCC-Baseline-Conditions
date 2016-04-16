@@ -44,6 +44,71 @@ crs_geog <- CRS("+init=epsg:2285") # Washington State plane CRS
 
 # SETUP: MY FUNCTIONS --------------------------------------------------------------------
 
+# myLfltSmpl
+# Creates a simple leaflet map with an appealing basemap and an argument for polygon data
+
+myLfltSmpl <- function(data){
+        leaflet() %>% 
+                addTiles(
+                        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+                        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
+                ) %>% 
+                addPolygons(data = data)
+}
+
+# myLflt
+# Creates a simple leaflet map with an appealing basemap (no other layers)
+
+myLflt <- function(data){
+        leaflet() %>% 
+                addTiles(
+                        urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+                        attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
+                )
+}
+
+
+
+# mySptlPntsDF
+# Converts 'SpatialPoints' objects to 'SpatialPointsDataFrames',
+# allowing them to be saved as shapefiles
+
+mySptlPntsDF <- function(shp){
+        
+        if(is.null(shp)){
+                return(message("The `shp` object is null"))
+        }
+        
+        data <- shp@data %>% as.data.frame()
+        
+        shp_cnts <- gCentroid(shp, byid = TRUE)
+        
+        shp_rn <- row.names(shp_cnts)
+        
+        shp_len <- shp_cnts@coords %>% nrow()
+        
+        if(length(shp_rn) != shp_len){
+                return(message("The `shp` object does not have the same number of row names as the list of polygons"))
+        }
+        
+        else{
+                nodata <- rep(NA, times = shp_len) %>% as.data.frame()
+                
+                rownames(nodata) <- shp_rn
+                
+                shp_cnts %<>% 
+                        SpatialPointsDataFrame(data = nodata)
+                
+                shp_cnts@data <- data
+                
+                return(shp_cnts)
+        }
+        
+        
+}
+
+
+
 
 # UV2Census
 # A function that attributes Urban Village identities to Census geometries (e.g., block groups, tracts)
