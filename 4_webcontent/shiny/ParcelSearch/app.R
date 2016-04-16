@@ -20,6 +20,14 @@ header <- dashboardHeader(
 sidebar <- dashboardSidebar(width = "550px",
 # ---- +--- Custom CSS ---------
                             tags$style(HTML("
+                                            .dropdown-menu>.active>a, .dropdown-menu>.active>a:focus, .dropdown-menu>.active>a:hover {
+                                            background-color: Transparent !important; border-color: Transparent !important;
+                                            font-weight: bold;
+                                            color: #FFFFFF; opacity: 1;
+                                            }
+                                            .dropdown-menu, .dropdown-menu>a:focus, .dropdown-menu>a:hover {
+                                            background-color: Transparent !important; border-color: Transparent !important;
+                                            }
                                             table, th, td {
                                             vertical-align: top !important;
                                             }
@@ -286,6 +294,19 @@ sidebar <- dashboardSidebar(width = "550px",
                                 conditionalPanel(
                                         condition = "input.menu == 'dev'",
                                         fluidRow(
+                                                column(10, offset = 1,
+                                                       strong("Zoning"),
+                                                       selectizeInput(inputId = "zoning_sel", label = "", choices = sort(unique(parcel_ycc_reduc@data$ZONELUT)), multiple = TRUE)
+                                                       # div(id = "zoning",class = "multicol",
+                                                       #     checkboxGroupInput(inputId = "zoning_chk",
+                                                       #                        label = "",
+                                                       #                        choices = unique(parcel_ycc_reduc@data$ZONELUT),
+                                                       #                        selected = unique(parcel_ycc_reduc@data$ZONELUT))
+                                                       # )
+                                                ),
+                                                column(1)
+                                        ),
+                                        fluidRow(
                                                 # column(width = 3, offset = 1,
                                                 #        uiOutput("capfla_low"),
                                                 #        uiOutput("landval_low"),
@@ -330,19 +351,6 @@ sidebar <- dashboardSidebar(width = "550px",
                                                 column(3,
                                                        strong("Input Type"),
                                                        radioButtons(inputId = "input_type",label = "",choices = c("Numeric","Slider"),selected = "Numeric"))
-                                        ),
-                                        fluidRow(
-                                                column(10, offset = 1,
-                                                       strong("Zoning"),
-                                                       selectizeInput(inputId = "zoning_sel", label = "", choices = sort(unique(parcel_ycc_reduc@data$ZONELUT)), multiple = TRUE)
-                                                       # div(id = "zoning",class = "multicol",
-                                                       #     checkboxGroupInput(inputId = "zoning_chk",
-                                                       #                        label = "",
-                                                       #                        choices = unique(parcel_ycc_reduc@data$ZONELUT),
-                                                       #                        selected = unique(parcel_ycc_reduc@data$ZONELUT))
-                                                       # )
-                                                ),
-                                                column(1)
                                         )
                                         
                                 ),
@@ -359,7 +367,7 @@ conditionalPanel(condition = "input.menu == 'about'",
                                                             icon("refresh"),
                                                             "button before seeing refreshed map results"))),
                                               tags$li("this is an unfinished, draft product and therefore may contain bugs"),
-                                              tags$li("the City of Seattle requests that all applications making use of their data provide a disclaimer (see the 'Disclaimer' tab on the navigation bar above)")),
+                                              tags$li("the City of Seattle requests that all applications making use of their data provide a disclaimer (see the 'License' tab on the navigation bar above)")),
                                             br(),
                                             p("~ The Futurewise Team,",HTML(paste0("<a href=\"", "http://www.futurewise.org","\"", "\ target=\"_blank", "\">", "www.futurewise.org", "</a>"))),
                                             # h3(br()),
@@ -397,59 +405,114 @@ conditionalPanel(condition = "input.menu == 'about'",
                                                 h4(HTML(paste0('<button_style data-toggle="collapse" data-target="#glimpse">',"Data Summary ",icon("angle-down"),'</button_style>')))),
                                             tags$div(id = 'glimpse',  class = 'collapse',
                                                      verbatimTextOutput(outputId = "orig_data_glimpse"))),
-                                   tabPanel(title = "Glossary",
-                                                h2("Glossary"),
-                                            # h4("Parcel Categories"),
-                                            tags$table(
-                                                    tags$th( h4("Parcel Categories")),
-                                                    tags$col(tags$th("Item"),
-                                                             width = "25%"),
-                                                    tags$th("Description"),
-                                                    tags$tr(
-                                                            tags$td("ALL"),
-                                                            tags$td("All parcels.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("PUBLIC"),
-                                                            tags$td("Parcels owned by public bodies (including the City of Seattle).")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("TAX_EXEMPT"),
-                                                            tags$td("Privately-owned parcels that are not subject to taxation.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("REDEV"),
-                                                            tags$td("Parcels with excess capacity for redevelopment.",br(),
-                                                                    "Capacity is calculated by a formula developed by the Seattle Office of Planning and Community Development",
-                                                                    "For details, see", HTML(paste0("<a href=\"", "http://www.seattle.gov/dpd/cs/groups/pan/@pan/documents/web_informational/p2182731.pdf","\"", "\ target=\"_blank", "\">", "this document", "</a>")), ".")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("PARKING"),
-                                                            tags$td("Parcels whose primary use is parking.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("CHURCH"),
-                                                            tags$td("Parcels whose primary use is as a center for faith-based activities.",
-                                                                    br(),
-                                                                    "Note: despite the title, this is not limited to any particular religion.")
-                                                    ),
-                                                    tags$tr(
-                                                            tags$td("HIST_LNDMRK"),
-                                                            tags$td("Parcels whose development is constrained by their locations within recognized historic zones or by their designation as landmark sites.")
-                                                    ),
-                                                    tags$tr(
-                                                            h2(br())
-                                                    )),
-                                                h4("Neighborhoods"),
-                                                tags$table(
-                                                        tags$col(tags$th("Item"),
-                                                                 width = "25%"),
-                                                        tags$th("Description"),
-                                                        tags$tr(
-                                                                tags$td("Outside YCC"),
-                                                                tags$td("Here's some text that is longer and may need to be wrapped.")
-                                                        ))
-                                            ),
+                                   navbarMenu(title = "Glossary",
+                                              tabPanel(title = "Parcel Categories",
+                                                      tags$table(
+                                                              tags$th( h4("Parcel Categories")),
+                                                              tags$col(tags$th("Item"),
+                                                                       width = "25%"),
+                                                              tags$th("Description"),
+                                                              tags$tr(
+                                                                      tags$td("ALL"),
+                                                                      tags$td("All parcels.")
+                                                              ),
+                                                              tags$tr(
+                                                                      tags$td("PUBLIC"),
+                                                                      tags$td("Parcels owned by public bodies (including the City of Seattle).")
+                                                              ),
+                                                              tags$tr(
+                                                                      tags$td("TAX_EXEMPT"),
+                                                                      tags$td("Privately-owned parcels that are not subject to taxation.")
+                                                              ),
+                                                              tags$tr(
+                                                                      tags$td("REDEV"),
+                                                                      tags$td("Parcels with excess capacity for redevelopment.",br(),
+                                                                              "Capacity is calculated by a formula developed by the Seattle Office of Planning and Community Development",
+                                                                              "For details, see", HTML(paste0("<a href=\"", "http://www.seattle.gov/dpd/cs/groups/pan/@pan/documents/web_informational/p2182731.pdf","\"", "\ target=\"_blank", "\">", "this document", "</a>")), ".")
+                                                              ),
+                                                              tags$tr(
+                                                                      tags$td("PARKING"),
+                                                                      tags$td("Parcels whose primary use is parking.")
+                                                              ),
+                                                              tags$tr(
+                                                                      tags$td("CHURCH"),
+                                                                      tags$td("Parcels whose primary use is as a center for faith-based activities.",
+                                                                              br(),
+                                                                              "Note: despite the title, this is not limited to any particular religion.")
+                                                              ),
+                                                              tags$tr(
+                                                                      tags$td("HIST_LNDMRK"),
+                                                                      tags$td("Parcels whose development is constrained by their locations within recognized historic zones or by their designation as landmark sites.")
+                                                              ),
+                                                              tags$tr(
+                                                                      h2(br())
+                                                              )
+                                              )),
+                                              tabPanel(title = "Neighborhoods",
+                                                      h4("Neighborhoods"),
+                                                      tags$table(
+                                                              tags$col(tags$th("Item"),
+                                                                       width = "25%"),
+                                                              tags$th("Description"),
+                                                              tags$tr(
+                                                                      tags$td("Outside YCC"),
+                                                                      tags$td("Parcels outside the boundary of the YCC neighborhoods but within the 500ft of these neighborhoods. ")
+                                                              ))
+                                              )
+                                   ),
+                                   # tabPanel(title = "Glossary",
+                                   #              h2("Glossary"),
+                                   #          # h4("Parcel Categories"),
+                                   #          tags$table(
+                                   #                  tags$th( h4("Parcel Categories")),
+                                   #                  tags$col(tags$th("Item"),
+                                   #                           width = "25%"),
+                                   #                  tags$th("Description"),
+                                   #                  tags$tr(
+                                   #                          tags$td("ALL"),
+                                   #                          tags$td("All parcels.")
+                                   #                  ),
+                                   #                  tags$tr(
+                                   #                          tags$td("PUBLIC"),
+                                   #                          tags$td("Parcels owned by public bodies (including the City of Seattle).")
+                                   #                  ),
+                                   #                  tags$tr(
+                                   #                          tags$td("TAX_EXEMPT"),
+                                   #                          tags$td("Privately-owned parcels that are not subject to taxation.")
+                                   #                  ),
+                                   #                  tags$tr(
+                                   #                          tags$td("REDEV"),
+                                   #                          tags$td("Parcels with excess capacity for redevelopment.",br(),
+                                   #                                  "Capacity is calculated by a formula developed by the Seattle Office of Planning and Community Development",
+                                   #                                  "For details, see", HTML(paste0("<a href=\"", "http://www.seattle.gov/dpd/cs/groups/pan/@pan/documents/web_informational/p2182731.pdf","\"", "\ target=\"_blank", "\">", "this document", "</a>")), ".")
+                                   #                  ),
+                                   #                  tags$tr(
+                                   #                          tags$td("PARKING"),
+                                   #                          tags$td("Parcels whose primary use is parking.")
+                                   #                  ),
+                                   #                  tags$tr(
+                                   #                          tags$td("CHURCH"),
+                                   #                          tags$td("Parcels whose primary use is as a center for faith-based activities.",
+                                   #                                  br(),
+                                   #                                  "Note: despite the title, this is not limited to any particular religion.")
+                                   #                  ),
+                                   #                  tags$tr(
+                                   #                          tags$td("HIST_LNDMRK"),
+                                   #                          tags$td("Parcels whose development is constrained by their locations within recognized historic zones or by their designation as landmark sites.")
+                                   #                  ),
+                                   #                  tags$tr(
+                                   #                          h2(br())
+                                   #                  )),
+                                   #              h4("Neighborhoods"),
+                                   #              tags$table(
+                                   #                      tags$col(tags$th("Item"),
+                                   #                               width = "25%"),
+                                   #                      tags$th("Description"),
+                                   #                      tags$tr(
+                                   #                              tags$td("Outside YCC"),
+                                   #                              tags$td("Here's some text that is longer and may need to be wrapped.")
+                                   #                      ))
+                                   #          ),
                                    tabPanel(title = "License",
                                             h2("License"),
                                             tags$blockquote(
