@@ -4,7 +4,6 @@
 
 source("./1_r_scripts/1_setup_1_functions.R") # load the project settings, packages, and user-defined functions
 
-
 # -------------------------------------------------------------------------------------------------
 
 # SPATIAL DATA: CAC NEIGHBORHOODS, BAILEY-GATZERT BOUNDARY, MY CAC BOUNDARY, WATERBODIES, UVS -----
@@ -605,8 +604,6 @@ blk_sea <- {
         
 }
 
-# -------------------------------------------------------------------------------------------------
-
 # SPATIAL DATA: TRACT SELECTION, REVISION OF BLOCK GROUP + BLOCK SELECTION ------------------------
 
 # I decided to connect the urban village identities to cesus geographies using the housing units count
@@ -983,153 +980,353 @@ bg_ycc_arb <- {
 
 }
 
+# ACS/UV Hybrid Neighborhood Boundaries
+
+uv_ycc_arb <- {
+        if (!file.exists("./2_inputs/uv_ycc_arb.shp")) {
+                make_uv_ycc_arb <- function() {
+                        
+                        # Merge tracts by UV
+                        
+                        uv1 <- maptools::unionSpatialPolygons(SpP = tract_ycc_arb,tract_ycc_arb@data$UV)
+                        uv2 <- tract_ycc_arb@data %>% group_by(UV) %>% summarise() %>% as.data.frame()
+                        uv3 <- SpatialPolygonsDataFrame(Sr = uv1,data = uv2,match.ID = FALSE)
+                        
+                        uv_ycc_arb <- uv3
+                        writeOGR(obj = uv_ycc_arb, dsn = "./2_inputs/", layer = "uv_ycc_arb", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(uv_ycc_arb@data) %>% data_frame() %>% write_csv(path = "./2_inputs/uv_ycc_arb_cn.csv")
+                        
+                        view_uv_ycc_arb <<- function() {
+                                
+                                # myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                # pal <- colorNumeric(palette = myYlOrRd, domain = range(CHANGE_THIS))
+                                pal <- colorFactor(palette = 'Set2', domain = as.factor(uv3@data$UV))
+                                
+                                # myLflt() %>% addPolygons(data = uv3, 
+                                #                          smoothFactor = 0, color = col2hex("white"), 
+                                #                          weight = 1.5, opacity = 0.5, fillColor = pal(uv3@data$UV), 
+                                #                          fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                #                                                            title = "CHANGE_THIS", pal = pal, values = range(CHANGE_THIS), 
+                                #                                                            opacity = 0.75, labFormat = labelFormat())
+                                
+                                myLflt() %>% addPolygons(data = uv3, smoothFactor =
+                                                                 0, color = col2hex('white'),weight = 1.5,opacity = .5,
+                                                         fillColor = pal(uv3@data$UV),fillOpacity = .75) %>%
+                                        addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                                  = pal, values = as.factor(uv3@data$UV), opacity = .75,
+                                                  labFormat = labelFormat())
+                                
+                        }
+                        uv_ycc_arb
+                        
+                }
+                
+                uv_ycc_arb <- make_uv_ycc_arb()
+                rm(make_uv_ycc_arb)
+                uv_ycc_arb
+        } else {
+                make_uv_ycc_arb <- function() {
+                        uv_ycc_arb <- readOGR(dsn = "./2_inputs/", layer = "uv_ycc_arb") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/uv_ycc_arb_cn.csv") %>% 
+                                unlist(use.names = FALSE)
+                        
+                        colnames(uv_ycc_arb@data) <- cn
+                        view_uv_ycc_arb <<- function() {
+                                
+                                # myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                # pal <- colorNumeric(palette = myYlOrRd, domain = range(CHANGE_THIS))
+                                pal <- colorFactor(palette = 'Set2', domain = as.factor(uv_ycc_arb@data$UV))
+                                
+                                # myLflt() %>% addPolygons(data = uv3, 
+                                #                          smoothFactor = 0, color = col2hex("white"), 
+                                #                          weight = 1.5, opacity = 0.5, fillColor = pal(uv3@data$UV), 
+                                #                          fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                #                                                            title = "CHANGE_THIS", pal = pal, values = range(CHANGE_THIS), 
+                                #                                                            opacity = 0.75, labFormat = labelFormat())
+                                
+                                myLflt() %>% addPolygons(data = uv_ycc_arb, smoothFactor =
+                                                                 0, color = col2hex('white'),weight = 1.5,opacity = .5,
+                                                         fillColor = pal(uv_ycc_arb@data$UV),fillOpacity = .75) %>%
+                                        addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                                  = pal, values = as.factor(uv_ycc_arb@data$UV), opacity = .75,
+                                                  labFormat = labelFormat())
+                                
+                        }
+                        uv_ycc_arb
+                }
+                uv_ycc_arb <- make_uv_ycc_arb()
+                rm(make_uv_ycc_arb)
+                uv_ycc_arb
+        }
+}
+
 
 # Parcels (within a 1000 foot buffer of the Arbitrary YCC boundary)
 # Note: this output uses the 'arbitrary' urban village-to-census mapping
 # Note 2: the object is used by the YCC ParcelSearch tool
 
-parcel_ycc <- {
-        
-        make_parcel_ycc <- function(){
-                
-                df <- read_csv(file = "./2_inputs/Capacity_For_All_Parcel_2015.csv")
-                
-                # Make `parcel_sea`
-                if(!file.exists("./2_inputs/parcel_sea.shp")){
-                        url <- "ftp://ftp.kingcounty.gov/gis/Web/GISData/parcel_SHP.zip" # save the URL for the waterbodies data
-                        
-                        temp <- tempfile() # create a temporary file to hold the compressed download
-                        
-                        download(url, dest = temp, mode="wb") # download the file
-                        
-                        unzip (temp, exdir = "./2_inputs/") # extract the ESRI geodatabase file to a project folder
-                        
-                        parcel_sea <- readOGR(dsn = "./2_inputs/parcel/",layer = "parcel") %>% 
-                                .[parcel_sea@data$PIN %in% unique(df$PIN),] %>% 
-                                spTransform(CRSobj = crs_proj)
-                        
-                        writeOGR(obj = parcel_sea,
-                                 dsn = "./2_inputs/",
-                                 layer = "parcel_sea",
-                                 driver = "ESRI Shapefile",
-                                 overwrite_layer = TRUE)
-                }
-                
-                # Load `parcel_sea`
-                if(!exists("parcel_sea")){
-                        parcel_sea <<- readOGR(dsn = "./2_inputs/",layer = "parcel_sea") %>% 
-                                spTransform(CRSobj = crs_proj)
-                }
-                
-                # Join `GEOID` to `parcel_sea`
-                
-                join_geoid <- function(){
-                        
-                        t_parcel <- 
-                                geo_join(spatial_data = parcel_sea,
-                                         data_frame = df,
-                                         by_sp = "PIN",
-                                         by_df = "PIN")
-                        
-                        t_parcel@data %<>% 
-                                mutate(TRBL10CHAR = as.character(TRBL10)) %>% 
-                                mutate(TRBL10CHAR = gsub(pattern = "\\.",replacement = "",x = TRBL10CHAR)) %>% 
-                                mutate(TRBL10CHAR = str_pad(TRBL10CHAR,width = 8, pad = "0",side = "right")) %>% 
-                                mutate(GEOID_TRT = paste0("5303300",substr(TRBL10CHAR,1,4))) %>% 
-                                mutate(GEOID_BG = paste0(GEOID_TRT,substr(TRBL10CHAR,5,5))) %>% 
-                                mutate(GEOID_BLK = paste0(GEOID_BG, substr(TRBL10CHAR,6,8))) %>% 
-                                select(-PIN.1,-Location.1,-TRBL10CHAR) %>% 
-                                select(GEOID_TRT,GEOID_BG,GEOID_BLK,everything())
-                        
-                        t_parcel
-                        
-                }
-                
-                parcel_sea_geoid <- join_geoid()
-                
-                
-                # Join `UV` to `parcel_sea`
+# source('./1_r_scripts/1_setup_createData_parcel_ycc.R')
 
-                make_parcel_sea_geoid_uv <- function(){
+# -------------------------------------------------------------------------------------------------
+
+# DEMOGRAPHIC DATA: AMERICAN COMMUNITY SURVEY (ACS), COMPREHENSIVE HOUSING AFFORDABILITY STRATEGY (CHAS)
+
+pctHsCstBrdn_sea <- {
+        if (!file.exists("./2_inputs/pctHsCstBrdn_sea.shp")) {
+                make_pctHsCstBrdn_sea <- function() {
+                        tr1 <- tract_sea
                         
-                        uv_tr <- tract_ycc_arb@data %>% select(GEOID,UV)
-                        uv_bg <- bg_ycc_arb@data %>% select(GEOID,UV)
+                        if (!file.exists("./2_inputs/ACS__5_Year_CHAS_Data_by_Summary_Level_080_as_of_2012.csv")){
+                                
+                                url <- 'http://egis.hud.opendata.arcgis.com/datasets/6c5f5f39d40c470586fa040063ff8d1d_0.csv' # direct URL to the file download
+                                
+                                download(url, dest = './2_inputs/ACS__5_Year_CHAS_Data_by_Summary_Level_080_as_of_2012.csv', mode='wb') # download the file
+                        }
                         
-                        parcel_sea_geoid_uv <- 
-                                geo_join(spatial_data = parcel_sea_geoid,
-                                          data_frame = uv_tr,
-                                          by_sp = "GEOID_TRT",
-                                          by_df = "GEOID") %>% 
-                                geo_join(spatial_data = .,
-                                          data_frame = uv_bg,
-                                          by_sp = "GEOID_BG",
-                                          by_df = "GEOID")
+                        hcb1 <- read_csv("./2_inputs/ACS__5_Year_CHAS_Data_by_Summary_Level_080_as_of_2012.csv") %>% 
+                                select(TRACT,OWNER = T8_EST2,RENTER = T8_EST68,T8_CB,T8_CB_PCT,T8_CB50,T8_CB50_PCT) %>%
+                                mutate(ALL = OWNER + RENTER) %>% 
+                                select(TRACT,ALL,everything()) %>% 
+                                filter(TRACT %in% tr1@data$GEOID) %>% 
+                                filter(!is.na(T8_CB_PCT))
                         
-                        parcel_sea_geoid_uv@data  %<>% 
-                                select(-GEOID,-GEOID.1) %>% 
-                                select(UV_TR = UV, UV_BG = UV.1,everything()) %>% 
-                                replace_na(list(UV_TR = "Outside YCC")) %>% 
-                                replace_na(list(UV_BG = "Outside YCC"))
+                        tr2 <- tr1 %>% 
+                                myGeoJoin(data_frame = hcb1,
+                                          by_sp = "GEOID",
+                                          by_df = "TRACT")
                         
-                        parcel_sea_geoid_uv
+                        pctHsCstBrdn_sea <- tr2
+                        writeOGR(obj = pctHsCstBrdn_sea, dsn = "./2_inputs/", 
+                                 layer = "pctHsCstBrdn_sea", driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                        
+                        colnames(pctHsCstBrdn_sea@data) %>% data_frame() %>% 
+                                write_csv(path = "./2_inputs/pctHsCstBrdn_sea_cn.csv")
+                        
+                        view_pctHsCstBrdn_sea <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:100))
+                                
+                                myLflt() %>% addPolygons(data = pctHsCstBrdn_sea, 
+                                                         smoothFactor = 0, color = col2hex("white"), 
+                                                         weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_sea@data$T8_CB_PCT), 
+                                                         fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                           # title = "Percent of Families Housing-Cost Burdened", 
+                                                                                           pal = pal, values = range(0:100), 
+                                                                                           opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        view_pctHsCstBrdn_sea50 <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:50))
+                                
+                                myLflt() %>% addPolygons(data = pctHsCstBrdn_sea, 
+                                                         smoothFactor = 0, color = col2hex("white"), 
+                                                         weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_sea@data$T8_CB50_PCT), 
+                                                         fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                           # title = "Percent of Families Severely Housing-Cost Burdened", 
+                                                                                           pal = pal, values = range(0:50), 
+                                                                                           opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        
+                        pctHsCstBrdn_sea
                         
                 }
-                        
-                parcel_sea_geoid_uv <- make_parcel_sea_geoid_uv()
                 
-                # Make `parcel_ycc'
-                
-                if(!file.exists("./2_inputs/parcel_ycc.shp")){
-                        
-                        parcel_ycc <- 
-                                seaUvs_ycc_rev %>% 
-                                spTransform(CRSobj = crs_geog) %>% 
-                                gBuffer(byid = FALSE,width = 1000) %>% 
-                                spTransform(CRSobj = crs_proj) %>% 
-                                gWithin(spgeom1 = parcel_sea_geoid,spgeom2 = .,byid = TRUE) %>% 
-                                .[1,] %>% 
-                                unlist(use.names = F) %>% 
-                                parcel_sea_geoid_uv[.,]
-                        
-                        cn <- colnames(parcel_ycc@data) %>% as.data.frame()
-                        
-                        writeOGR(obj = parcel_ycc,
-                                 dsn = "./2_inputs/",
-                                 layer = "parcel_ycc",
-                                 driver = "ESRI Shapefile",
-                                 overwrite_layer = TRUE)
-                        
-                        # writeOGR(obj = parcel_ycc,
-                        #          dsn = "./4_webcontent/shiny/ParcelSearch/",
-                        #          layer = "parcel_ycc",
-                        #          driver = "ESRI Shapefile",
-                        #          overwrite_layer = TRUE)
-                        
-                        write_csv(cn,"./2_inputs/parcel_ycc_cn.csv")
-                        # write_csv(cn,"./4_webcontent/shiny/ParcelSearch/parcel_ycc_cn.csv")
-                        
-                
-                }
-                
-                # Load `parcel_ycc`
-                if(!exists("parcel_ycc")){
-                        parcel_ycc <- readOGR(dsn = "./2_inputs/",layer = "parcel_ycc") %>% 
+                pctHsCstBrdn_sea <- make_pctHsCstBrdn_sea()
+                rm(make_pctHsCstBrdn_sea)
+                pctHsCstBrdn_sea
+        } else {
+                make_pctHsCstBrdn_sea <- function() {
+                        pctHsCstBrdn_sea <- readOGR(dsn = "./2_inputs/", layer = "pctHsCstBrdn_sea") %>% 
                                 spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/pctHsCstBrdn_sea_cn.csv") %>% 
+                                unlist(use.names = FALSE)
                         
-                        cn <- read_csv(file = "./2_inputs/parcel_ycc_cn.csv") %>% unlist(use.names = F)
+                        colnames(pctHsCstBrdn_sea@data) <- cn
+                        view_pctHsCstBrdn_sea <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:100))
+                                
+                                myLflt() %>% addPolygons(data = pctHsCstBrdn_sea, 
+                                                         smoothFactor = 0, color = col2hex("white"), 
+                                                         weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_sea@data$T8_CB_PCT), 
+                                                         fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                           # title = "Percent of Families Housing-Cost Burdened", 
+                                                                                           pal = pal, values = range(0:100), 
+                                                                                           opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        view_pctHsCstBrdn_sea50 <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:50))
+                                
+                                myLflt() %>% addPolygons(data = pctHsCstBrdn_sea, 
+                                                         smoothFactor = 0, color = col2hex("white"), 
+                                                         weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_sea@data$T8_CB50_PCT), 
+                                                         fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                           # title = "Percent of Families Severely Housing-Cost Burdened", 
+                                                                                           pal = pal, values = range(0:50), 
+                                                                                           opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        pctHsCstBrdn_sea
+                }
+                pctHsCstBrdn_sea <- make_pctHsCstBrdn_sea()
+                rm(make_pctHsCstBrdn_sea)
+                pctHsCstBrdn_sea
+        }
+}
+
+pctHsCstBrdn_ycc <- {
+        if (!file.exists("./2_inputs/pctHsCstBrdn_ycc.shp")) {
+                make_pctHsCstBrdn_ycc <- function() {
                         
-                        colnames(parcel_ycc@data) <- cn
+                        # Subset the Seattle HCB to include only YCC tracts
+                        tr1 <- pctHsCstBrdn_sea %>% subset(TRACTCE %in% tract_ycc_arb@data$TRACTCE)
+                        
+                        # Select the columns related to cost burdening
+                        hcb1 <- read_csv("./2_inputs/ACS__5_Year_CHAS_Data_by_Summary_Level_080_as_of_2012.csv") %>% 
+                                select(TRACT,OWNER = T8_EST2,RENTER = T8_EST68,T8_CB,T8_CB_PCT,T8_CB50,T8_CB50_PCT) %>%
+                                mutate(ALL = OWNER + RENTER) %>% 
+                                select(TRACT,ALL,everything()) %>% 
+                                filter(TRACT %in% tr1@data$GEOID)
+                        
+                        # Join the UV names
+                        UVs <- tract_ycc_arb@data %>% select(TRACTCE,UV)
+                        
+                        tr2 <- tr1 
+                        
+                        tr2@data %<>%
+                                left_join(UVs) 
+                        
+                        # Group by UV and calculate the CB and CB50 percentages
+                        
+                        uv1 <- tr2@data %>% 
+                                as.data.frame() %>% 
+                                group_by(UV) %>% 
+                                summarise(CB_PCT = sum(T8_CB)/sum(ALL)) 
+                        uv2 <- tr2@data %>% 
+                                as.data.frame() %>% 
+                                group_by(UV) %>% 
+                                summarise(CB_PCT50 = sum(T8_CB50)/sum(ALL)) 
+                        uv3 <- tr2@data %>% 
+                                as.data.frame() %>% 
+                                group_by(UV) %>% 
+                                summarise(ALL = sum(ALL)) 
+                        uv4 <- left_join(uv1,uv2) %>% 
+                                left_join(uv3)
+                        
+                        # Join the summary CB/CB50 values to the grouped ACS/UV polygons
+                        
+                        uv5 <- myGeoJoin(spatial_data = uv_ycc_arb,data_frame = uv4,by_sp = "UV",by_df = "UV") 
+                        
+                        # Convert the decimals into 1^e2 (better for mapping)
+                        
+                        uv5@data %<>% 
+                                mutate(CB_PCT = round_any(CB_PCT * 100,.01, round)) %>% 
+                                mutate(CB_PCT50 = round_any(CB_PCT50 * 100,.01, round))
+                        
+                        pctHsCstBrdn_ycc <- uv5
+                        writeOGR(obj = pctHsCstBrdn_ycc, dsn = "./2_inputs/", 
+                                 layer = "pctHsCstBrdn_ycc", driver = "ESRI Shapefile",overwrite_layer = TRUE)
+                        
+                        colnames(pctHsCstBrdn_ycc@data) %>% data_frame() %>% 
+                                write_csv(path = "./2_inputs/pctHsCstBrdn_ycc_cn.csv")
+                        
+                        view_pctHsCstBrdn_ycc <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                max <- max(pctHsCstBrdn_ycc@data$CB_PCT) %>% round_any(.,10,ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                
+                                myLflt() %>% 
+                                        addPolygons(data = pctHsCstBrdn_ycc, 
+                                                    smoothFactor = 0, color = col2hex("white"), 
+                                                    weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_ycc@data$CB_PCT), 
+                                                    fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                      # title = "Percent of Families Housing-Cost Burdened", 
+                                                                                      pal = pal, values = range(0:max), 
+                                                                                      opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        view_pctHsCstBrdn_ycc50 <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                max <- max(pctHsCstBrdn_ycc@data$CB_PCT50) %>% round_any(.,10,ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                
+                                myLflt() %>% addPolygons(data = pctHsCstBrdn_ycc, 
+                                                         smoothFactor = 0, color = col2hex("white"), 
+                                                         weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_ycc@data$CB_PCT50), 
+                                                         fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                           # title = "Percent of Families Severely Housing-Cost Burdened", 
+                                                                                           pal = pal, values = range(0:max), 
+                                                                                           opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        
+                        pctHsCstBrdn_ycc
+                        
                 }
                 
-                parcel_ycc
-                
+                pctHsCstBrdn_ycc <- make_pctHsCstBrdn_ycc()
+                rm(make_pctHsCstBrdn_ycc)
+                pctHsCstBrdn_ycc
+        } else {
+                make_pctHsCstBrdn_ycc <- function() {
+                        pctHsCstBrdn_ycc <- readOGR(dsn = "./2_inputs/", layer = "pctHsCstBrdn_ycc") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/pctHsCstBrdn_ycc_cn.csv") %>% 
+                                unlist(use.names = FALSE)
+                        
+                        colnames(pctHsCstBrdn_ycc@data) <- cn
+                        view_pctHsCstBrdn_ycc <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                max <- max(pctHsCstBrdn_ycc@data$CB_PCT) %>% round_any(.,10,ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                
+                                myLflt() %>% 
+                                        addPolygons(data = pctHsCstBrdn_ycc, 
+                                                    smoothFactor = 0, color = col2hex("white"), 
+                                                    weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_ycc@data$CB_PCT), 
+                                                    fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                      # title = "Percent of Families Housing-Cost Burdened", 
+                                                                                      pal = pal, values = range(0:max), 
+                                                                                      opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        view_pctHsCstBrdn_ycc50 <<- function() {
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                
+                                max <- max(pctHsCstBrdn_ycc@data$CB_PCT50) %>% round_any(.,10,ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                
+                                myLflt() %>% addPolygons(data = pctHsCstBrdn_ycc, 
+                                                         smoothFactor = 0, color = col2hex("white"), 
+                                                         weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_ycc@data$CB_PCT50), 
+                                                         fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                                           # title = "Percent of Families Severely Housing-Cost Burdened", 
+                                                                                           pal = pal, values = range(0:max), 
+                                                                                           opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+                        }
+                        pctHsCstBrdn_ycc
+                }
+                pctHsCstBrdn_ycc <- make_pctHsCstBrdn_ycc()
+                rm(make_pctHsCstBrdn_ycc)
+                pctHsCstBrdn_ycc
         }
-        
-        parcel_ycc <- make_parcel_ycc()
-        
-        rm(make_parcel_ycc)
-        
-        parcel_ycc
 }
 
 
