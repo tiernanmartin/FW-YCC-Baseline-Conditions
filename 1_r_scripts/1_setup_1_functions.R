@@ -44,6 +44,12 @@ crs_geog <- CRS("+init=epsg:2285") # Washington State plane CRS
 
 # SETUP: MY FUNCTIONS --------------------------------------------------------------------
 
+# myPctRound
+# Converts a decimal value into a 10^e2 with 10^e-2 rounded
+myPctRound <- function(x){
+        plyr::round_any(x*100,.01)
+}
+
 # myLfltSmpl
 # Creates a simple leaflet map with an appealing basemap and an argument for polygon data
 

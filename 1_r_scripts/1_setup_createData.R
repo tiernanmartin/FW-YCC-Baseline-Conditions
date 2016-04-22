@@ -462,6 +462,91 @@ seaAcsUvs <- {
 
 # all Census geometries are TIGER shapefiles that are clipped to remove waterbodies (for visual clarity)
 
+sea <- {
+        if (!file.exists("./2_inputs/sea.shp")) {
+                make_sea <- function() {
+                       
+                        sea <- tigris::places(state = "WA") %>% 
+                                subset(NAME == "Seattle") %>% 
+                                spTransform(CRSobj = crs_proj) %>% 
+                                wtr_clip(wtr = waterbodies)
+                        
+                        writeOGR(obj = sea, dsn = "./2_inputs/", layer = "sea", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(sea@data) %>% data_frame() %>% write_csv(path = "./2_inputs/sea_cn.csv")
+                        
+                        view_sea <<- function() {
+                                
+                                myLfltSmpl(sea)
+                                # myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                # max <- max(sea@data$IND) %>% round_any(10, ceiling)
+                                # pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # # pal <- colorFactor(palette = 'Set2', domain =
+                                # # as.factor(sea@data$IND))
+                                # 
+                                # myLflt() %>% addPolygons(data = sea, smoothFactor = 0, 
+                                #                          color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                #                          fillColor = pal(sea@data$IND), fillOpacity = 0.75) %>% 
+                                #         addLegend(position = "topright", title = "CHANGE_THIS", 
+                                #                   pal = pal, values = range(0:max), opacity = 0.75, 
+                                #                   labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = sea, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(sea@data$IND),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(sea@data$IND), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        sea
+                        
+                }
+                
+                sea <- make_sea()
+                rm(make_sea)
+                sea
+        } else {
+                make_sea <- function() {
+                        sea <- readOGR(dsn = "./2_inputs/", layer = "sea") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/sea_cn.csv") %>% unlist(use.names = FALSE)
+                        
+                        colnames(sea@data) <- cn
+                        view_sea <<- function() {
+                                
+                                myLfltSmpl(sea)
+                                # myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                # max <- max(sea@data$IND) %>% round_any(10, ceiling)
+                                # pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # # pal <- colorFactor(palette = 'Set2', domain =
+                                # # as.factor(sea@data$IND))
+                                # 
+                                # myLflt() %>% addPolygons(data = sea, smoothFactor = 0, 
+                                #                          color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                #                          fillColor = pal(sea@data$IND), fillOpacity = 0.75) %>% 
+                                #         addLegend(position = "topright", title = "CHANGE_THIS", 
+                                #                   pal = pal, values = range(0:max), opacity = 0.75, 
+                                #                   labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = sea, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(sea@data$IND),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(sea@data$IND), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        sea
+                }
+                sea <- make_sea()
+                rm(make_sea)
+                sea
+        }
+}
+
+
 tract_sea <- {
         
         make_tract_sea <- function(){
@@ -1076,6 +1161,352 @@ uv_ycc_arb <- {
 
 # DEMOGRAPHIC DATA: AMERICAN COMMUNITY SURVEY (ACS), COMPREHENSIVE HOUSING AFFORDABILITY STRATEGY (CHAS) -----
 
+# Race & Ethnicity
+
+
+
+pctRace_sea_tr <- {
+        if (!file.exists("./2_inputs/pctRace_sea_tr.shp")) {
+                make_pctRace_sea_tr <- function() {
+                        
+                        tr1 <- tract_sea
+                        
+                        tr_wa <- geo.make(state = "WA",county = "King", tract = "*")
+                        
+                        race1 <- acs.fetch(endyear = 2014,geography = tr_wa,table.number = "B03002")
+                        colCode <- race1@acs.colnames
+                        colPretty <- acs.fetch(endyear = 2014,geography = tr_wa,table.number = "B03002",col.names = "pretty") %>%
+                                .@acs.colnames
+                        colGuide <- rbind(colCode,colPretty) %>% as.data.frame()
+                        
+                        race2 <- race1[race1@geography$tract %in% tr1$TRACTCE,] %>%
+                                .@estimate %>% 
+                                cbind(race1[race1@geography$tract %in% tr1$TRACTCE,]@geography$tract) %>%
+                                as.data.frame() %>% 
+                                rename(TRACTCE = V22) %>% 
+                                mutate_each(funs(as.numeric),-contains("TRACTCE")) %>% 
+                                rename(TOTAL = B03002_001,
+                                       WHITE = B03002_003,
+                                       BLACK = B03002_004,
+                                       AM_INDIAN = B03002_005,
+                                       ASIAN = B03002_006,
+                                       PACIFIC = B03002_007,
+                                       HISPANIC = B03002_012) %>% 
+                                mutate(OTHER = B03002_008 + B03002_009) %>% 
+                                mutate(POC = TOTAL - WHITE) %>% 
+                                select(TRACTCE,
+                                       TOTAL,
+                                       WHITE,
+                                       POC,
+                                       BLACK,
+                                       AM_INDIAN,
+                                       ASIAN,
+                                       PACIFIC,
+                                       HISPANIC,
+                                       OTHER) %>% 
+                                mutate(PCT_WHITE = myPctRound(WHITE/TOTAL),
+                                       PCT_POC = myPctRound(POC/TOTAL),
+                                       PCT_BLACK = myPctRound(BLACK/TOTAL),
+                                       PCT_AM_INDIAN = myPctRound(AM_INDIAN/TOTAL),
+                                       PCT_ASIAN = myPctRound(ASIAN/TOTAL),
+                                       PCT_PACIFIC = myPctRound(PACIFIC/TOTAL),
+                                       PCT_HISPANIC = myPctRound(HISPANIC/TOTAL),
+                                       PCT_OTHER = myPctRound(OTHER/TOTAL))
+                        
+                        tr2 <- myGeoJoin(tr1,race2,"TRACTCE","TRACTCE")
+                        
+                        pctRace_sea_tr <- tr2
+                        writeOGR(obj = pctRace_sea_tr, dsn = "./2_inputs/", layer = "pctRace_sea_tr", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(pctRace_sea_tr@data) %>% data_frame() %>% write_csv(path = "./2_inputs/pctRace_sea_tr_cn.csv")
+                        
+                        view_pctRace_sea_tr_pctPOC <<- function() {
+                                tr2 <- pctRace_sea_tr
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(tr2@data$PCT_POC) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(tr2@data$PCT_POC))
+                                
+                                myLflt() %>% addPolygons(data = tr2, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(tr2@data$PCT_POC), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat(suffix = "%"))
+                                
+                                # myLflt() %>% addPolygons(data = tr2, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(tr2@data$PCT_POC),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(tr2@data$PCT_POC), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        pctRace_sea_tr
+                        
+                }
+                
+                pctRace_sea_tr <- make_pctRace_sea_tr()
+                rm(make_pctRace_sea_tr)
+                pctRace_sea_tr
+        } else {
+                make_pctRace_sea_tr <- function() {
+                        pctRace_sea_tr <- readOGR(dsn = "./2_inputs/", layer = "pctRace_sea_tr") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/pctRace_sea_tr_cn.csv") %>% unlist(use.names = FALSE)
+                        
+                        colnames(pctRace_sea_tr@data) <- cn
+                        view_pctRace_sea_tr_pctPOC <<- function() {
+                                tr2 <- pctRace_sea_tr
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(tr2@data$PCT_POC) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(tr2@data$PCT_POC))
+                                
+                                myLflt() %>% addPolygons(data = tr2, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(tr2@data$PCT_POC), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat(suffix = "%"))
+                                
+                                # myLflt() %>% addPolygons(data = tr2, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(tr2@data$PCT_POC),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(tr2@data$PCT_POC), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        pctRace_sea_tr
+                }
+                pctRace_sea_tr <- make_pctRace_sea_tr()
+                rm(make_pctRace_sea_tr)
+                pctRace_sea_tr
+        }
+}
+
+
+pctPoC_sea <- {
+        if (!file.exists("./2_inputs/pctPoC_sea.shp")) {
+                make_pctPoC_sea <- function() {
+                        
+                        tr1 <- tract_sea
+                        
+                        tr_wa <- geo.make(state = "WA",county = "King", tract = "*")
+                        
+                        poc1 <- acs.fetch(endyear = 2014,geography = tr_wa,table.number = "B02001",col.names = "pretty")
+                        
+                        poc2 <- poc1[poc1@geography$tract %in% tr1$TRACTCE,] %>%
+                                .@estimate %>%
+                                cbind(poc1[poc1@geography$tract %in% tr1$TRACTCE,]@geography$tract) %>%
+                                as.data.frame() %>% 
+                                select(TRACTCE = V11, TOTAL = contains("Total"),WHITE = contains("White alone")) %>%
+                                mutate_each(funs(as.numeric),-contains("TRACTCE")) %>% 
+                                mutate(POC = TOTAL - WHITE) %>% 
+                                mutate(PCT_POC = POC/TOTAL) %>% 
+                                mutate(PCT_POC = round_any(PCT_POC*100,.01,round)) %>% 
+                                select(TRACTCE,TOTAL,POC,PCT_POC)
+                        
+                        tr2 <- myGeoJoin(tr1,poc2,"TRACTCE","TRACTCE")
+                        
+                        pctPoC_sea <- tr2
+                        writeOGR(obj = pctPoC_sea, dsn = "./2_inputs/", layer = "pctPoC_sea", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(pctPoC_sea@data) %>% data_frame() %>% write_csv(path = "./2_inputs/pctPoC_sea_cn.csv")
+                        
+                        view_pctPoC_sea <<- function() {
+                                tr2 <- pctPoC_sea
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(tr2@data$PCT_POC) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(tr2@data$PCT_POC))
+                                
+                                myLflt() %>% addPolygons(data = tr2, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(tr2@data$PCT_POC), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = tr2, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(tr2@data$PCT_POC),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(tr2@data$PCT_POC), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        pctPoC_sea
+                        
+                }
+                
+                pctPoC_sea <- make_pctPoC_sea()
+                rm(make_pctPoC_sea)
+                pctPoC_sea
+        } else {
+                make_pctPoC_sea <- function() {
+                        pctPoC_sea <- readOGR(dsn = "./2_inputs/", layer = "pctPoC_sea") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/pctPoC_sea_cn.csv") %>% 
+                                unlist(use.names = FALSE)
+                        
+                        colnames(pctPoC_sea@data) <- cn
+                        view_pctPoC_sea <<- function() {
+                                tr2 <- pctPoC_sea
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(tr2@data$PCT_POC) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(tr2@data$PCT_POC))
+                                
+                                myLflt() %>% addPolygons(data = tr2, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(tr2@data$PCT_POC), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = tr2, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(tr2@data$PCT_POC),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(tr2@data$PCT_POC), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        pctPoC_sea
+                }
+                pctPoC_sea <- make_pctPoC_sea()
+                rm(make_pctPoC_sea)
+                pctPoC_sea
+        }
+}
+
+pctPoC_ycc <- {
+        if (!file.exists("./2_inputs/pctPoC_ycc.shp")) {
+                make_pctPoC_ycc <- function() {
+                        
+                        
+                        # Subset the Seattle data to include only YCC tracts
+                        tr1 <- pctPoC_sea %>% subset(TRACTCE %in% tract_ycc_arb@data$TRACTCE)
+                        
+                        
+                        # Join the UV names
+                        UVs <- tract_ycc_arb@data %>% select(TRACTCE,UV)
+                        
+                        tr2 <- tr1 
+                        
+                        tr2@data %<>%
+                                left_join(UVs) 
+                        
+                        # Group by UV (and calculate the percentages, if applicable)
+                        uv1 <- tr2@data %>% 
+                                as.data.frame() %>% 
+                                group_by(UV) %>% 
+                                summarise(POC = sum(POC))
+                        uv2 <- tr2@data %>% 
+                                as.data.frame() %>% 
+                                group_by(UV) %>% 
+                                summarise(PCT_POC = sum(POC)/sum(TOTAL)) %>% 
+                                mutate(PCT_POC = round_any(PCT_POC*100,.01,round))
+                        uv3 <- left_join(uv1,uv2)
+                        
+                        # Join the summary CB/CB50 values to the grouped ACS/UV polygons
+                        
+                        uv4 <- myGeoJoin(spatial_data = uv_ycc_arb,data_frame = uv3,by_sp = 'UV',by_df = 'UV') 
+                        
+                        pctPoC_ycc <- uv4
+                        
+                        writeOGR(obj = pctPoC_ycc, dsn = "./2_inputs/", layer = "pctPoC_ycc", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(pctPoC_ycc@data) %>% data_frame() %>% write_csv(path = "./2_inputs/pctPoC_ycc_cn.csv")
+                        
+                        view_pctPoC_ycc <<- function() {
+                                uv4 <- pctPoC_ycc
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(uv4@data$PCT_POC) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(uv4@data$PCT_POC))
+                                
+                                myLflt() %>% addPolygons(data = uv4, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(uv4@data$PCT_POC), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = uv4, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(uv4@data$PCT_POC),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(uv4@data$PCT_POC), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        
+                        pctPoC_ycc
+                        
+                }
+                
+                pctPoC_ycc <- make_pctPoC_ycc()
+                rm(make_pctPoC_ycc)
+                pctPoC_ycc
+        } else {
+                make_pctPoC_ycc <- function() {
+                        pctPoC_ycc <- readOGR(dsn = "./2_inputs/", layer = "pctPoC_ycc") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/pctPoC_ycc_cn.csv") %>% 
+                                unlist(use.names = FALSE)
+                        
+                        colnames(pctPoC_ycc@data) <- cn
+                        view_pctPoC_ycc <<- function() {
+                                uv4 <- pctPoC_ycc
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(uv4@data$PCT_POC) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(uv4@data$PCT_POC))
+                                
+                                myLflt() %>% addPolygons(data = uv4, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(uv4@data$PCT_POC), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = uv4, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(uv4@data$PCT_POC),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(uv4@data$PCT_POC), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        pctPoC_ycc
+                }
+                pctPoC_ycc <- make_pctPoC_ycc()
+                rm(make_pctPoC_ycc)
+                pctPoC_ycc
+        }
+}
+
+
+# Housing
+
 pctHsCstBrdn_sea <- {
         if (!file.exists("./2_inputs/pctHsCstBrdn_sea.shp")) {
                 make_pctHsCstBrdn_sea <- function() {
@@ -1329,6 +1760,9 @@ pctHsCstBrdn_ycc <- {
         }
 }
 
+
+# Income
+
 pctBelowPvty_sea <- {
         if (!file.exists("./2_inputs/pctBelowPvty_sea.shp")) {
                 make_pctBelowPvty_sea <- function() {
@@ -1547,6 +1981,9 @@ pctBelowPvty_ycc <- {
                 pctBelowPvty_ycc
         }
 }
+
+
+# Language
 
 pctEngLTvwell_sea <- {
         if (!file.exists("./2_inputs/pctEngLTvwell_sea.shp")) {
@@ -1773,215 +2210,5 @@ pctEngLTvwell_ycc <- {
         }
 }
 
-pctPoC_sea <- {
-        if (!file.exists("./2_inputs/pctPoC_sea.shp")) {
-                make_pctPoC_sea <- function() {
-                        
-                        tr1 <- tract_sea
-                        
-                        tr_wa <- geo.make(state = "WA",county = "King", tract = "*")
-                        
-                        poc1 <- acs.fetch(endyear = 2014,geography = tr_wa,table.number = "B02001",col.names = "pretty")
-                        
-                        poc2 <- poc1[poc1@geography$tract %in% tr1$TRACTCE,] %>%
-                                .@estimate %>%
-                                cbind(poc1[poc1@geography$tract %in% tr1$TRACTCE,]@geography$tract) %>%
-                                as.data.frame() %>% 
-                                select(TRACTCE = V11, TOTAL = contains("Total"),WHITE = contains("White alone")) %>%
-                                mutate_each(funs(as.numeric),-contains("TRACTCE")) %>% 
-                                mutate(POC = TOTAL - WHITE) %>% 
-                                mutate(PCT_POC = POC/TOTAL) %>% 
-                                mutate(PCT_POC = round_any(PCT_POC*100,.01,round)) %>% 
-                                select(TRACTCE,TOTAL,POC,PCT_POC)
-                        
-                        tr2 <- myGeoJoin(tr1,poc2,"TRACTCE","TRACTCE")
-                        
-                        pctPoC_sea <- tr2
-                        writeOGR(obj = pctPoC_sea, dsn = "./2_inputs/", layer = "pctPoC_sea", 
-                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
-                        
-                        colnames(pctPoC_sea@data) %>% data_frame() %>% write_csv(path = "./2_inputs/pctPoC_sea_cn.csv")
-                        
-                        view_pctPoC_sea <<- function() {
-                                tr2 <- pctPoC_sea
-                                
-                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
-                                max <- max(tr2@data$PCT_POC) %>% round_any(10, ceiling)
-                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
-                                # pal <- colorFactor(palette = 'Set2', domain =
-                                # as.factor(tr2@data$PCT_POC))
-                                
-                                myLflt() %>% addPolygons(data = tr2, smoothFactor = 0, 
-                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
-                                                         fillColor = pal(tr2@data$PCT_POC), fillOpacity = 0.75) %>% 
-                                        addLegend(position = "topright", title = "CHANGE_THIS", 
-                                                  pal = pal, values = range(0:max), opacity = 0.75, 
-                                                  labFormat = labelFormat())
-                                
-                                # myLflt() %>% addPolygons(data = tr2, smoothFactor = 0,
-                                # color = col2hex('white'),weight = 1.5,opacity = .5,
-                                # fillColor = pal(tr2@data$PCT_POC),fillOpacity = .75) %>%
-                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
-                                # = pal, values = as.factor(tr2@data$PCT_POC), opacity = .75,
-                                # labFormat = labelFormat())
-                                
-                        }
-                        pctPoC_sea
-                        
-                }
-                
-                pctPoC_sea <- make_pctPoC_sea()
-                rm(make_pctPoC_sea)
-                pctPoC_sea
-        } else {
-                make_pctPoC_sea <- function() {
-                        pctPoC_sea <- readOGR(dsn = "./2_inputs/", layer = "pctPoC_sea") %>% 
-                                spTransform(CRSobj = crs_proj)
-                        cn <- read_csv("./2_inputs/pctPoC_sea_cn.csv") %>% 
-                                unlist(use.names = FALSE)
-                        
-                        colnames(pctPoC_sea@data) <- cn
-                        view_pctPoC_sea <<- function() {
-                                tr2 <- pctPoC_sea
-                                
-                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
-                                max <- max(tr2@data$PCT_POC) %>% round_any(10, ceiling)
-                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
-                                # pal <- colorFactor(palette = 'Set2', domain =
-                                # as.factor(tr2@data$PCT_POC))
-                                
-                                myLflt() %>% addPolygons(data = tr2, smoothFactor = 0, 
-                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
-                                                         fillColor = pal(tr2@data$PCT_POC), fillOpacity = 0.75) %>% 
-                                        addLegend(position = "topright", title = "CHANGE_THIS", 
-                                                  pal = pal, values = range(0:max), opacity = 0.75, 
-                                                  labFormat = labelFormat())
-                                
-                                # myLflt() %>% addPolygons(data = tr2, smoothFactor = 0,
-                                # color = col2hex('white'),weight = 1.5,opacity = .5,
-                                # fillColor = pal(tr2@data$PCT_POC),fillOpacity = .75) %>%
-                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
-                                # = pal, values = as.factor(tr2@data$PCT_POC), opacity = .75,
-                                # labFormat = labelFormat())
-                                
-                        }
-                        pctPoC_sea
-                }
-                pctPoC_sea <- make_pctPoC_sea()
-                rm(make_pctPoC_sea)
-                pctPoC_sea
-        }
-}
 
-pctPoC_ycc <- {
-        if (!file.exists("./2_inputs/pctPoC_ycc.shp")) {
-                make_pctPoC_ycc <- function() {
-                        
-                        
-                        # Subset the Seattle data to include only YCC tracts
-                        tr1 <- pctPoC_sea %>% subset(TRACTCE %in% tract_ycc_arb@data$TRACTCE)
-                        
-                        
-                        # Join the UV names
-                        UVs <- tract_ycc_arb@data %>% select(TRACTCE,UV)
-                        
-                        tr2 <- tr1 
-                        
-                        tr2@data %<>%
-                                left_join(UVs) 
-                        
-                        # Group by UV (and calculate the percentages, if applicable)
-                        uv1 <- tr2@data %>% 
-                                as.data.frame() %>% 
-                                group_by(UV) %>% 
-                                summarise(POC = sum(POC))
-                        uv2 <- tr2@data %>% 
-                                as.data.frame() %>% 
-                                group_by(UV) %>% 
-                                summarise(PCT_POC = sum(POC)/sum(TOTAL)) %>% 
-                                mutate(PCT_POC = round_any(PCT_POC*100,.01,round))
-                        uv3 <- left_join(uv1,uv2)
-                        
-                        # Join the summary CB/CB50 values to the grouped ACS/UV polygons
-                        
-                        uv4 <- myGeoJoin(spatial_data = uv_ycc_arb,data_frame = uv3,by_sp = 'UV',by_df = 'UV') 
-                        
-                        pctPoC_ycc <- uv4
-                        
-                        writeOGR(obj = pctPoC_ycc, dsn = "./2_inputs/", layer = "pctPoC_ycc", 
-                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
-                        
-                        colnames(pctPoC_ycc@data) %>% data_frame() %>% write_csv(path = "./2_inputs/pctPoC_ycc_cn.csv")
-                        
-                        view_pctPoC_ycc <<- function() {
-                                uv4 <- pctPoC_ycc
-                                
-                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
-                                max <- max(uv4@data$PCT_POC) %>% round_any(10, ceiling)
-                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
-                                # pal <- colorFactor(palette = 'Set2', domain =
-                                # as.factor(uv4@data$PCT_POC))
-                                
-                                myLflt() %>% addPolygons(data = uv4, smoothFactor = 0, 
-                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
-                                                         fillColor = pal(uv4@data$PCT_POC), fillOpacity = 0.75) %>% 
-                                        addLegend(position = "topright", title = "CHANGE_THIS", 
-                                                  pal = pal, values = range(0:max), opacity = 0.75, 
-                                                  labFormat = labelFormat())
-                                
-                                # myLflt() %>% addPolygons(data = uv4, smoothFactor = 0,
-                                # color = col2hex('white'),weight = 1.5,opacity = .5,
-                                # fillColor = pal(uv4@data$PCT_POC),fillOpacity = .75) %>%
-                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
-                                # = pal, values = as.factor(uv4@data$PCT_POC), opacity = .75,
-                                # labFormat = labelFormat())
-                                
-                        }
-                        
-                        pctPoC_ycc
-                        
-                }
-                
-                pctPoC_ycc <- make_pctPoC_ycc()
-                rm(make_pctPoC_ycc)
-                pctPoC_ycc
-        } else {
-                make_pctPoC_ycc <- function() {
-                        pctPoC_ycc <- readOGR(dsn = "./2_inputs/", layer = "pctPoC_ycc") %>% 
-                                spTransform(CRSobj = crs_proj)
-                        cn <- read_csv("./2_inputs/pctPoC_ycc_cn.csv") %>% 
-                                unlist(use.names = FALSE)
-                        
-                        colnames(pctPoC_ycc@data) <- cn
-                        view_pctPoC_ycc <<- function() {
-                                uv4 <- pctPoC_ycc
-                                
-                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
-                                max <- max(uv4@data$PCT_POC) %>% round_any(10, ceiling)
-                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
-                                # pal <- colorFactor(palette = 'Set2', domain =
-                                # as.factor(uv4@data$PCT_POC))
-                                
-                                myLflt() %>% addPolygons(data = uv4, smoothFactor = 0, 
-                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
-                                                         fillColor = pal(uv4@data$PCT_POC), fillOpacity = 0.75) %>% 
-                                        addLegend(position = "topright", title = "CHANGE_THIS", 
-                                                  pal = pal, values = range(0:max), opacity = 0.75, 
-                                                  labFormat = labelFormat())
-                                
-                                # myLflt() %>% addPolygons(data = uv4, smoothFactor = 0,
-                                # color = col2hex('white'),weight = 1.5,opacity = .5,
-                                # fillColor = pal(uv4@data$PCT_POC),fillOpacity = .75) %>%
-                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
-                                # = pal, values = as.factor(uv4@data$PCT_POC), opacity = .75,
-                                # labFormat = labelFormat())
-                                
-                        }
-                        pctPoC_ycc
-                }
-                pctPoC_ycc <- make_pctPoC_ycc()
-                rm(make_pctPoC_ycc)
-                pctPoC_ycc
-        }
-}
 
