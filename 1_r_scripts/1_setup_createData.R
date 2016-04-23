@@ -546,6 +546,49 @@ sea <- {
         }
 }
 
+sea_ua <- {
+        if (!file.exists("./2_inputs/sea_ua.shp")) {
+                make_sea_ua <- function() {
+                        
+                        sea_ua <- tigris::urban_areas(cb = TRUE) %>% 
+                                subset(NAME10 == "Seattle, WA") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        
+                        writeOGR(obj = sea_ua, dsn = "./2_inputs/", layer = "sea_ua", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(sea_ua@data) %>% data_frame() %>% write_csv(path = "./2_inputs/sea_ua_cn.csv")
+                        
+                        view_sea_ua <<- function() {
+                                myLfltSmpl(sea_ua)
+                                
+                        }
+                        sea_ua
+                        
+                }
+                
+                sea_ua <- make_sea_ua()
+                rm(make_sea_ua)
+                sea_ua
+        } else {
+                make_sea_ua <- function() {
+                        sea_ua <- readOGR(dsn = "./2_inputs/", layer = "sea_ua") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/sea_ua_cn.csv") %>% unlist(use.names = FALSE)
+                        
+                        colnames(sea_ua@data) <- cn
+                        view_sea_ua <<- function() {
+                                myLfltSmpl(sea_ua)
+                                
+                        }
+                        sea_ua
+                }
+                sea_ua <- make_sea_ua()
+                rm(make_sea_ua)
+                sea_ua
+        }
+}
+
 tract_sea <- {
         
         make_tract_sea <- function(){
@@ -1760,7 +1803,64 @@ pctHsCstBrdn_ycc_tr <- {
 
 # Income
 
-
+pctBelowPvty_seattle <- {
+        if (!file.exists("./2_inputs/pctBelowPvty_seattle.csv")) {
+                make_pctBelowPvty_seattle <- function() {
+                        
+                        tr1 <- tract_sea
+                        
+                        tr_wa <- geo.make(state = "WA",county = "King", tract = "*")
+                        
+                        pbp1 <- acs.fetch(endyear = 2014,geography = tr_wa,table.number = "C17002",col.names = "pretty")
+                        
+                        pbp2 <- pbp1[pbp1@geography$tract %in% tr1$TRACTCE,] %>%
+                                .@estimate %>%
+                                cbind(pbp1[pbp1@geography$tract %in% tr1$TRACTCE,]@geography$tract) %>%
+                                as.data.frame()
+                        
+                        colnames(pbp2) <- c("TOTAL",
+                                            "UNDER50PCT",
+                                            "BTWN50TO99PCT",
+                                            "BTWN100TO124PCT",
+                                            "BTWN125TO149PCT",
+                                            "BTWN150TO184PCT",
+                                            "BTWN185TO199PCT",
+                                            "OVER200PCT",
+                                            "TRACTCE")
+                        
+                        tr2 <- myGeoJoin(tr1,pbp2,"TRACTCE","TRACTCE")
+                        
+                        sea <- tr2 %>% 
+                                as.data.frame() %>% 
+                                mutate_each(funs(as.numeric),TOTAL:OVER200PCT) %>% 
+                                mutate(UNDER200PCT = TOTAL - OVER200PCT) %>% 
+                                select(TOTAL:UNDER200PCT) %>% 
+                                summarise_each(funs(sum)) %>% 
+                                mutate(PCT_UNDER200PCT = 1 - OVER200PCT/TOTAL) %>% 
+                                mutate(PCT_UNDER200PCT = myPctRound(PCT_UNDER200PCT))
+                        
+                        pctBelowPvty_seattle <- sea
+                        
+                        pctBelowPvty_seattle %>% write_csv(path = "./2_inputs/pctBelowPvty_seattle.csv")
+                        
+                        pctBelowPvty_seattle
+                        
+                }
+                
+                pctBelowPvty_seattle <- make_pctBelowPvty_seattle()
+                rm(make_pctBelowPvty_seattle)
+                pctBelowPvty_seattle
+        } else {
+                make_pctBelowPvty_seattle <- function() {
+                        pctBelowPvty_seattle <- 
+                                read_csv("./2_inputs/pctBelowPvty_seattle.csv")
+                }
+                pctBelowPvty_seattle
+        }
+        pctBelowPvty_seattle <- make_pctBelowPvty_seattle()
+        rm(make_pctBelowPvty_seattle)
+        pctBelowPvty_seattle
+}
 
 pctBelowPvty_sea <- {
         if (!file.exists("./2_inputs/pctBelowPvty_sea.shp")) {
@@ -1983,6 +2083,51 @@ pctBelowPvty_ycc <- {
 
 
 # Language
+
+pctEngLTvwell_seattle <- {
+        if (!file.exists("./2_inputs/pctEngLTvwell_seattle.csv")) {
+                make_pctEngLTvwell_seattle <- function() {
+                        
+                        tr1 <- tract_sea
+                        
+                        tr_wa <- geo.make(state = "WA",county = "King", tract = "*")
+                        
+                        eng1 <- acs.fetch(endyear = 2014,geography = tr_wa,table.number = "B16001",col.names = "pretty")
+                        
+                        eng2 <- eng1[eng1@geography$tract %in% tr1$TRACTCE,] %>%
+                                .@estimate %>% 
+                                cbind(eng1[eng1@geography$tract %in% tr1$TRACTCE,]@geography$tract) %>%
+                                as.data.frame()
+                        eng3 <- 
+                                eng2 %>% 
+                                select(TRACTCE = contains("V120"),TOTAL = contains("Total"),contains("less")) %>% 
+                                mutate_each(funs(as.numeric),-contains("TRACTCE")) %>% 
+                                mutate(LTVW = select(.,-matches("TRACTCE|TOTAL")) %>% rowSums()) %>% 
+                                select(TOTAL,LTVW) %>% 
+                                summarise_each(funs(sum)) %>% 
+                                mutate(PCT_LTVW = myPctRound(LTVW/TOTAL))
+                        
+                        write_csv(eng3,"./2_inputs/pctEngLTvwell_seattle.csv")
+                        
+                        pctEngLTvwell_seattle <- eng3
+                        pctEngLTvwell_seattle
+                        
+                }
+                
+                pctEngLTvwell_seattle <- make_pctEngLTvwell_seattle()
+                rm(make_pctEngLTvwell_seattle)
+                pctEngLTvwell_seattle
+        } else {
+                make_pctEngLTvwell_seattle <- function() {
+                        pctEngLTvwell_seattle <- read_csv("./2_inputs/pctEngLTvwell_seattle.csv")
+                        
+                }
+                pctEngLTvwell_seattle <- make_pctEngLTvwell_seattle()
+                rm(make_pctEngLTvwell_seattle)
+                pctEngLTvwell_seattle
+        }
+        
+}
 
 pctEngLTvwell_sea <- {
         if (!file.exists("./2_inputs/pctEngLTvwell_sea.shp")) {
