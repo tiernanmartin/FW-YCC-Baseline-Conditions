@@ -634,6 +634,141 @@ tract_sea <- {
         tract_sea
 }
 
+KCseaCCD <- {
+        if (!file.exists("./2_inputs/KCseaCCD.shp")) {
+                make_KCseaCCD <- function() {
+                        
+                        KCseaCCD <- readOGR(dsn = "./2_inputs/",layer = "tl_2014_53_cousub") %>% 
+                                subset(NAME == "Seattle") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        
+                        writeOGR(obj = KCseaCCD, dsn = "./2_inputs/", layer = "KCseaCCD", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(KCseaCCD@data) %>% data_frame() %>% write_csv(path = "./2_inputs/KCseaCCD_cn.csv")
+                        
+                        view_KCseaCCD <<- function() {
+                                myLfltSmpl(KCseaCCD)
+                                
+                        }
+                        KCseaCCD
+                        
+                }
+                
+                KCseaCCD <- make_KCseaCCD()
+                rm(make_KCseaCCD)
+                KCseaCCD
+        } else {
+                make_KCseaCCD <- function() {
+                        KCseaCCD <- readOGR(dsn = "./2_inputs/", layer = "KCseaCCD") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/KCseaCCD_cn.csv") %>% 
+                                unlist(use.names = FALSE)
+                        
+                        colnames(KCseaCCD@data) <- cn
+                        view_KCseaCCD <<- function() {
+                                myLfltSmpl(KCseaCCD)
+                                
+                        }
+                        KCseaCCD
+                }
+                KCseaCCD <- make_KCseaCCD()
+                rm(make_KCseaCCD)
+                KCseaCCD
+        }
+}
+
+KCseaCCD_tr <- {
+        if (!file.exists("./2_inputs/KCseaCCD_tr.shp")) {
+                make_KCseaCCD_tr <- function() {
+                        tr <- read_csv("./2_inputs/ACS_12_5YR_B01003_with_ann.csv",skip = 1) %>% 
+                                mutate(TRACTCE = as.character(Id) %>% substr(25,30))
+                        
+                        kc_tr <- tigris::tracts(state = "WA",county = "King",cb = TRUE) %>% 
+                                subset(TRACTCE %in% tr$TRACTCE)
+                        
+                        # tr %>% select(Id,Geography,TRACTCE) %>% View()
+                        
+                        KCseaCCD_tr <- tigris::tracts(state = "WA",county = "King",cb = TRUE) %>% 
+                                subset(TRACTCE %in% tr$TRACTCE)
+                        writeOGR(obj = KCseaCCD_tr, dsn = "./2_inputs/", 
+                                 layer = "KCseaCCD_tr", driver = "ESRI Shapefile", 
+                                 overwrite_layer = TRUE)
+                        
+                        colnames(KCseaCCD_tr@data) %>% data_frame() %>% write_csv(path = "./2_inputs/KCseaCCD_tr_cn.csv")
+                        
+                        view_KCseaCCD_tr <<- function() {
+                                abbr <- KCseaCCD_tr
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(abbr@data$IND) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(abbr@data$IND))
+                                
+                                myLflt() %>% addPolygons(data = abbr, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(abbr@data$IND), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = abbr, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(abbr@data$IND),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(abbr@data$IND), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        KCseaCCD_tr
+                        
+                }
+                
+                KCseaCCD_tr <- make_KCseaCCD_tr()
+                rm(make_KCseaCCD_tr)
+                KCseaCCD_tr
+        } else {
+                make_KCseaCCD_tr <- function() {
+                        KCseaCCD_tr <- readOGR(dsn = "./2_inputs/", layer = "KCseaCCD_tr") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/KCseaCCD_tr_cn.csv") %>% 
+                                unlist(use.names = FALSE)
+                        
+                        colnames(KCseaCCD_tr@data) <- cn
+                        view_KCseaCCD_tr <<- function() {
+                                abbr <- KCseaCCD_tr
+                                
+                                myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+                                max <- max(abbr@data$IND) %>% round_any(10, ceiling)
+                                pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+                                # pal <- colorFactor(palette = 'Set2', domain =
+                                # as.factor(abbr@data$IND))
+                                
+                                myLflt() %>% addPolygons(data = abbr, smoothFactor = 0, 
+                                                         color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+                                                         fillColor = pal(abbr@data$IND), fillOpacity = 0.75) %>% 
+                                        addLegend(position = "topright", title = "CHANGE_THIS", 
+                                                  pal = pal, values = range(0:max), opacity = 0.75, 
+                                                  labFormat = labelFormat())
+                                
+                                # myLflt() %>% addPolygons(data = abbr, smoothFactor = 0,
+                                # color = col2hex('white'),weight = 1.5,opacity = .5,
+                                # fillColor = pal(abbr@data$IND),fillOpacity = .75) %>%
+                                # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
+                                # = pal, values = as.factor(abbr@data$IND), opacity = .75,
+                                # labFormat = labelFormat())
+                                
+                        }
+                        KCseaCCD_tr
+                }
+                KCseaCCD_tr <- make_KCseaCCD_tr()
+                rm(make_KCseaCCD_tr)
+                KCseaCCD_tr
+        }
+}
+
+
 bounds_sea <- {
         
         tract_sea %>% gUnaryUnion() %>% .@bbox
@@ -1204,6 +1339,72 @@ uv_ycc_arb <- {
 # DEMOGRAPHIC DATA: AMERICAN COMMUNITY SURVEY (ACS), COMPREHENSIVE HOUSING AFFORDABILITY STRATEGY (CHAS) -----
 
 # Race & Ethnicity
+
+pctRace_KCseaCCD <- {
+        if (!file.exists("./2_inputs/pctRace_KCseaCCD.csv")) {
+                make_pctRace_KCseaCCD <- function() {
+                        
+                        # Check out the subdivision, manually record the 'county.subdivision' code
+                        geo.lookup(state = "WA",county = "King",county.subdivision = "*")
+                        
+                        cnty_div_code <- 92928
+                        
+                        # Create the ACS geography object
+                        KCseaCCD <- geo.make(state = "WA",county = "King",county.subdivision = cnty_div_code)
+                        
+                        race1 <- acs.fetch(endyear = 2014,geography = KCseaCCD,table.number = "B03002")
+                        
+                        race2 <- race1@estimate %>% 
+                                as.data.frame() %>% 
+                                mutate_each(funs(as.numeric),everything()) %>% 
+                                rename(TOTAL = B03002_001,
+                                       WHITE = B03002_003,
+                                       BLACK = B03002_004,
+                                       AM_INDIAN = B03002_005,
+                                       ASIAN = B03002_006,
+                                       PACIFIC = B03002_007,
+                                       HISPANIC = B03002_012) %>% 
+                                mutate(OTHER = B03002_008 + B03002_009) %>% 
+                                mutate(POC = TOTAL - WHITE) %>% 
+                                select(TOTAL,
+                                       WHITE,
+                                       POC,
+                                       BLACK,
+                                       AM_INDIAN,
+                                       ASIAN,
+                                       PACIFIC,
+                                       HISPANIC,
+                                       OTHER) %>% 
+                                mutate(PCT_WHITE = myPctRound(WHITE/TOTAL),
+                                       PCT_POC = myPctRound(POC/TOTAL),
+                                       PCT_BLACK = myPctRound(BLACK/TOTAL),
+                                       PCT_AM_INDIAN = myPctRound(AM_INDIAN/TOTAL),
+                                       PCT_ASIAN = myPctRound(ASIAN/TOTAL),
+                                       PCT_PACIFIC = myPctRound(PACIFIC/TOTAL),
+                                       PCT_HISPANIC = myPctRound(HISPANIC/TOTAL),
+                                       PCT_OTHER = myPctRound(OTHER/TOTAL))
+                        
+                        race2 %>% 
+                                write_csv(path = "./2_inputs/pctRace_KCseaCCD.csv")
+                        
+                        
+                        pctRace_KCseaCCD <- race2
+                        
+                }
+                
+                pctRace_KCseaCCD <- make_pctRace_KCseaCCD()
+                rm(make_pctRace_KCseaCCD)
+                pctRace_KCseaCCD
+        } else {
+                make_pctRace_KCseaCCD <- function() {
+                        
+                        pctRace_KCseaCCD <- read_csv("./2_inputs/pctRace_KCseaCCD.csv")
+                }
+                pctRace_KCseaCCD <- make_pctRace_KCseaCCD()
+                rm(make_pctRace_KCseaCCD)
+                pctRace_KCseaCCD
+        }
+}
 
 pctRace_seattle <- {
         if (!file.exists("./2_inputs/pctRace_seattle.csv")) {
