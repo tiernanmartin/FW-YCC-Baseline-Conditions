@@ -1405,7 +1405,7 @@ pctRace <- {
                                        RACE_PACIFIC_PCT = myPctRound(RACE_PACIFIC/RACE_TOTAL),
                                        RACE_HISPANIC_PCT = myPctRound(RACE_HISPANIC/RACE_TOTAL),
                                        RACE_OTHER_PCT = myPctRound(RACE_OTHER/RACE_TOTAL),
-                                       GEO = c("Seatte CCD","Seattle")) %>% 
+                                       GEO = c("Seattle CCD","Seattle")) %>% 
                                 select(GEO,everything())
                         
                         # SEATTLE: TRACTS ---------------------------------------------------------
@@ -1516,6 +1516,125 @@ pctRace <- {
 }
 
 # Housing
+
+pctHsCstBrdn <- {
+        if (!file.exists("./2_inputs/pctHsCstBrdn.csv")) {
+                make_pctHsCstBrdn <- function() {
+                        
+                        # Note: this indicator is based on data from HUD, not ACS tables
+                        
+                        if (!file.exists("./2_inputs/ACS__5_Year_CHAS_Data_by_Summary_Level_080_as_of_2012.csv")){
+                                
+                                url <- 'http://egis.hud.opendata.arcgis.com/datasets/6c5f5f39d40c470586fa040063ff8d1d_0.csv' # direct URL to the file download
+                                
+                                download(url, dest = './2_inputs/ACS__5_Year_CHAS_Data_by_Summary_Level_080_as_of_2012.csv', mode='wb') # download the file
+                        }
+                        
+                        # SEATTLE: COUNTY SUBDIVISION ----------------------------
+                        
+                        x <- read_csv("./2_inputs/ACS__5_Year_CHAS_Data_by_Summary_Level_080_as_of_2012.csv")
+                        
+                        hcb_seaCCD <- 
+                                x %>% 
+                                filter(COUSUBNAME == "Seattle CCD (King, WA)") %>%
+                                select(OWNER = T8_EST2,RENTER = T8_EST68,T8_CB,T8_CB_PCT,T8_CB50,T8_CB50_PCT) %>%
+                                mutate(ALL = OWNER + RENTER) %>% 
+                                select(ALL,everything()) %>% 
+                                summarise(GEO = "Seattle CCD",
+                                          HCB_ALL = sum(ALL),
+                                          HCB_OWNER = sum(OWNER),
+                                          HCB_RENTER = sum(RENTER),
+                                          HCB_CB = sum(T8_CB),
+                                          HCB_CB_PCT = myPctRound(sum(T8_CB)/sum(ALL)),
+                                          HCB_CB50 = sum(T8_CB50),
+                                          HCB_CB50_PCT = myPctRound(sum(T8_CB50)/sum(ALL)))
+                        
+                        
+                        
+                        # SEATTLE: PLACE -----------------------------------
+                        
+                        hcb_sea <- 
+                                x %>% 
+                                filter(PLACENAME == "Seattle city, WA") %>% 
+                                select(OWNER = T8_EST2,RENTER = T8_EST68,T8_CB,T8_CB_PCT,T8_CB50,T8_CB50_PCT) %>%
+                                mutate(ALL = OWNER + RENTER) %>% 
+                                select(ALL,everything()) %>% 
+                                summarise(GEO = "Seattle",
+                                          HCB_ALL = sum(ALL),
+                                          HCB_OWNER = sum(OWNER),
+                                          HCB_RENTER = sum(RENTER),
+                                          HCB_CB = sum(T8_CB),
+                                          HCB_CB_PCT = myPctRound(sum(T8_CB)/sum(ALL)),
+                                          HCB_CB50 = sum(T8_CB50),
+                                          HCB_CB50_PCT = myPctRound(sum(T8_CB50)/sum(ALL)))
+                        
+                        # SEATTLE: TRACTS
+                        # ---------------------------------------------------------
+                        
+                        hcb_sea_tr1 <- 
+                                x %>% 
+                                mutate(TR = substr(TRACT,6,11)) %>% 
+                                filter(PLACENAME == "Seattle city, WA") %>% 
+                                select(TR,OWNER = T8_EST2,RENTER = T8_EST68,T8_CB,T8_CB_PCT,T8_CB50,T8_CB50_PCT) %>%
+                                mutate(ALL = OWNER + RENTER) %>% 
+                                select(GEO = TR,
+                                       HCB_ALL = ALL,
+                                       HCB_OWNER = OWNER,
+                                       HCB_RENTER = RENTER,
+                                       HCB_CB = T8_CB,
+                                       HCB_CB_PCT = T8_CB_PCT,
+                                       HCB_CB50 = T8_CB50,
+                                       HCB_CB50_PCT = T8_CB50_PCT)
+                        
+                        
+                        
+                        # YCC: URBAN VILLAGES (AGGREGATED TRACTS)
+                        # ---------------------------------
+                        
+                        # Subset the Seattle data to include only YCC tracts
+                        ycc1 <- hcb_sea_tr1 %>% filter(GEO %in% tract_ycc_arb@data$TRACTCE)
+                        
+                        # Join the UV names
+                        UVs <- tract_ycc_arb@data %>% select(GEO = TRACTCE, 
+                                                             UV)
+                        
+                        ycc2 <- ycc1 %>% left_join(UVs)
+                        
+                        
+                        # Group by UV (and calculate the percentages, if applicable)
+                        uv1 <- 
+                                ycc2 %>% 
+                                group_by(UV) %>%
+                                summarise(HCB_ALL = sum(HCB_ALL),
+                                          HCB_OWNER = sum(HCB_OWNER),
+                                          HCB_RENTER = sum(HCB_RENTER),
+                                          HCB_CB = sum(HCB_CB),
+                                          HCB_CB_PCT = myPctRound(sum(HCB_CB)/sum(HCB_ALL)),
+                                          HCB_CB50 = sum(HCB_CB50),
+                                          HCB_CB50_PCT = myPctRound(sum(HCB_CB50)/sum(HCB_ALL))) %>% 
+                                select(GEO = UV, everything())
+                        
+                        # EXPORT THE DATAFRAME
+                        pctHsCstBrdn <- bind_rows(hcb_seaCCD,hcb_sea, hcb_sea_tr1, uv1)
+                        pctHsCstBrdn %>% write_csv(path = "./2_inputs/pctHsCstBrdn.csv")
+                        
+                        pctHsCstBrdn
+                        
+                }
+                
+                pctHsCstBrdn <- make_pctHsCstBrdn()
+                rm(make_pctHsCstBrdn)
+                pctHsCstBrdn
+        } else {
+                make_pctHsCstBrdn <- function() {
+                        
+                        pctHsCstBrdn <- read_csv("./2_inputs/pctHsCstBrdn.csv")
+                }
+                pctHsCstBrdn <- make_pctHsCstBrdn()
+                rm(make_pctHsCstBrdn)
+                pctHsCstBrdn
+        }
+}
 
 pctHsCstBrdn_seattle <- {
         if (!file.exists("./2_inputs/pctHsCstBrdn_seattle.csv")) {
@@ -1836,7 +1955,7 @@ pctBelowPvty <- {
                                 mutate_each(funs(as.numeric),PBP_TOTAL:PBP_OVER200PCT) %>% 
                                 mutate(PBP_UNDER200PCT = PBP_TOTAL - PBP_OVER200PCT) %>% 
                                 mutate(PBP_UNDER200PCT_PCT = myPctRound(PBP_UNDER200PCT/PBP_TOTAL)) %>% 
-                                mutate(GEO = c("Seatte CCD", "Seattle")) %>% 
+                                mutate(GEO = c("Seattle CCD", "Seattle")) %>% 
                                 select(GEO, everything())
                         
                         # SEATTLE: TRACTS
@@ -1953,7 +2072,7 @@ pctEngLTvwell <- {
                                 mutate(ENG_LTVW = select(.,-matches("GEO|ENG_TOTAL")) %>% rowSums()) %>% 
                                 select(ENG_TOTAL,ENG_LTVW) %>% 
                                 mutate(ENG_LTVW_PCT = myPctRound(ENG_LTVW/ENG_TOTAL)) %>% 
-                                mutate(GEO = c("Seatte CCD", "Seattle")) %>% 
+                                mutate(GEO = c("Seattle CCD", "Seattle")) %>% 
                                 select(GEO, everything())
                         
                         # SEATTLE: TRACTS
@@ -2029,7 +2148,8 @@ pctEngLTvwell <- {
 acsData <- {
         make_acsData <- function(){
                 acsData <- 
-                        left_join(pctRace,pctBelowPvty) %>% 
+                        left_join(pctRace,pctHsCstBrdn) %>% 
+                        left_join(pctBelowPvty) %>% 
                         left_join(pctEngLTvwell)
         }
         acsData <- make_acsData(pctRace,)
@@ -2093,6 +2213,71 @@ view_pctRace_sea_ycc_pctPOC <- function() {
         # = pal, values = as.factor(uv2@data$PCT_POC), opacity = .75,
         # labFormat = labelFormat())
         
+}
+
+# Housing
+
+view_pctHsCstBrdn_sea_tr <- function() {
+        
+        myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+        
+        pal <- colorNumeric(palette = myYlOrRd, domain = range(0:100))
+        
+        myLflt() %>% addPolygons(data = pctHsCstBrdn_sea_tr, 
+                                 smoothFactor = 0, color = col2hex("white"), 
+                                 weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_sea_tr@data$T8_CB_PCT), 
+                                 fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                   # title = "Percent of Families Housing-Cost Burdened", 
+                                                                   pal = pal, values = range(0:100), 
+                                                                   opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+}
+
+view_pctHsCstBrdn_sea_tr50 <- function() {
+        
+        myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+        
+        pal <- colorNumeric(palette = myYlOrRd, domain = range(0:50))
+        
+        myLflt() %>% addPolygons(data = pctHsCstBrdn_sea_tr, 
+                                 smoothFactor = 0, color = col2hex("white"), 
+                                 weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_sea_tr@data$T8_CB50_PCT), 
+                                 fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                   # title = "Percent of Families Severely Housing-Cost Burdened", 
+                                                                   pal = pal, values = range(0:50), 
+                                                                   opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+}
+
+view_pctHsCstBrdn_ycc_tr <- function() {
+        
+        myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+        
+        max <- max(pctHsCstBrdn_ycc_tr@data$CB_PCT) %>% round_any(.,10,ceiling)
+        pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+        
+        myLflt() %>% 
+                addPolygons(data = pctHsCstBrdn_ycc_tr, 
+                            smoothFactor = 0, color = col2hex("white"), 
+                            weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_ycc_tr@data$CB_PCT), 
+                            fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                              # title = "Percent of Families Housing-Cost Burdened", 
+                                                              pal = pal, values = range(0:max), 
+                                                              opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+}
+
+view_pctHsCstBrdn50_ycc_tr <- function() {
+        
+        myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+        
+        max <- max(pctHsCstBrdn_ycc_tr@data$CB_PCT50) %>% round_any(.,10,ceiling)
+        pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+        
+        myLflt() %>% addPolygons(data = pctHsCstBrdn_ycc_tr, 
+                                 smoothFactor = 0, color = col2hex("white"), 
+                                 weight = 1.5, opacity = 0.5, fillColor = pal(pctHsCstBrdn_ycc_tr@data$CB_PCT50), 
+                                 fillOpacity = 0.75) %>% addLegend(position = "topright", 
+                                                                   # title = "Percent of Families Severely Housing-Cost Burdened", 
+                                                                   pal = pal, values = range(0:max), 
+                                                                   opacity = 0.75, labFormat = labelFormat(suffix = "%"))
 }
 
 # Income
