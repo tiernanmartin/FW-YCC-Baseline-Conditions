@@ -37,6 +37,9 @@ require(gridExtra)
 require(useful)         # for "$150K labeling 
 require(readxl)         # for reading Excel documents
 require(stringr)        # for string extraction
+require(lubridate)
+require(nominatim)      # for geocoding addresses
+require(rmapshaper)     # for simplifying polygons
 
 
 crs_proj <- CRS("+init=epsg:4326") # This project will use WGS 84 projected coordinate system

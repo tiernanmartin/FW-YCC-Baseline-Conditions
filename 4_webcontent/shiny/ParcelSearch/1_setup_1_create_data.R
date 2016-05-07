@@ -73,6 +73,10 @@ make_parcel_ycc_reduc <- function(){
         write_csv(x = cn_reduc,
                   path = "./4_webcontent/shiny/ParcelSearch/parcel_ycc_reduc_cn.csv")
         
+        cn_reduc_short <- paste0(rep("V",ncol(parcel_ycc_reduc@data)),paste0(1:ncol(parcel_ycc_reduc@data)))
+        
+        colnames(parcel_ycc_reduc@data) <- cn_reduc_short
+        
         writeOGR(obj = parcel_ycc_reduc,
                  dsn = "./4_webcontent/shiny/ParcelSearch/",
                  layer = "parcel_ycc_reduc",

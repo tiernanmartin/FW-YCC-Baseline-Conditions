@@ -7,6 +7,7 @@ parcel_ycc <- {
                 
                 df <- read_csv(file = "./2_inputs/Capacity_For_All_Parcel_2015.csv")
                 
+                
                 # Make `parcel_sea`
                 if(!file.exists("./2_inputs/parcel_sea.shp")){
                         url <- "ftp://ftp.kingcounty.gov/gis/Web/GISData/parcel_SHP.zip" # save the URL for the waterbodies data
@@ -106,12 +107,18 @@ parcel_ycc <- {
                         
                         cn <- colnames(parcel_ycc@data) %>% as.data.frame()
                         
+                        # Create a abbreviated column names to prevent data loss
+                        cn_new <- paste0(rep("V",ncol(parcel_ycc@data)),paste0(1:ncol(parcel_ycc@data)))
+                        
+                        colnames(parcel_ycc@data) <- cn_new
+                        
                         writeOGR(obj = parcel_ycc,
                                  dsn = "./2_inputs/",
                                  layer = "parcel_ycc",
                                  driver = "ESRI Shapefile",
                                  overwrite_layer = TRUE)
                         
+                        # Use this function to save the shapefile to the ParcelFinder tool repo
                         # writeOGR(obj = parcel_ycc,
                         #          dsn = "./4_webcontent/shiny/ParcelSearch/",
                         #          layer = "parcel_ycc",

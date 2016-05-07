@@ -768,7 +768,6 @@ KCseaCCD_tr <- {
         }
 }
 
-
 bounds_sea <- {
         
         tract_sea %>% gUnaryUnion() %>% .@bbox
@@ -1876,7 +1875,7 @@ acsData <- {
         acsData
 }
 
-# Merge Seattle Tracts
+# Merge with Seattle Tracts and YCC Neighborhoods
 
 YCCBA_sea_tr <- {
         
@@ -1886,11 +1885,11 @@ YCCBA_sea_tr <- {
                         acsData %>% 
                         filter(GEO %!in% c("Seattle","Seattle CCD",uv_ycc_arb@data$UV))
                 
-                YCCBA_sea_tr <- myGeoJoin(spatial_data = tract_sea,data_frame = acsData,by_sp = ,by_df = )
+                YCCBA_sea_tr <- myGeoJoin(spatial_data = tract_sea,data_frame = acsData,by_sp = "TRACTCE",by_df = "GEO")
                 
         }
         
-        YCCBA_sea_tr <- make_YCCBA_sea_tr
+        YCCBA_sea_tr <- make_YCCBA_sea_tr()
         
         rm(make_YCCBA_sea_tr)
         
@@ -1898,61 +1897,222 @@ YCCBA_sea_tr <- {
         
 }
 
+YCCBA_sea_ycc <- {
+        
+        make_YCCBA_sea_ycc <- function(){
+                
+                df <- 
+                        acsData %>% 
+                        filter(GEO %in% uv_ycc_arb@data$UV)
+                
+                YCCBA_sea_ycc <- myGeoJoin(spatial_data = uv_ycc_arb,data_frame = acsData,by_sp = "UV",by_df = "GEO")
+                
+        }
+        
+        YCCBA_sea_ycc <- make_YCCBA_sea_ycc()
+        
+        rm(make_YCCBA_sea_ycc)
+        
+        YCCBA_sea_ycc
+        
+}
 
-# Merge YCC Neighborhoods
+
+# NON-DEMOGRAPHIC DATA ----------------------------------------------------------------------------
+
+urm_sea <- {
+        if (!file.exists("./2_inputs/urm_sea.shp")) {
+                make_urm_sea <- function() {
+                        
+                        urm1 <- read_excel(path = "./2_inputs/20160502_PublicURMList.xlsx")
+                        
+                        urm2 <- urm1 
+                        
+                        colnames(urm2) <- c("RISK",
+                                            "NHOOD",
+                                            "ADDRESS",
+                                            "YRBUILT",
+                                            "STORIES",
+                                            "RFITLVL",
+                                            "BLDGUSE",
+                                            "OCC",
+                                            "SOURCE")
+                        urm2 %<>%
+                                mutate(RISK = ifelse(RISK == "Medium RiskediuMedium Risk Risk",
+                                                     "Medium Risk",
+                                                     RISK)) %>% 
+                                mutate_each(funs(as.factor),matches("RISK|NHOOD|RFITLVL|OCC|SOURCE")) %>%  
+                                mutate(RISK = factor(RISK, levels = c("Medium Risk","High Risk","Critical Risk")),
+                                       OCC = factor(OCC, levels = c("1-10","11-100","101+"))) %>% 
+                                mutate(RESSTAT = ifelse(BLDGUSE %in% c("Residential","Commercial/Residential"),
+                                                        "Residential",
+                                                        "Non-Residential")) %>% 
+                                select(NHOOD:BLDGUSE,RESSTAT,everything())
+                        
+                        urm3 <- 
+                                urm2 %>% 
+                                mutate(FULLADDRESS = paste0(ADDRESS,", Seattle, WA"))
+                        
+                        # This code queries the Google Maps api, which has a query limit of 2500/day
+                        # Retreiving 1157 lat/lon pairs takes approx. 25 mins
+                        
+                        # latlon <- 
+                        #         urm3 %>% 
+                        #         select(FULLADDRESS) %>%
+                        #         unlist() %>% 
+                        #         lapply(geocode) %>%  
+                        #         bind_rows() %>% 
+                        #         as.data.frame()
+                        
+                        urm4 <- 
+                                urm3 %>% 
+                                cbind(latlon) %>% 
+                                select(NHOOD:ADDRESS,FULLADDRESS,LON = lon,LAT = lat,everything())
+                        
+                        urm5 <- 
+                                urm4 %>% select(LON,LAT)
+                        
+                        urm_sp <- SpatialPoints(coords = urm5)
+                        
+                        proj4string(urm_sp) <- crs_proj
+                        
+                        urm_spdf <- 
+                                SpatialPointsDataFrame(coords = urm_sp,data = urm4,match.ID = FALSE)
+                        
+                        # Attach the UV's
+                        
+                        urm_spdf2 <- urm_spdf
+                        urm_spdf2@data <-
+                                over(urm_spdf,uv_ycc_arb) %>% 
+                                cbind(urm_spdf@data,.) %>% 
+                                select(NHOOD,UV, everything())
+                        
+                        urm_sea <- urm_spdf2
+                        writeOGR(obj = urm_sea, dsn = "./2_inputs/", layer = "urm_sea", 
+                                 driver = "ESRI Shapefile", overwrite_layer = TRUE)
+                        
+                        colnames(urm_sea@data) %>% data_frame() %>% write_csv(path = "./2_inputs/urm_sea_cn.csv")
+                        
+                        view_urm_sea <<- function() {
+                                
+                                myPal1 <- RColorBrewer::brewer.pal(9,"YlOrRd")[c(3,5,6)]
+                                pal <- colorFactor(palette = myPal1,domain = urm_sea@data$RISK, levels = levels(urm_sea@data$RISK))
+                                op <- function(){
+                                        ifelse(is.na(urm_sea@data$UV),.5,.9)
+                                }
+                                
+                                myLflt() %>% 
+                                        addCircles(data = urm_sea,
+                                                   color = pal(urm_sea@data$RISK), opacity = op(),
+                                                   fillColor = pal(urm_sea@data$RISK), fillOpacity = op()) %>% 
+                                        addLegend(position = ,pal = pal,title = "URM Buildings",values = levels(urm_sea@data$RISK))
+                                
+                                
+                        }
+                        view_urm_sea_res <<- function() {
+                                
+                                myPal2 <- RColorBrewer::brewer.pal(8,"Set2")[1:2]
+                                pal <- colorFactor(palette = myPal2,domain = urm_sea@data$RESSTAT, levels = levels(urm_sea@data$RESSTAT))
+                                op <- function(){
+                                        ifelse(is.na(urm_sea@data$UV),.5,.9)
+                                }
+                                
+                                myLflt() %>% 
+                                        addCircles(data = urm_sea,
+                                                   color = pal(urm_sea@data$RESSTAT), opacity = .75,
+                                                   fillColor = pal(urm_sea@data$RESSTAT), fillOpacity = .75) %>% 
+                                        addLegend(position = ,pal = pal,title = "URM Buildings",values = levels(urm_sea@data$RESSTAT))
+                                
+                                
+                        }
+                        urm_sea
+                        
+                }
+                
+                urm_sea <- make_urm_sea()
+                rm(make_urm_sea)
+                urm_sea
+        } else {
+                make_urm_sea <- function() {
+                        urm_sea <- readOGR(dsn = "./2_inputs/", layer = "urm_sea") %>% 
+                                spTransform(CRSobj = crs_proj)
+                        cn <- read_csv("./2_inputs/urm_sea_cn.csv") %>% unlist(use.names = FALSE)
+                        
+                        colnames(urm_sea@data) <- cn
+                        
+                        urm_sea@data %<>%
+                                mutate(RISK = factor(RISK, levels = c("Medium Risk","High Risk","Critical Risk"))) %>% 
+                                mutate(RESSTAT = factor(RESSTAT, levels = c("Residential","Non-Residential")))
+                        
+                        
+                        view_urm_sea <<- function() {
+                                
+                                myPal1 <- RColorBrewer::brewer.pal(9,"YlOrRd")[c(3,5,6)]
+                                pal <- colorFactor(palette = myPal1,domain = urm_sea@data$RISK, levels = levels(urm_sea@data$RISK))
+                                op <- function(){
+                                        ifelse(is.na(urm_sea@data$UV),.5,.9)
+                                }
+                                
+                                myLflt() %>% 
+                                        addCircles(data = urm_sea,
+                                                   color = pal(urm_sea@data$RISK), opacity = op(),
+                                                   fillColor = pal(urm_sea@data$RISK), fillOpacity = op()) %>% 
+                                        addLegend(position = ,pal = pal,title = "URM Buildings",values = levels(urm_sea@data$RISK))
+                                
+                                
+                        }
+                        view_urm_sea_res <<- function() {
+                                
+                                myPal2 <- RColorBrewer::brewer.pal(8,"Set2")[1:2]
+                                pal <- colorFactor(palette = myPal2,domain = urm_sea@data$RESSTAT, levels = levels(urm_sea@data$RESSTAT))
+                                op <- function(){
+                                        ifelse(is.na(urm_sea@data$UV),.5,.9)
+                                }
+                                
+                                myLflt() %>% 
+                                        addCircles(data = urm_sea,
+                                                   color = pal(urm_sea@data$RESSTAT), opacity = .75,
+                                                   fillColor = pal(urm_sea@data$RESSTAT), fillOpacity = .75) %>% 
+                                        addLegend(position = ,pal = pal,title = "URM Buildings",values = levels(urm_sea@data$RESSTAT))
+                                
+                                
+                        }
+                        urm_sea
+                }
+                urm_sea <- make_urm_sea()
+                rm(make_urm_sea)
+                urm_sea
+        }
+}
 
 # VISUALIZATIONS ----------------------------------------------------------------------------------
 
 #  Race
 
-view_pctRace_sea_tr_pctPOC <- function() {
-        tr2 <- pctRace_sea_tr
-        
-        myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
-        max <- max(tr2@data$PCT_POC) %>% round_any(10, ceiling)
-        pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
-        # pal <- colorFactor(palette = 'Set2', domain =
-        # as.factor(tr2@data$PCT_POC))
-        
-        myLflt() %>% addPolygons(data = tr2, smoothFactor = 0, 
-                                 color = col2hex("white"), weight = 1.5, opacity = 0.5, 
-                                 fillColor = pal(tr2@data$PCT_POC), fillOpacity = 0.75) %>% 
-                addLegend(position = "topright", title = "CHANGE_THIS", 
-                          pal = pal, values = range(0:max), opacity = 0.75, 
-                          labFormat = labelFormat(suffix = "%"))
-        
-        # myLflt() %>% addPolygons(data = tr2, smoothFactor = 0,
-        # color = col2hex('white'),weight = 1.5,opacity = .5,
-        # fillColor = pal(tr2@data$PCT_POC),fillOpacity = .75) %>%
-        # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
-        # = pal, values = as.factor(tr2@data$PCT_POC), opacity = .75,
-        # labFormat = labelFormat())
-        
+view_pctRace_seatr_RACE_POC_PCT <- function() {
+    tr <- YCCBA_sea_tr
+    
+    myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+    max <- max(tr@data$RACE_POC_PCT) %>% round_any(10, ceiling)
+    pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+    
+    myLflt() %>% addPolygons(data = tr, smoothFactor = 0, color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+        fillColor = pal(tr@data$RACE_POC_PCT), fillOpacity = 0.75) %>% addLegend(position = "topright", 
+        title = "LEGEND", pal = pal, values = range(0:max), opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+    
 }
 
-view_pctRace_sea_ycc_pctPOC <- function() {
-        uv2 <- pctRace_ycc_tr
-        
-        myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
-        max <- max(uv2@data$PCT_POC) %>% round_any(10, ceiling)
-        pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
-        # pal <- colorFactor(palette = 'Set2', domain =
-        # as.factor(uv2@data$PCT_POC))
-        
-        myLflt() %>% addPolygons(data = uv2, smoothFactor = 0, 
-                                 color = col2hex("white"), weight = 1.5, opacity = 0.5, 
-                                 fillColor = pal(uv2@data$PCT_POC), fillOpacity = 0.75) %>% 
-                addLegend(position = "topright", title = "CHANGE_THIS", 
-                          pal = pal, values = range(0:max), opacity = 0.75, 
-                          labFormat = labelFormat(suffix = "%"))
-        
-        # myLflt() %>% addPolygons(data = uv2, smoothFactor = 0,
-        # color = col2hex('white'),weight = 1.5,opacity = .5,
-        # fillColor = pal(uv2@data$PCT_POC),fillOpacity = .75) %>%
-        # addLegend(position = 'topright', title = 'CHANGE_THIS', pal
-        # = pal, values = as.factor(uv2@data$PCT_POC), opacity = .75,
-        # labFormat = labelFormat())
-        
+view_pctRace_sea_ycc_RACE_POC_PCT <- function() {
+    tr <- YCCBA_sea_ycc
+    
+    myYlOrRd <- RColorBrewer::brewer.pal(9, "YlOrRd")[2:7]
+    max <- max(tr@data$RACE_POC_PCT) %>% round_any(10, ceiling)
+    pal <- colorNumeric(palette = myYlOrRd, domain = range(0:max))
+    
+    myLflt() %>% addPolygons(data = tr, smoothFactor = 0, color = col2hex("white"), weight = 1.5, opacity = 0.5, 
+        fillColor = pal(tr@data$RACE_POC_PCT), fillOpacity = 0.75) %>% addLegend(position = "topright", 
+        title = "LEGEND", pal = pal, values = range(0:max), opacity = 0.75, labFormat = labelFormat(suffix = "%"))
+    
 }
 
 # Housing
